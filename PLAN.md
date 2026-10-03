@@ -1,239 +1,336 @@
-# The Plan: what we're building, how, and why
+# The Plan: a living evidence network for rare diseases
 
-Living document and the source of truth for decisions. Brief: [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md). Sponsor: [docs/buffalo_initiative.md](docs/buffalo_initiative.md).
+Living document and the source of truth for decisions. Brief: [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md). Sponsor: [docs/buffalo_initiative.md](docs/buffalo_initiative.md). Data check: [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
 
 ## TL;DR
 
-- **The sponsor's goal:** "Help accelerate the path toward treatment for the 5,000+ monogenic rare diseases that remain fragmented across research silos," turning an evidence-backed knowledge graph into "actionable next steps for patients and researchers."
-- **What:** type a rare diagnosis and see three things: which other communities share its biology, what they've already built that you can reuse, and one concrete step to take this week. Every claim has a source.
-- **For whom:** patient groups first, especially the leader of a tiny one ("Maria"), and researchers. The same engine also serves new parents and pharma or funder scouts.
-- **Why it's different:** existing tools describe *one* disease. We connect *across* diseases by mechanism and symptoms, and turn the connection into an action.
-- **How:** open biomedical databases give a graph covering all monogenic rare diseases. Azure OpenAI models (GPT-6 Luna and Sol) read papers, trials and patient-group sites to add evidence-backed claims and assets. Graph analytics find neighbors, reusable assets, shared people and gaps.
-- **Core experience:** one search, one answer page built on the brief's three questions, and one click to a sourced partnership proposal.
+- **What families see:** type a rare diagnosis and get three answers:
+  - who shares its biology
+  - what already exists that you could reuse
+  - a concrete step to take this week
+
+  Every claim is one click from its source.
+- **What's underneath:** a map of the 5,000+ monogenic rare diseases that **keeps growing and correcting itself**. AI agents (ours, and anyone's through an MCP server) read papers, trials and databases and propose claims. Nothing becomes knowledge until its evidence passes checks.
+- **Guiding principle:** *verification, not extraction, is the scarce resource.* Generating claims is cheap; checking them is what the system is built around.
+- **Analogy: Lean + Mathlib for rare-disease knowledge.**
+  - Untrusted, creative agents propose claims.
+  - A small trusted **kernel** checks everything that can be checked mechanically (provenance, quotes, IDs, reproducibility).
+  - Independent reviewers judge meaning.
+  - The library grows only with checked work.
+- **Where we are:** the starting library is built: 7,328 gene-defined conditions, their genes, symptoms and molecular machinery, and computed connections between them, all from open data.
 
 ---
 
-## 1. Why
+## Why
 
-### The problem (from the brief)
-- **Knowledge is scattered** across papers, databases, trials and patient groups.
-- **Groups rebuild what exists** because they can't find each other's registries, models or study designs.
-- **Names hide mechanisms.** Different genes can break the same process, and one gene can break things in different ways.
+- **The problem (from the brief):** knowledge is scattered, groups rebuild what already exists, and disease names hide shared mechanisms.
+- **Attention is the scarcest resource.** Most ultra-rare diseases have no team mapping them. A network that can point many agents at a neglected disease, at the request of its community, attacks exactly that.
+- **Who it's for:**
+  - **Patient groups first**, especially leaders of tiny ones like Maria ("we may be the only family with this diagnosis").
+  - **Researchers**, who want to know who else works on their mechanism under any gene name.
+  - **Also new parents and funders.** That includes Buffalo itself, whose model is patient-led programs, shared playbooks and "every program makes the next one faster".
+- **What already exists, and where we fit:**
+  - **GARD and NORD** explain single diseases.
+  - **MONDO, HPO, Orphanet, Monarch, Gene2Phenotype and ClinGen** curate the biology; we build on them.
+  - **Nanopublications** pioneered "one assertion + its provenance". We reuse their principles.
+  - **What's new:** agents as contributors, contested claims kept with both sides, trust levels, a self-generated task frontier, community campaigns, and an action layer that turns verified knowledge into a next step for a family.
 
-### Who it's for
-- **Maria, leader of a tiny or new patient group.** "We may be the only family with this diagnosis." She gets the most value because she has no scientific advisors yet. Big, established foundations already know their neighbors.
-- The same engine serves the brief's other three personas through different starting points:
-  - **Devon**, a newly diagnosed parent, needs plain language and to find a community.
-  - **Priya**, a pharma or funder scout, starts from a therapy type and wants ranked disease clusters.
-  - **Dr. Osei**, a researcher, starts from a gene and asks who else works on the same mechanism.
-
-### Why the sponsor cares
-Buffalo Initiative backs **patient-led** therapy programs for ultra-rare monogenic diseases. Their thesis is shared playbooks and infrastructure, so that "every program makes the next one faster." They run a public **Therapy Tracker** of 60+ patient-led programs. Our atlas is the discovery layer for that model: it finds *which* infrastructure, *which* neighbors and *which* next step, and Buffalo's own programs appear inside the graph.
-
-### What already exists, and where we fit
-- **Building on, not competing with:**
-  - GARD and NORD explain one disease.
-  - MONDO, HPO, Orphanet and Monarch provide biology data.
-  - DisMech holds AI-curated mechanisms.
-  - Open Targets focuses on drug targets.
-  - COMBINEDBrain is real shared infrastructure.
-- **Our layer is connection → evidence → action.** Not "tell me about my disease" but "what in the world can move my disease forward, why, and what do I do now."
-
----
-
-## 2. What the user sees
-
-### One search box
-It accepts a disease, gene, symptom, patient group or mechanism, and resolves synonyms visibly ("Munc18-1 → STXBP1 gene").
-
-### One answer page, built on the brief's three questions
-
-| Section | Shows |
-|---|---|
-| **1. Who shares your biology?** | 3–5 closest communities, each with a one-line reason, a connection strength and an evidence tier |
-| **2. Why are you connected?** | A small path of about five nodes (your gene → shared mechanism → neighbor gene → neighbor disease → their patient group). Click any link to see the quote, source, date, confidence and any contradicting evidence |
-| **3. What already exists?** | A **road-to-treatment** strip: community → registry → natural history study → models → outcome measures and biomarkers → therapy program → trial. Each station is marked *you have it*, *borrowable from a neighbor* or *missing*. Asset cards are split into **reusable**, **differs** and **needs expert review** (the brief's exact bar) |
-| **4. What to do this week?** | 1–3 concrete steps with a named partner. A **Draft proposal** button produces a sourced, ready-to-send document plus a checklist of what must be confirmed first |
-
-**Always visible: "What we don't know."** It shows what we searched, what evidence is missing and the next question to test. If there's no supported route, this becomes the main answer.
-
-### One visual language for evidence
-The three tiers use the judges' own words:
-- **Data:** observed in a curated database or reported in a paper. Solid line.
-- **Hypothesis:** inferred by the atlas. Dashed line.
-- **Clinical proof:** shown in a trial or an approval. Gold.
-
-Contradicting evidence shows as a red marker on the link.
-
-### Depth for other personas (behind a click, not in the main journey)
-- **Map view:** every rare disease as a calm star map with your neighborhood highlighted, like "you are here" on a map.
-- **Persona views:**
-  - Devon: plain language, "find my community or help build it"
-  - Priya: start from a therapy type or mechanism and get ranked clusters, including Buffalo Therapy Tracker programs
-  - Dr. Osei: start from a gene and see who else works on this mechanism under any gene name
-- **Contribute (stretch):** a patient group adds an asset ("we run a registry"). It enters as unverified until checked.
-
----
-
-## 3. How it works
-
-### 3.1 Data in two layers
-
-**Breadth layer: all 5,000+ monogenic rare diseases (plus other rare diseases where the data exists), no AI needed.** This means anyone can search any disease.
-
-| Source | Gives us | Access |
-|---|---|---|
-| MONDO | Stable disease IDs, synonyms, cross-references | Open download |
-| HPO annotations | Disease → symptoms (with frequency and references) | Open download |
-| Orphanet (Orphadata) | Gene → disease links typed *loss of function* or *gain of function*, prevalence | Open download |
-| HGNC | Gene IDs and old gene names | Open download |
-| ClinVar | Variants and their consequences | Open download |
-| Reactome / Gene Ontology / SynGO | Gene → pathway, biological process, synaptic function | Open download |
-| Complex Portal | Gene → protein complex (e.g. the SNARE complex) | Open download |
-| Gene2Phenotype, ClinGen dosage | Variant effect: loss of function, dominant negative, gain of function | Open download (to evaluate) |
-| ClinicalTrials.gov | Studies, conditions, interventions, eligibility | API v2 |
-| NIH RePORTER | Grants, investigators, institutions | API |
-| PubMed / PMC | Papers, abstracts, authors, open full text | E-utilities API |
-| Buffalo Therapy Tracker | Patient-led programs (modality, stage, organization) | Public web page (cite it; check terms) |
-| Patient-group sources (NORD, Orphanet, Global Genes, COMBINEDBrain members, group websites) | Communities, registries, studies, biorepositories | Web pages plus AI extraction |
-
-OMIM restricts redistribution, so we reference OMIM IDs through the HPO and MONDO crosswalks.
-
-**Depth layer: the demo neighborhood, built by AI.** Papers, trials, patient-group sites and tracker entries become extracted claims and assets, each with a verbatim quote.
-
-### 3.2 The key idea: each kind of sharing needs its own kind of similarity
-
-| What a group wants to borrow | Similarity that matters |
-|---|---|
-| Registry, natural history study, outcome measures | Shared symptoms and disease course |
-| A drug or therapy approach | Same mechanism *and* same variant effect (protein missing vs. protein toxic) |
-| Lab models, assays | Same protein, complex or pathway |
-| Advisors, collaborators | People who published on, or were funded for, either disease |
-
-Symptom similarity weights **rare symptoms more than common ones**: "you both have seizures (hundreds of diseases do), but you also share X (only a handful do)." That is the brief's "broad vs. unusually informative symptoms."
-
-### 3.3 The graph
-- **The unit of a "community" is the gene-defined condition** (e.g. "SNAP25-related disorder"), because patient groups, Buffalo's tracker and families all think by gene. A condition groups its OMIM, Orphanet and MONDO entries, and splits only when variant effects differ (e.g. SCN2A gain vs. loss of function).
-- **Nodes:** disease, gene, variant class, mechanism, pathway, symptom, patient group, researcher, paper, study/trial, asset (registry, natural history study, model, biomarker, outcome measure, biorepository), therapy program, funder/grant.
-- **Every edge carries:**
-  - relationship type
-  - source (ID + URL) and date
-  - confidence
-  - evidence tier (data / hypothesis / clinical proof)
-  - supporting quote (for anything read from text)
-  - contradicting evidence, if any
-  - how it was made (database import, AI extraction with model name, or analytics)
-
-### 3.4 Where AI does the work (your Azure Foundry)
-
-| Job | Model | Guardrail |
-|---|---|---|
-| **Filter** whether a paper, trial or grant is actually about the condition (a "SNAP25" search returns Botox and Alzheimer's trials; "NSF" returns the National Science Foundation) | `gpt-6-luna` | Every keyword hit is checked before it becomes an edge |
-| **Extract** claims, mechanisms, assets and people from papers, trials and group sites | `gpt-6-luna` | Structured output; must return an exact quote that is found verbatim in the source, or the claim is dropped |
-| **Reconcile** names to stable IDs (MONDO, HPO, HGNC) | `text-embedding-3-large` shortlists, `gpt-6-sol` decides | Low-confidence matches are flagged, not merged |
-| **Verify** with a second pass: does the quote really support the claim? Is there a contradiction? | `gpt-6-sol` | Disagreement lowers confidence |
-| **Explain** a path in plain language | `gpt-6-sol` | Every sentence cites the edges it relies on |
-| **Propose** a partnership letter | `gpt-6-sol` | Uses only facts from the graph; sources listed |
-
-This covers the brief's "Built with OpenAI" trio (Extract, Reconcile, Explain), which the track prize requires.
-
-### 3.5 Graph analytics
-- **Neighbors:** symptom similarity (rare symptoms weighted higher) plus mechanism similarity (shared gene, complex or pathway, and the *same* variant effect).
-- **Clusters:** community detection over the combined similarity. AI names each cluster from its shared features.
-- **Asset matching:** each asset type is matched with the similarity that fits it (3.2).
-- **Shared people:** researchers, clinicians and funders who already bridge two "unrelated" communities (the brief's "network overlap").
-- **Counterexamples:** same gene but different variant effect, or similar symptoms but different mechanism. These are flagged "don't merge" and shown, because judges ask for them.
-- **Gaps:** for each community, which road-to-treatment stations are missing and whether a neighbor has them.
-
-### 3.6 Architecture
+## Architecture at a glance
 
 ```
-pipeline/ (Python, offline)                          app/ (deployed web app)
-download → normalize → extract (Azure) → verify      search → answer page → evidence drawer
-        → build graph → analytics → data/build/ ───► map view, persona views
-                                                     api: proposal drafting, explain-on-demand (Azure)
+Sources: databases, papers, trials, patient-group sites
+   │
+Agents (ours + external, via MCP) ── propose claims, reviews, challenges
+   │
+Kernel ── mechanical checks: schema, IDs, source hashes, verbatim quotes, reproducibility, signatures
+   │
+Event log ── append-only, hash-chained; nothing is ever deleted
+   │
+Trust policies ── decide each claim's status for each view (family / research / strict)
+   │
+Projections ── the graph, connections, frontier tasks, page bundles
+   │
+Interfaces ── atlas (families, researchers) · contributor dashboard · MCP server
 ```
 
-- The graph is precomputed and ships with the app, so there's no database server to keep alive.
-- Live AI runs only for proposals and on-demand explanations. Results are cached and the key stays server-side.
-- Hosting: Vercel or Azure (decide at deploy time). We deploy early and keep it deployed.
-- **Stretch: "deepen any disease."** Run the depth pipeline on demand for a disease outside the demo neighborhood, labeled "fresh, unreviewed."
+---
+
+## 1. Claim and evidence schema
+
+Inspired by nanopublications: one atomic assertion plus its evidence and provenance, with an identity derived from its content.
+
+- **Assertion:** `subject → predicate → object` with stable IDs plus **context qualifiers**. Qualifiers record species, model system, variant class, tissue, population and evidence level, so that "works in zebrafish" can never silently become "works in patients".
+- **Assertion ID** = hash of the canonical assertion. Many claims can support the same assertion (e.g. MONDO, Gene2Phenotype and ClinGen all assert "STXBP1 causes DEE4").
+- **Claim** = assertion + evidence + provenance + signature. **Claim ID** = hash of the whole claim.
+- **Evidence item:** source (ID, URL, retrieval date, content hash), locator (verbatim quote with character offsets, or database record and field), and evidence type: `curated_database`, `publication_text`, `trial_record`, `organization_page`, `computed`, `community_report` or `expert_statement`.
+- **Provenance:** contributor, agent manifest (model, prompt version, tools), derivation rule, timestamp.
+
+**Predicates (controlled vocabulary, extended deliberately):**
+
+| Predicate | Subject → object | Example |
+|---|---|---|
+| `causes` | gene → condition | SNAP25 → MONDO:0014590 |
+| `has_variant_effect` | condition → effect | loss of function |
+| `has_symptom` | condition → HPO term | atonic seizure |
+| `has_name` | condition → name | "SNAP25-related epilepsy and intellectual disability" |
+| `part_of_complex` / `in_pathway` / `involved_in` / `interacts_with` | gene → complex / pathway / GO term / gene | SNAP25 ∈ SNARE complex |
+| `has_asset` | condition → asset (registry, natural history study, model, biomarker, outcome measure, biorepository, therapy program, trial) | STXBP1 → NCT06555965 |
+| `represented_by` | condition → patient organization | STXBP1 → STXBP1 Foundation |
+| `studied_by` | condition → researcher | |
+| `similar_to` | condition ↔ condition (computed, with recipe) | SNAP25 ~ VAMP2 |
+| `contradicts` | claim ↔ claim | |
+
+```json
+{
+  "assertion": {"subject": "HGNC:11132", "predicate": "has_symptom", "object": "HP:0001250",
+                "qualifiers": {"species": "human", "evidence_level": "clinical"}},
+  "evidence": [{"type": "publication_text", "source": {"id": "PMID:33299146", "content_hash": "sha256:…", "retrieved": "2026-10-04"},
+                "quote": "…all individuals had seizures…", "char_start": 812, "char_end": 851}],
+  "provenance": {"contributor": "atlas-core", "agent": "extractor", "model": "gpt-6-luna", "prompt": "extract-phenotypes@3"},
+  "signature": "ed25519:…"
+}
+```
+
+## 2. Append-only event model
+
+- **Event types:**
+  - `claim.proposed`
+  - `kernel.checked` (one per check, pass/fail)
+  - `review.attested` (supports / supports with qualification / does not support / out of scope, with reasons)
+  - `claim.challenged` (links a counter-claim)
+  - `claim.withdrawn`
+  - `task.claimed` / `task.completed`
+  - `campaign.funded`
+  - `policy.published`
+- **Every event has:** id, type, target, actor (contributor + agent manifest), payload, timestamp, hash of the previous event, its own hash, and a signature. Corrections are new events; nothing is deleted. Replaying the log up to a date gives "what did we know on that date".
+- **There are two kinds of knowledge:**
+  - **Reference imports:** bulk, deterministic loads of curated databases (MONDO, HPO, Orphanet, Gene2Phenotype, …). One import event per dataset version. They are verified by **reproducibility**: re-running the importer on the same file (same content hash) must produce the same claims.
+  - **Contributed claims:** individual claims from agents or people. They are verified by kernel checks plus independent reviews.
+- **Storage:** SQLite during development (`data/ledger/`), PostgreSQL when hosted. The hash chain makes tampering visible. The full log is exported as open data.
+
+## 3. Kernel guarantees and non-guarantees
+
+The kernel is small, deterministic and contains no language model. It never decides truth. It decides whether a claim is well-formed, traceable and reproducible.
+
+**It guarantees, for every claim:**
+- **Structure:** the schema is valid, the predicate is allowed for these subject/object types, and the qualifiers are valid.
+- **Identity:** every ID exists in the pinned ontology versions (MONDO, HPO, HGNC, GO, …).
+- **Source integrity:** stored sources match their content hashes, and quotes appear verbatim at the stated offsets.
+- **Reproducibility:** computed claims (similarities, imports) reproduce from their declared inputs and recipe.
+- **Accountability:** signatures belong to registered contributors.
+- **Log integrity:** the hash chain is intact and nothing was altered or removed.
+
+**It does not guarantee:**
+- that a quote *means* what the claim says (that's semantic review)
+- that a source is correct or free of fraud or bias
+- that the graph is complete (absence of a claim is not evidence of absence)
+- that a preclinical result applies to patients
+
+## 4. Semantic review and independence policy
+
+- **A review is a signed attestation:**
+  - *supports*
+  - *supports with qualification* (e.g. "in zebrafish only")
+  - *does not support*
+  - *out of scope*
+
+  Each comes with a reason. Reviewers see the source passage, not just the claim.
+- **Independence:** a second review counts only if it comes from a different model family, a different source, or a human. The same model with a different prompt is **not** independent.
+- **Who reviews:**
+  - **Primary judge:** GPT-6 Sol.
+  - **Second, independent model family:** DeepSeek-V4-Flash (both deployed in our Foundry).
+  - **Humans:** experts and patient-group reviewers, for anything the family view will present as established.
+- **Forbidden shortcuts** (encoded as rules, enforced in reviews and projections):
+  - shared pathway ≠ shared treatment
+  - same gene ≠ same mechanism
+  - similar symptoms ≠ common cause
+  - preclinical ≠ clinical
+  - absent from a database ≠ absent in reality
+- **Challenges:** anyone can challenge a claim with counter-evidence. The assertion becomes *contested*, and both sides stay visible.
+- **Status of an assertion:**
+
+  `proposed → checked → supported` (one independent review) `→ verified` (two independent reviews, or a human expert), or `contested` / `rejected` / `withdrawn`.
+
+  Reference-import claims start as *checked*, and the curator's own grade (e.g. ClinGen "Definitive") is shown.
+
+## 5. Materialized graph projections
+
+- **Trust policies** are versioned and public:
+  - **family:** reference data plus verified claims; contested claims shown *as contested*; computed connections always labeled as hypotheses
+  - **research:** everything except rejected claims, with status flags
+  - **strict:** human-reviewed only
+- **The projection job** reads the claims accepted under a policy and produces:
+  - the graph
+  - connections (symptom, mechanism and combined similarity)
+  - look-alikes
+  - frontier tasks
+  - the page bundles the app loads today
+
+  Today's `build_graph.py` becomes this job.
+- **Incremental:** when claims land, only the affected conditions and their neighbors are recomputed.
+- **Static + live:** projections are published as static bundles (fast and cheap). A live API serves claim histories, activity, the frontier and campaigns.
+
+## 6. Agent roles and MCP operations
+
+**Model routing rule: use cheap models only where their mistakes are cheap to catch.**
+
+| Role | Does | Model |
+|---|---|---|
+| Scout | Finds new papers, trials, registries, group pages per condition; watches for new ones | deterministic + Luna |
+| Screener | "Is this source actually about this condition?" (a "SNAP25" search returns Botox trials) | GPT-6 Luna |
+| Extractor | Turns a source into atomic claims with verbatim quotes | GPT-6 Luna (quotes checked by the kernel) |
+| Verifier | Judges whether the passage supports the claim, with context qualifiers | GPT-6 Sol, then DeepSeek-V4-Flash for independence |
+| Skeptic | Searches for counter-evidence; files challenges | GPT-6 Sol |
+| Resolver | Maps names to stable IDs; flags ambiguous ones | embeddings + Sol |
+| Gap hunter | Generates and ranks frontier tasks from the graph | deterministic |
+| Proposer | Turns verified claims into a sourced partnership proposal for a family | GPT-6 Sol |
+| Auditor | Detects low-quality or suspicious contributors and patterns | deterministic + Sol |
+
+Before scaling any role, measure Luna vs. Sol on a hand-checked set of claims from the STXBP1/SNARE neighborhood, and log real token cost per task.
+
+**MCP server (the public door):**
+- **Read:** `search_atlas`, `get_condition`, `get_claim` (with full history)
+- **Work:** `list_frontier`, `claim_task`
+- **Write:** `submit_claim`, `submit_review`, `submit_challenge`
+- **Account:** `my_contributions`, `get_campaign`
+
+Rules for the MCP server:
+- **Every write goes through the kernel.** No agent writes the graph directly, including ours.
+- **Contributor identity:** API key + signing key + an **agent manifest** (models, tools, data access, focus, language skills). Agents are distinct by what they can access and which model they run, not by a persona.
+- **Track record:** reputation comes from outcomes: accepted claims, upheld challenges, successful reproductions, corrections.
+- **Safety:** source text and submissions are data, never instructions (prompt-injection rule). Writes are rate-limited. Agents fetch sources through the atlas's shared cache, so 500 agents don't hammer PubMed.
+
+## 7. Frontier-task prioritization
+
+The graph writes its own to-do list. Examples from the current data:
+- **Variant effect:** 4,333 conditions have no curated variant effect (loss vs. gain of function decides whether therapies could transfer).
+- **Name conflicts:** a database label contradicts the literature (SNAP25: "myasthenic syndrome" vs. epileptic encephalopathy).
+- **Thin symptom profiles:** too few symptoms recorded to compare reliably.
+- **Unreviewed connections:** strong computed connections nobody has checked.
+- **Missing assets:** a condition has no known registry, natural history study, model, patient group or trial.
+- **New sources:** papers and trials published since the last check.
+- **Contested claims** waiting for review.
+
+**Priority = impact × uncertainty × feasibility × campaign boost**
+- **Impact:** how many families' answers would change (e.g. how many strong connections have an "unknown" variant-effect relation).
+- **Uncertainty:** current evidence state.
+- **Feasibility:** sources exist to answer it.
+- **Campaign boost:** a community sponsors this condition.
+
+Tasks re-rank automatically as claims land. This is the "mining": agents close the gaps that matter, and credit comes from work that survives review.
+
+## 8. Migration of existing importers
+
+- **Phase 1 parsers stay.** They become reference imports that emit claims instead of writing tables:
+  - MONDO, Gene2Phenotype, GenCC, ClinGen, Orphanet → `causes` and `has_variant_effect`
+  - HPO → `has_symptom`
+  - Complex Portal, Reactome, GO, STRING → `part_of_complex`, `in_pathway`, `involved_in`, `interacts_with`
+  - Orphanet → prevalence
+
+  Each import records the dataset version and content hash.
+- **The semantic fixes already learned become policies:**
+  - GenCC "Supportive" is not a causality grade.
+  - Orphanet modifier genes are not causal.
+  - Umbrella terms are aliases.
+- **`build_graph.py` becomes the projection job**, with the same outputs, now read from accepted claims.
+- **Contributed-claim sources (via agents):**
+  - Buffalo's tracker (self-reported programs)
+  - ClinicalTrials.gov
+  - NIH RePORTER
+  - PubMed/PMC
+  - patient-group sites
+
+## 9. Family, researcher and contributor interfaces
+
+- **Family view (default):** the answer page built on the brief's three questions.
+  - **Statuses in plain words:** "checked by two independent reviewers", "contested: see both sides", "computed hypothesis".
+  - **Gaps:** "What we don't know" and "What's being investigated right now".
+  - **Start a campaign** for this condition.
+- **Researcher view:** full claim histories and derivations, contested claims, the frontier, filters by evidence type, exports.
+- **Contributor view:**
+  - connect your agent (MCP endpoint + key)
+  - task board
+  - your claims and reviews
+  - track record
+  - live activity feed, including the map lighting up when a verified claim bridges two disease regions
+- **Campaign page:** condition, goals, sponsor, budget, and receipts (sources screened, claims proposed and verified, contradictions found, new bridges).
+
+## 10. Campaign funding and governance
+
+- **A campaign** = a condition + goals (e.g. "map every model and outcome measure relevant to SNAP25") + a budget. Funding buys agent time and expert review, and the receipts are public.
+- **Rules:**
+  - money buys attention, never acceptance
+  - no pay-to-rank
+  - no suppressing contradictions
+  - never promise outcomes to families
+- **Payments:** subscriptions and one-off sponsorship (e.g. Stripe). Tax-deductible donations need a nonprofit or fiscal sponsor. Later: nonprofit commons + hosted services.
+- **Governance:**
+  - policies are versioned and public
+  - appeals happen through challenges
+  - moderation handles abuse
+  - a panel of expert and patient-group reviewers
+  - no tokens or crypto (trust matters more than speculation in this space)
 
 ---
 
-## 4. The deep-dive neighborhood (confirmed in Phase 0)
+## First campaign: the STXBP1 / SNARE neighborhood
 
-**STXBP1 and the SNARE-machinery disorders** (STXBP1, SNAP25, STX1B, VAMP2, SYT1, CPLX1, …). The SNARE complex is the protein machinery nerve cells use to release signals. Full findings: [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
+The deep-dive neighborhood from Phase 0 becomes the first campaign and the place where every agent role is tested and measured.
 
-**The anchor story: Maria's child has SNAP25-related disorder.**
-- About 32 known patients, no trial, no natural history study.
-- The databases still file it as a myasthenic syndrome, while the literature describes an epileptic encephalopathy.
-- **The atlas connects her through mechanism.** STXBP1 is part of the same SNARE machinery (the "SNAREopathies" literature), where symptom matching alone fails.
-- **It finds real assets:**
-  - Simons Searchlight already covers SNAP25.
-  - A multi-gene STXBP1 + SYNGAP1 natural history study is recruiting at CHOP.
-  - A European STXBP1 trial-readiness study is running.
-  - The STXBP1 Foundation has a phenylbutyrate program.
-- **It shows contradictions:** phenylbutyrate for STXBP1 has both supporting and opposing 2026 evidence.
-- **It shows lessons:** a terminated gene-therapy trial.
-- **It finds bridge people:** e.g. Weill Cornell partners with several communities.
+- **The data check confirmed:**
+  - SNAP25 is mislabeled in the databases.
+  - Real shared assets exist (Simons Searchlight, the CHOP STXBP1 + SYNGAP1 natural history study, the European STXBP1 trial-readiness study).
+  - Contradictions exist (phenylbutyrate for STXBP1).
+  - There's a terminated gene-therapy trial to learn from.
+  - Buffalo's tracker shows phenylbutyrate programs in two communities with the same partner.
+- **The breadth graph already gets the mechanism right.** SNAP25's top connections are VAMP1, CPLX1, VAMP2, SYT1 and STX1B, each explained ("SNAP25 and VAMP2 proteins bind each other").
+- **The first proof that the system self-corrects:** an extractor adds the literature's epileptic-encephalopathy symptoms for SNAP25, a verifier on another model confirms them, the projection recomputes, and STXBP1 rises on Maria's list without anyone editing by hand.
 
-**Why it fits:**
-- Buffalo's home turf (pediatric, neurogenetic, monogenic) and in Buffalo's own tracker.
-- Untreated.
-- A real backtest: from SLC6A1's side, STXBP1 ranks #12 of 10,739 diseases by symptoms, the pairing the real phenylbutyrate trial made.
-- Clean counterexamples the graph finds on its own: STXBP2, the same protein family, causes an immune disease; SYT2 and VAMP1 belong to the neuromuscular cluster.
+## The 10× case
 
-The breadth layer still covers every monogenic disease. This neighborhood is where the deep evidence layer is built and checked first.
+**Milestone:** a tiny community gets its children into a natural history study, which almost every rare-disease trial needs first.
 
----
+- **Today:** months of networking to find the right people, then a protocol, ethics approval, a registry, recruitment.
+- **With the network:**
+  - The community starts a campaign.
+  - Agents map the neighborhood's assets and people.
+  - The atlas finds a neighbor's study whose eligibility and outcome measures fit.
+  - The family sends a sourced proposal to join via a protocol amendment.
+- **Assumptions to state openly:**
+  - a neighbor study is willing to expand
+  - symptoms are similar enough for the same outcome measures
+  - an amendment is faster than a new protocol
+  - mapping a neighborhood with agents is much faster than manual networking
+- **Numbers:** all timelines must come from sources.
 
-## 5. Rules we hold ourselves to
+## Evidence rules (non-negotiable)
 
-- No claim without a source. AI-extracted claims carry a verbatim quote.
-- Every link shows source, date, confidence and tier.
-- AI inference is always labeled "hypothesis."
-- Say "we don't know" when we don't, and show what we searched.
+- No claim without a source, and AI-extracted claims carry verbatim quotes the kernel has checked.
+- Every link shows source, date, status and who checked it.
+- Computed connections are always labeled as hypotheses.
+- Say "we don't know" when we don't, and show what was searched.
 - Public, professional contact information only. No patient data.
 - A research-coordination tool, not medical advice.
-- Plain language first, detail on click.
 
----
+## Build order
 
-## 6. The 10× case
+Phases are defined by what they produce.
 
-**Milestone:** a tiny community gets its children into a natural history study. Almost every rare-disease trial needs one first.
+0. ~~**Data check.**~~ Done ([docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md)).
+1. ~~**Breadth graph.**~~ Done: 7,328 gene-defined conditions, mechanism layer, connections, look-alikes (`pipeline/build_graph.py`).
+2. **Front door.** Search and the condition answer page from static projections, deployed. *(in progress)*
+3. **Ledger and kernel.** Claim schema, event log, kernel checks, trust policies. Re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
+4. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set, then widen.
+5. **Live service.** API + MCP server, claim histories and statuses in the UI, frontier view, activity feed.
+6. **Campaigns and the action layer.** Sponsor a condition, receipts, and partnership proposals generated from verified claims.
+7. **Open contribution.** Contributor keys, agent manifests, reputation, moderation.
+8. **Submission material.** README (architecture + how to reproduce the dataset), walkthrough video.
 
-- **Today:** networking to find the right people, designing a protocol, getting ethics approval, setting up a registry, recruiting.
-- **With the atlas:** find a neighbor's study whose eligibility and outcome measures fit, ask to join through a protocol amendment, and use shared infrastructure like a biorepository.
-- **Assumptions to state openly:**
-  - A neighbor study is willing to expand.
-  - Symptoms are similar enough to use the same outcome measures.
-  - An ethics amendment is faster than a new protocol.
-  - The atlas turns months of networking into one search.
-- **What must be validated next:** talk to patient-group leaders and study investigators, and test the atlas against historical cases (the 4-PBA trial).
-- **Numbers:** all timelines must come from sources. No invented numbers.
+## Open questions and risks
 
----
-
-## 7. Build order
-
-Phases are defined by what they produce. Each one ends with something we can look at.
-
-0. ~~**Data check.**~~ Done: go. See [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
-1. **Breadth graph.** Every monogenic rare disease with IDs, synonyms, genes (with loss/gain of function), symptoms and trials. Output: searchable graph data.
-2. **App skeleton.** Search plus the answer page, wired to real breadth data and deployed. Output: a live URL.
-3. **Depth layer.** AI extraction and verification for the neighborhood (papers, trials, group sites, tracker). Output: evidence-backed claims and assets.
-4. **Analytics.** Neighbors, clusters, asset matching, shared people, counterexamples, gaps.
-5. **Action.** Road to treatment, next steps, proposal drafting, the "what we don't know" view.
-6. **Polish.** Map view, persona views, a plain-language pass, the backtest on the 4-PBA precedent.
-7. **Submission.** README (architecture and how to reproduce the dataset), the 1-minute walkthrough, the team video.
-
----
-
-## 8. Open questions and risks
-
-- **Patient-group and registry data is the messiest layer.** It needs AI extraction plus manual spot checks.
-- **Symptom similarity alone groups "everything with seizures."** Mechanism and rare symptoms must carry the weight.
-- **Data terms:** OMIM is restricted; the Buffalo tracker's terms need checking; respect site terms and robots.txt.
-- **Product name and visual identity:** to be decided.
+- **Running cost:** agents and a live database cost money continuously. Budgets are a setting, and paid Azure resources need the owner's approval first.
+- **Human reviewers:** who are the expert and patient-group reviewers, and how are they recruited?
+- **Model independence:** GPT-6 Luna and Sol share a family, so independence needs DeepSeek or humans.
+- **Quote licensing:** keep quotes short, and respect PMC licenses (CC BY vs. non-commercial).
+- **Adoption:** outside contributors aren't guaranteed. Without them, the system is still self-improving with our own agents.
+- **Patient-facing safety:** contested or preclinical claims must never read as advice.

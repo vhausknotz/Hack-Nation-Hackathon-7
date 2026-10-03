@@ -27,3 +27,6 @@ Thumbs.db
 
 # built graph (reproducible with pipeline/build_graph.py)
 data/build/
+
+# app data bundles (rebuilt by pipeline/export_app.py)
+app/public/data/
