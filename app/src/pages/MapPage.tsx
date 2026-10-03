@@ -97,7 +97,7 @@ export default function MapPage() {
 
 function Panel({ children }: { open: boolean; children: ReactNode }) {
   return (
-    <aside className="absolute inset-x-0 bottom-0 z-10 max-h-[58dvh] overflow-y-auto rounded-t-3xl bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:bottom-4 sm:left-4 sm:top-[84px] sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:shadow-2xl">
+    <aside className="absolute inset-x-0 bottom-0 z-10 max-h-[58dvh] overflow-y-auto rounded-t-3xl bg-white shadow-[0_-12px_40px_rgba(0,0,0,0.35)] sm:inset-x-auto sm:bottom-auto sm:left-4 sm:top-[84px] sm:max-h-[calc(100dvh-100px)] sm:w-[400px] sm:rounded-2xl sm:shadow-2xl">
       <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
       {children}
     </aside>

@@ -182,7 +182,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
     const cx = focus ? pts[0].x : (Math.min(...xs) + Math.max(...xs)) / 2;
     const cy = focus ? pts[0].y : (Math.min(...ys) + Math.max(...ys)) / 2;
     const extent = Math.max(...xs.map((x) => Math.abs(x - cx)), ...ys.map((y) => Math.abs(y - cy)));
-    const ratio = Math.min(0.9, Math.max(0.08, extent * 2.6));
+    const ratio = Math.min(0.9, Math.max(focus ? 0.1 : 0.22, extent * 2.6));
     renderer.getCamera().animate({ x: cx, y: cy, ratio }, { duration: 900, easing: "quadraticInOut" });
   }, [focus, highlight, related]);
 
