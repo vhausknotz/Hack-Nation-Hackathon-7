@@ -34,3 +34,6 @@ app/public/data/
 # build output
 dist/
 *.tsbuildinfo
+
+# development ledger and signing keys (never commit keys)
+data/ledger/

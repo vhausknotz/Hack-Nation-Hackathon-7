@@ -162,7 +162,7 @@ There are two separate questions, answered at two separate levels:
   - `independently reviewed` (two reviewers from different model families, or one human)
   - `human-reviewed`
   - `rejected`
-- **Reviewer independence** means a different model family (GPT-6 Sol vs. DeepSeek-V4-Flash, both in our Foundry) or a human. The same model with a different prompt is **not** independent. A different *source* is not reviewer independence either; it is more evidence and counts under (b).
+- **Reviewer independence** means a different model family (a non-OpenAI family alongside GPT-6 Sol; which one is still to be chosen, see open questions) or a human. Until a second family is chosen, model reviews count as single reviews, and only humans add independence. The same model with a different prompt is **not** independent. A different *source* is not reviewer independence either; it is more evidence and counts under (b).
 
 **(b) How well supported is the assertion? (per assertion, computed from the claims)**
 - An assertion's **evidence state** is computed from its claims that passed review:
@@ -216,7 +216,7 @@ There are two separate questions, answered at two separate levels:
 | Scout | Finds new papers, trials, registries, group pages per condition; watches for new ones | deterministic + Luna |
 | Screener | "Is this source actually about this condition?" (a "SNAP25" search returns Botox trials) | GPT-6 Luna |
 | Extractor | Turns a source into atomic claims with verbatim quotes | GPT-6 Luna (quotes checked by the kernel) |
-| Verifier | Judges whether the passage supports the claim, with context qualifiers | GPT-6 Sol, then DeepSeek-V4-Flash for independence |
+| Verifier | Judges whether the passage supports the claim, with context qualifiers | GPT-6 Sol, then a second model family (to be chosen) or a human for independence |
 | Skeptic | Searches for counter-evidence; files challenges | GPT-6 Sol |
 | Resolver | Maps names to stable IDs; flags ambiguous ones | embeddings + Sol |
 | Gap hunter | Generates and ranks frontier tasks from the graph | deterministic |
@@ -367,7 +367,7 @@ Phases are defined by what they produce.
 
 - **Running cost:** agents and a live database cost money continuously. Budgets are a setting, and paid Azure resources need the owner's approval first.
 - **Human reviewers:** who are the expert and patient-group reviewers, and how are they recruited?
-- **Model independence:** GPT-6 Luna and Sol share a family, so independence needs DeepSeek or humans.
+- **Model independence:** GPT-6 Luna and Sol share a family. Choose a second, non-OpenAI model family for independent review: Microsoft Phi-4 is already deployed, or another family can be deployed in Foundry. Until then, independence comes only from humans.
 - **Quote licensing:** keep quotes short, and respect PMC licenses (CC BY vs. non-commercial).
 - **Adoption:** outside contributors aren't guaranteed. Without them, the system is still self-improving with our own agents.
 - **Patient-facing safety:** contested or preclinical claims must never read as advice.

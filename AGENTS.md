@@ -26,7 +26,7 @@ One developer working with AI agents. The aim is a genuinely ambitious, meaningf
 - **Use cheap models only where their mistakes are cheap to catch.**
   - Luna screens and extracts, and the kernel checks quotes mechanically.
   - Judgment goes to Sol.
-  - Independence needs a different model family (DeepSeek-V4-Flash) or a human. A different prompt on the same model doesn't count.
+  - Independence needs a different model family (second family not chosen yet; don't use DeepSeek, the owner doesn't want it) or a human. A different prompt on the same model doesn't count.
 - **The kernel contains no language model.** It checks schema, IDs, source hashes, verbatim quotes, reproducibility, signatures and log integrity. It never decides truth.
 
 ## Repo layout
@@ -61,7 +61,6 @@ docs/             research notes and decisions
 - **Which model for what:**
   - `gpt-6-luna`: screening and extraction (cheap, high volume)
   - `gpt-6-sol`: verification, challenges, entity resolution decisions, explanations, proposals
-  - `DeepSeek-V4-Flash`: independent second review (a different model family)
   - `text-embedding-3-large`: entity matching and semantic search (3072 dimensions)
   - Also deployed: `gpt-5.4-mini`, `gpt-5.4-nano`, `o4-mini`
 - **Local auth:** Entra ID through the user's Az PowerShell login. Azure CLI is *not* installed. No API key needed. If auth fails, ask the user to run `Connect-AzAccount`. Tested and working:
