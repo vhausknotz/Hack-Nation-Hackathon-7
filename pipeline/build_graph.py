@@ -363,7 +363,8 @@ def main() -> None:
             votes[eff] += 1
             sources.append({"source": "Orphanet", "value": eff.replace("_", " ")})
         d = dosage.get(gene_table[c.gene].symbol, {})
-        if d.get("haploinsufficiency_score") == "3":
+        # ClinGen dosage is a gene-level score: it only speaks for a condition when the gene causes no other condition
+        if d.get("haploinsufficiency_score") == "3" and len(gene_conditions[c.gene]) == 1:
             votes["loss_of_function"] += 1
             sources.append({"source": "ClinGen dosage", "value": "haploinsufficiency (sufficient evidence)", "url": d["url"]})
         return {"value": votes.most_common(1)[0][0] if votes else "unknown", "sources": sources}
