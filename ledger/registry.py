@@ -57,7 +57,11 @@ class Registry:
         return "registry:" + hashlib.sha256(json.dumps(self.versions, sort_keys=True).encode()).hexdigest()[:16]
 
     def dataset_hash(self, file: str) -> str:
-        return file_hash(self.raw / file)
+        if not hasattr(self, "_dataset_hashes"):
+            self._dataset_hashes: dict[str, str] = {}
+        if file not in self._dataset_hashes:
+            self._dataset_hashes[file] = file_hash(self.raw / file)
+        return self._dataset_hashes[file]
 
     def _ids(self, file: str, pattern: str) -> frozenset[str]:
         text = (self.raw / file).read_text(encoding="utf-8")

@@ -61,6 +61,26 @@ def link_strength(source: str, confidence: str) -> str:
     return "none"  # disputed, refuted, no known disease relationship, animal model only, ...
 
 
+def ledger_overlay(policy: str = "family") -> dict[str, list[tuple[dict, str, str]]]:
+    """Contributed claims the policy accepts, by predicate: [(claim, review status, claim id)]. Empty without a ledger."""
+    import sys
+    root = Path(__file__).resolve().parent.parent
+    if not (root / "data" / "ledger" / "ledger.db").exists():
+        return {}
+    sys.path.insert(0, str(root))
+    from ledger import policy as pol
+    from ledger.store import Store
+
+    store = Store()
+    out: dict[str, list] = defaultdict(list)
+    for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1"):
+        status = pol.claim_review_status([dict(r) for r in store.reviews_for(row["claim_id"])])
+        if pol.visible(policy, "contributed", status, {}, row["predicate"]):
+            out[row["predicate"]].append((json.loads(row["body"]), status, row["claim_id"]))
+    store.close()
+    return out
+
+
 @dataclass
 class Condition:
     id: str
@@ -201,6 +221,27 @@ def main() -> None:
 
     cond_pheno = {cid: condition_pheno(c) for cid, c in conditions.items()}
 
+    # ---- overlay: contributed claims from the ledger that the family policy accepts ----------------------
+    contributed = ledger_overlay()
+    by_disease: dict[str, list[str]] = defaultdict(list)
+    for cid, c in conditions.items():
+        by_disease[c.disease].append(cid)
+    added = 0
+    for claim, status, claim_id_ in contributed.get("has_symptom", []):
+        a, ev = claim["assertion"], claim["evidence"][0]
+        h = onto.resolve(a["object"])
+        if not h:
+            continue
+        for cid in by_disease.get(a["subject"], []):
+            entry = cond_pheno[cid].setdefault(h, {"frequency": "", "sources": [], "refs": []})
+            entry["sources"] = entry["sources"] + [f"{ev.get('pmid', 'paper')} (agent claim, {status.replace('_', ' ')})"]
+            entry["refs"] = sorted(set(entry["refs"]) | ({ev["pmid"]} if ev.get("pmid") else set()))[:5]
+            if not entry["frequency"] and ev.get("frequency"):
+                entry["frequency"] = ev["frequency"]
+            entry.setdefault("claims", []).append({"claim_id": claim_id_, "status": status, "quote": ev["quote"][:300], "pmid": ev.get("pmid")})
+            added += 1
+    log(f"ledger overlay: {added} contributed symptom claims added ({sum(len(v) for v in contributed.values())} accepted contributed claims)")
+
     def closure(terms) -> set[str]:
         out = set()
         for t in terms:
@@ -330,10 +371,14 @@ def main() -> None:
     effects = {cid: effect_of(c) for cid, c in conditions.items()}
 
     def effect_relation(a: str, b: str) -> str:
+        """same / different / unknown. Loss vs. gain is only comparable within one gene: across genes, an enzyme's
+        loss of function can cause the same harm as its substrate's gain of function (e.g. ZMPSTE24 and LMNA)."""
         ea, eb = effects[a]["value"], effects[b]["value"]
         if "unknown" in (ea, eb):
             return "unknown"
-        return "same" if ea == eb else "different"
+        if ea == eb:
+            return "same"
+        return "different" if conditions[a].gene == conditions[b].gene else "not_comparable"
 
     # ---- neighbors ----------------------------------------------------------------------------------------
     sym_top = symptom_index.top_k(with_symptoms, with_symptoms, k=60)
@@ -377,9 +422,26 @@ def main() -> None:
             out.append({"k": kind, "id": term, "symbol": gene_table[term].symbol} if kind == "partner" else {"k": kind, "id": term})
         return out
 
-    def combine(s_sym: float, s_mech: float) -> float:
-        """Half plain average, half geometric mean: strong one-sided matches count, matches on both count most."""
+    # A signal counts as "measured" only when both sides have data for it. Absent data is not dissimilarity.
+    def mech_measured(g1: str, g2: str) -> bool:
+        def rich(g: str) -> bool:  # interaction-level data; GO terms alone are too uneven to judge dissimilarity
+            return bool(partners.get(g)) or bool(complexes.get(g))
+        return rich(g1) and rich(g2)
+
+    def sym_measured(c1: str, c2: str) -> bool:
+        """Symptoms count as measured when both have recorded symptoms, or when their body systems differ
+        (the body-system classification is itself coarse clinical information)."""
+        both = bool(cond_pheno.get(c1)) and bool(cond_pheno.get(c2))
+        return both or category_of(conditions[c1]) != category_of(conditions[c2])
+
+    def combine(s_sym: float, s_mech: float, sym_known: bool = True, mech_known: bool = True) -> float:
+        """Half plain average, half geometric mean: strong one-sided matches count, matches on both count most.
+        When one signal was not measured (missing data), the other stands alone, slightly discounted."""
         a, b = min(s_sym / sym_scale, 1.0), min(s_mech / mech_scale, 1.0)
+        if not mech_known and sym_known:
+            return 0.75 * a
+        if not sym_known and mech_known:
+            return 0.75 * b
         return 0.5 * (a + b) / 2 + 0.5 * (a * b) ** 0.5
 
     # Look-alikes: sister proteins (same HGNC gene family) whose conditions share almost no symptoms.
@@ -408,7 +470,13 @@ def main() -> None:
     referenced_mech: set[str] = set()
     with open(OUT / "neighbors.jsonl", "w", encoding="utf-8") as f:
         for cid in cond_ids:
-            rows = [(combine(s_sym, min(s_mech, 0.999)), o, s_sym, s_mech) for o, s_sym, s_mech in scored[cid]]
+            # Same gene is not the same mechanism (the brief's key insight): same-gene conditions are ranked on
+            # symptom overlap alone and flagged, never scored as maximally similar machinery.
+            g0 = conditions[cid].gene
+            looks = lookalikes(cid)
+            lookalike_ids = {x["id"] for x in looks}
+            rows = [(combine(s_sym, 0.0 if s_mech >= 1 else s_mech, sym_measured(cid, o), s_mech >= 1 or mech_measured(g0, conditions[o].gene)), o, s_sym, s_mech)
+                    for o, s_sym, s_mech in scored[cid] if o not in lookalike_ids]
             keep = {o for _, o, _, _ in sorted(rows, key=lambda x: -x[0])[:K_COMBINED]}
             keep |= {o for _, o, _, _ in sorted(rows, key=lambda x: -x[2])[:K_SYMPTOM]}
             keep |= {o for _, o, _, _ in sorted((r for r in rows if r[3] < 1), key=lambda x: -x[3])[:K_MECHANISM]}
@@ -422,9 +490,9 @@ def main() -> None:
                 referenced_mech.update(m["id"] for m in mechs if m["k"] in ("complex", "pathway", "go"))
                 out.append({"id": o, "score": round(combined, 4), "sym": round(s_sym, 4), "mech": round(s_mech, 4),
                             "same_gene": g1 == g2, "effect": effect_relation(cid, o),
+                            "mech_known": g1 == g2 or mech_measured(g1, g2), "sym_known": sym_measured(cid, o),
                             "same_category": category_of(conditions[cid]) == category_of(conditions[o]),
                             "symptoms": syms, "mechanisms": mechs})
-            looks = lookalikes(cid)
             referenced_hpo.update(s for x in looks for s in shared_symptoms(cid, x["id"]))
             f.write(json.dumps({"id": cid, "neighbors": out, "lookalikes": looks}, ensure_ascii=False) + "\n")
     log("wrote neighbors.jsonl")

@@ -71,16 +71,30 @@ def evidence_state(claims: list[tuple[dict, str, str]], contested: bool) -> dict
             "human_reviewed": any(status == "human_reviewed" for _, _, status in claims)}
 
 
-def visible(policy: str, origin: str, review_status: str, state: dict) -> bool:
+# Risk tiers: how much review a contributed claim needs before the family view may show it.
+DESCRIPTIVE = {"has_symptom", "has_asset", "has_name", "represented_by", "studied_by", "has_prevalence"}  # what a source reports
+MECHANISTIC = {"causes", "has_variant_effect", "interacts_with", "part_of_complex", "in_pathway", "involved_in"}  # how biology works
+THERAPEUTIC = {"tested_in"}  # anything about treatment effects
+
+
+def visible(policy: str, origin: str, review_status: str, state: dict, predicate: str = "") -> bool:
     """Whether a claim belongs in a view (the projection then labels it; see PLAN.md section 5)."""
-    if review_status in ("rejected",):
+    if review_status in ("rejected", "review_disagreement") and policy != "research":
+        return False
+    if review_status == "rejected":
         return False
     if policy == "research":
         return True
+    if origin == "reference":
+        return True
     if policy == "family":
-        return origin == "reference" or review_status in ("independently_reviewed", "human_reviewed")
+        if predicate in THERAPEUTIC:
+            return review_status == "human_reviewed"
+        if predicate in MECHANISTIC:
+            return review_status in ("independently_reviewed", "human_reviewed")
+        return review_status in ("reviewed", "independently_reviewed", "human_reviewed")
     if policy == "strict":
-        return origin == "reference" or review_status == "human_reviewed"
+        return review_status == "human_reviewed"
     raise ValueError(f"unknown policy {policy!r}")
 
 
@@ -94,4 +108,6 @@ def family_label(origin: str, review_status: str, state: dict) -> str:
         return "Reviewed by an expert"
     if review_status == "independently_reviewed":
         return "Checked by two independent AI reviewers"
+    if review_status == "reviewed":
+        return "Checked by an AI reviewer against its source"
     return "Not yet checked"

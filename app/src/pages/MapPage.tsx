@@ -47,7 +47,7 @@ export default function MapPage() {
       getMechanism(key).then((m) => m && setExplore({ kind: "m", title: m.name, subtitle: `Shared machinery · ${m.source}`, conditions: m.conditions, total: m.condition_count, science: routes.mechanism(m.id) }));
   }, [kind, id]);
 
-  const neighbors = useMemo(() => (condition ? [...condition.neighbors].sort((a, b) => b.score - a.score) : []), [condition]);
+  const neighbors = useMemo(() => (condition ? condition.neighbors.filter((n) => !n.same_gene).sort((a, b) => b.score - a.score) : []), [condition]);
   const related: Related[] = useMemo(() => neighbors.slice(0, 8).map((n) => ({ id: n.id, strength: Math.min(1, n.score / 0.6) })), [neighbors]);
   const highlight = useMemo(() => (explore ? new Set(explore.conditions.map((c) => c.id)) : null), [explore]);
 
@@ -193,6 +193,8 @@ function ConditionPanel({ c, neighbors, map, emphasized, setEmphasized, onClose 
         <p className="mt-2 text-sm text-ink-soft">Too little is recorded about this condition to compare it with others yet.</p>
       )}
 
+      <SameGene c={c} />
+
       <h2 className="mt-7 text-lg font-semibold">What already exists</h2>
       <p className="mt-1 text-sm text-ink-soft">Studies, registries and patient groups for this condition are not mapped in the atlas yet. Meanwhile, these trusted sources list them:</p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -207,6 +209,33 @@ function ConditionPanel({ c, neighbors, map, emphasized, setEmphasized, onClose 
       </Link>
       <p className="mt-3 text-xs leading-relaxed text-ink-faint">Connections are computed from open data: leads for experts to check, not medical advice.</p>
     </div>
+  );
+}
+
+function SameGene({ c }: { c: ConditionBundle }) {
+  const same = c.neighbors.filter((n) => n.same_gene).sort((a, b) => b.sym - a.sym);
+  if (!same.length) return null;
+  const overlap = (n: Neighbor) => (n.sym >= 0.25 ? "Many shared symptoms" : n.sym >= 0.1 ? "Some shared symptoms" : "Mostly different symptoms");
+  return (
+    <>
+      <h2 className="mt-7 text-lg font-semibold">Same gene, different condition</h2>
+      <p className="mt-1 text-sm text-ink-soft">
+        Changes in {c.gene.symbol} can cause other conditions too. They may work in different ways, so they are not automatically close.
+      </p>
+      <ul className="mt-3 space-y-1.5">
+        {same.slice(0, 5).map((n) => (
+          <li key={n.id}>
+            <Link to={routes.condition(n.id)} className="flex items-baseline justify-between gap-3 rounded-lg px-1 py-1 text-sm hover:text-machinery">
+              <span className="min-w-0 truncate">{n.name}</span>
+              <span className={`shrink-0 text-[11px] ${n.effect === "different" ? "text-caution" : "text-ink-faint"}`}>
+                {n.effect === "different" ? "Acts differently" : overlap(n)}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {same.length > 5 && <p className="mt-1 text-xs text-ink-faint">and {same.length - 5} more</p>}
+    </>
   );
 }
 
@@ -230,6 +259,7 @@ function RelativeRow({ c, n, open, onToggle }: { c: ConditionBundle; n: Neighbor
             Where this comes from: <span className="text-ink">{sources.join(", ") || "computed from open data"}</span>
           </div>
           {n.effect === "different" && <div className="mt-1 text-caution">Note: the two gene changes act differently, so treatments may not transfer.</div>}
+          {n.mech_known === false && <div className="mt-1 text-ink-faint">How these two genes relate has not been recorded yet. This link rests on shared symptoms.</div>}
           <div className="mt-2 flex gap-4">
             <button onClick={() => openEvidence(connectionPanel(c, n))} className="font-medium text-machinery hover:underline">
               See the evidence

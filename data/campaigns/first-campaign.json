@@ -1,0 +1,31 @@
+{
+ "campaign": "first-campaign",
+ "started": "2026-10-03T21:12:36+00:00",
+ "conditions": {
+  "MONDO:0014590": {
+   "name": "SNAP25-related epilepsy and intellectual disability",
+   "papers_found": 45,
+   "abstracts_archived": 45,
+   "papers_relevant": 6,
+   "features_extracted": 21,
+   "claims_proposed": 14,
+   "claims_kernel_accepted": 14,
+   "dropped_no_hpo_term": 6,
+   "dropped_quote_not_found": 1,
+   "review_supports": 6,
+   "review_supports_with_qualification": 8
+  }
+ },
+ "finished": "2026-10-03T21:19:29+00:00",
+ "seconds": 414,
+ "model_tokens": {
+  "input": 31879,
+  "output": 9317
+ },
+ "usd_known_prices": 0.0053,
+ "ledger_tree_head": {
+  "size": 100,
+  "root": "e2fba752c3052d37f76ea2517e9584b461e309921e5f849e7b163a85e1cead03"
+ },
+ "log_verified": true
+}

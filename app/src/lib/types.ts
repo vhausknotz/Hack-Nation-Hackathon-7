@@ -46,7 +46,9 @@ export interface Neighbor extends Brief {
   sym: number;
   mech: number;
   same_gene: boolean;
-  effect: "same" | "different" | "unknown";
+  effect: "same" | "different" | "unknown" | "not_comparable";
+  mech_known?: boolean; // both genes have interaction-level data
+  sym_known?: boolean;
   same_category: boolean;
   symptoms: string[];
   mechanisms: SharedMechanism[];

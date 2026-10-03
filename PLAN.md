@@ -191,7 +191,7 @@ There are two separate questions, answered at two separate levels:
 
 | Policy | Shows | Labels |
 |---|---|---|
-| **family** (default) | Reference-import (curated) assertions, plus assertions with ≥1 *independently reviewed* claim (two model families) | Model-reviewed assertions read "checked by two independent AI reviewers". Only *human-reviewed* assertions may be worded as established. *Contested* assertions are shown as contested, with both sides. Computed connections are always "hypothesis". Unreviewed and rejected claims are hidden. |
+| **family** (default) | Reference-import (curated) assertions, plus contributed claims by risk tier:<br>• *descriptive* (what a source reports: `has_symptom`, `has_asset`, `has_name`, `represented_by`, `studied_by`): at least *reviewed* by one strong model<br>• *mechanistic* (`causes`, `has_variant_effect`, `interacts_with`, …): *independently reviewed* (two model families) or *human-reviewed*<br>• *therapeutic* (`tested_in`): *human-reviewed* only | Each claim says who checked it, e.g. "checked by an AI reviewer against its source". Only *human-reviewed* assertions may be worded as established. *Contested* assertions are shown as contested, with both sides. Computed connections are always "hypothesis". Unreviewed, rejected and disputed claims are hidden. |
 | **research** | Everything except rejected claims | Full status flags |
 | **strict** | Curated reference data and *human-reviewed* claims only | — |
 
