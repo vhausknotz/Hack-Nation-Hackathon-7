@@ -392,7 +392,7 @@ Phases are defined by what they produce.
 1. ~~**Breadth graph.**~~ Done: 7,328 gene-defined conditions, mechanism layer, connections, look-alikes (`pipeline/build_graph.py`).
 2. ~~**Front door v1.**~~ Search, condition pages and evidence, deployed (free tier).
 3. **Ledger and kernel.** ~~Claim schema, event log, kernel checks, trust policies~~ (done, tested). Still to do: re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
-4. **The map (front door v2).** Map-first, Google Maps-style interface (section 9): star map with named clusters, search that flies to a condition, simple side panel with plain-language explanations, "Show the science" for depth.
+4. ~~**The map (front door v2).**~~ Done and deployed: star map with named regions and constellations, search that flies to a condition, plain-language side panel, explore mode for genes/symptoms/groups, "Show the science" for depth. Still to come: "What you could do" (needs agents and assets) and the live feed and replay.
 5. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set.
 6. **Genesis enrichment.** A budgeted, broad AI run over all 7,328 conditions before outside contributors arrive:
    - ClinicalTrials.gov studies (screened for relevance, typed as registry, natural history study, trial, …)

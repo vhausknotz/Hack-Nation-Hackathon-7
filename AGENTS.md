@@ -32,17 +32,29 @@ One developer working with AI agents. The aim is a genuinely ambitious, meaningf
 ## Repo layout
 
 ```
-pipeline/         Python. Source parsers (pipeline/sources/), Phase 1 graph build (build_graph.py → becomes the projection job),
-                  app export (export_app.py), inspection tools
-ledger/           (planned) claim schema, append-only event log, kernel checks, trust policies
+pipeline/         Python data pipeline:
+                    sources/            parsers and API clients (HPO, MONDO, Orphanet, HGNC, G2P, GenCC, ClinGen,
+                                        Complex Portal, Reactome, GO, STRING, PubMed, ClinicalTrials.gov, RePORTER,
+                                        Buffalo tracker)
+                    build_graph.py      breadth graph: conditions, genes, neighbors, look-alikes (becomes the projection job)
+                    build_map.py        star map: layout, named regions and constellations (GPT-6 Sol names them)
+                    export_app.py       sharded static bundles for the app
+                    llm.py              cached Azure OpenAI client with token/cost log
+                    inspect_condition.py, recon_*.py   review tools and Phase 0 checks
+ledger/           claims ledger (built and tested; importers not yet routed through it): schema, kernel, Merkle log,
+                  signatures, policies, source archive. Tests in ledger/tests (run: python -m pytest ledger/tests)
 agents/           (planned) scout, screener, extractor, verifier, skeptic, resolver, gap hunter, proposer
 api/              (planned) live API + MCP server
-app/              web app (Vite + React + TypeScript + Tailwind); reads static projections from app/public/data/
+enrich/           work by parallel agents (see docs/agent_tasks/)
+app/              web app (Vite + React + TypeScript + Tailwind, sigma.js map); reads app/public/data/
+                    routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism
+                    lit up · /c/:id/details, /g, /s, /group, /m  "Show the science" pages · /about
+tools/            screenshot.py (visual QA with overflow check), map_preview.py, azure_status.ps1, azure_off.ps1
 data/raw/         downloaded source files (gitignored; rebuild with pipeline/download.py)
 data/cache/       cached HTTP and LLM responses (gitignored)
-data/build/       built graph (gitignored; rebuild with pipeline/build_graph.py)
-data/ledger/      (planned) development ledger (SQLite)
-docs/             research notes and decisions
+data/build/       built graph and map (gitignored; rebuild with the pipeline)
+data/ledger/      development ledger and signing keys (gitignored; never commit keys)
+docs/             research notes, operations (Azure register), parallel-agent tasks
 ```
 
 **Rebuild everything:**
@@ -50,10 +62,14 @@ docs/             research notes and decisions
 ```
 ./.venv/Scripts/python pipeline/download.py
 ./.venv/Scripts/python pipeline/build_graph.py
+./.venv/Scripts/python pipeline/build_map.py      # uses GPT-6 Sol for names (cached)
 ./.venv/Scripts/python pipeline/export_app.py
+cd app && npm install && npm run build            # then deploy dist/ (docs/operations.md)
 ```
 
 **Review a condition's connections:** `./.venv/Scripts/python pipeline/inspect_condition.py SNAP25`
+
+**Visual check:** `MSYS_NO_PATHCONV=1 ./.venv/Scripts/python tools/screenshot.py <out_dir> http://localhost:4173 / "/c/MONDO:0014590" --width 390` (after `npx vite preview` in app/). Check both desktop and phone widths before deploying.
 
 ## Azure OpenAI (Foundry)
 
