@@ -7,7 +7,7 @@ const KIND: Record<SearchKind, { label: string; className: string }> = {
   c: { label: "Condition", className: "bg-ink-wash text-ink-soft" },
   g: { label: "Gene", className: "bg-ink text-white" },
   s: { label: "Symptom", className: "bg-symptom-soft text-symptom" },
-  grp: { label: "Group", className: "bg-ink-wash text-ink-soft" },
+  grp: { label: "Group", className: "bg-ink-wash text-ink-soft" }, // a group of conditions
   m: { label: "Mechanism", className: "bg-machinery-soft text-machinery" },
 };
 
@@ -20,6 +20,7 @@ function extraText(r: SearchResult): string {
   if (r.kind === "c") return r.extra;
   if (r.kind === "g") return `${r.extra} condition${r.extra === "1" ? "" : "s"}`;
   if (r.kind === "s") return `in ${Number(r.extra).toLocaleString("en-US")} conditions`;
+  if (r.kind === "grp") return r.extra ? `group of ${r.extra}` : "group";
   return "";
 }
 

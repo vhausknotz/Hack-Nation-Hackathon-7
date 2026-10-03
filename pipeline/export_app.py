@@ -6,6 +6,7 @@ Usage: python pipeline/export_app.py
 """
 
 import json
+import math
 import shutil
 from collections import defaultdict
 from datetime import date
@@ -174,7 +175,13 @@ def main() -> None:
                 extra = str(phenotypes.get(r["id"], {}).get("conditions_with_it", ""))
             elif kind == "g":
                 extra = str(len(gene_by_symbol[r["label"]]["conditions"]))
-            entries.append([r["text"], kind, ref, r["label"] if r["label"] != r["text"] else "", extra])
+            prominence = 0.0
+            if kind == "c":  # well-documented conditions rank first among similar matches
+                c = conditions[r["id"]]
+                prominence = round(min(1.0, math.log1p(len(c["phenotypes"])) / math.log1p(150)) * 0.8 + (0.2 if c["prevalence"] else 0.0), 2)
+            elif kind == "grp":
+                extra = str(len(groups[r["id"]]["members"])) if r["id"] in groups else ""
+            entries.append([r["text"], kind, ref, r["label"] if r["label"] != r["text"] else "", extra, prominence])
     (OUT / "search.json").write_text(json.dumps(entries, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     shutil.copyfile(BUILD / "map.json", OUT / "map.json")
