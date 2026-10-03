@@ -129,7 +129,7 @@ def main(args: list[str]) -> None:
                 r["already_reviewed"] += 1
                 continue
             v = verify_asset(conditions[cid], claim, texts[0])
-            ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL)
+            ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt=VERIFY_ASSET_PROMPT)
             r[f"review_{v['verdict']}"] += 1
             print(f"  {claim['assertion']['object']} {claim['assertion']['qualifiers'].get('asset_type'):22} {v['verdict']:28} {conditions[cid]['name'][:50]}")
     head = ledger.publish_tree_head()

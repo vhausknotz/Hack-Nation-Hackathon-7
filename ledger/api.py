@@ -96,7 +96,8 @@ class Ledger:
         self.store.commit()
         return ProposalResult(cid, aid, ok, [c.to_dict() for c in checks])
 
-    def review(self, claim_id_: str, verdict: str, reason: str, signer: identity.Signer, model_family: str | None = None, model: str | None = None) -> str:
+    def review(self, claim_id_: str, verdict: str, reason: str, signer: identity.Signer, model_family: str | None = None, model: str | None = None,
+               prompt: str | None = None) -> str:
         if verdict not in REVIEW_VERDICTS:
             raise ValueError(f"verdict must be one of {sorted(REVIEW_VERDICTS)}")
         claim = self.store.claim(claim_id_)
@@ -108,7 +109,8 @@ class Ledger:
         kind = "human" if contributor and contributor["kind"] == "human" else "model"
         if kind == "model" and not model_family:
             raise ValueError("model reviews must declare their model family")
-        event_id, seq = self._append(signer, "review.attested", claim_id_, {"verdict": verdict, "reason": reason, "model_family": model_family, "model": model})
+        event_id, seq = self._append(signer, "review.attested", claim_id_, {"verdict": verdict, "reason": reason, "model_family": model_family, "model": model,
+                                                                          **({"prompt": prompt} if prompt else {})})
         self.store.add_review((event_id, claim_id_, signer.contributor, kind, model_family, model, verdict, reason, seq))
         self.store.commit()
         return event_id

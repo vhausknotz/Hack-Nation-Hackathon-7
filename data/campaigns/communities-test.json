@@ -1,0 +1,50 @@
+{
+ "campaign": "communities-test",
+ "kind": "communities",
+ "started": "2026-10-03T22:11:10+00:00",
+ "conditions": {
+  "MONDO:0014590": {
+   "name": "SNAP25-related epilepsy and intellectual disability",
+   "organizations_named": 6,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 3,
+   "skipped_directory_or_platform": 2,
+   "dropped_page_does_not_name_condition": 1
+  },
+  "MONDO:0008310": {
+   "name": "LMNA-related Hutchinson-Gilford progeria syndrome",
+   "organizations_named": 5,
+   "page_archived_snapshot": 1,
+   "claims_proposed": 4,
+   "claims_kernel_accepted": 4,
+   "review_supports": 2,
+   "page_live": 2,
+   "review_does_not_support": 2,
+   "corrected_kind_or_scope": 1,
+   "skipped_directory_or_platform": 2
+  },
+  "MONDO:0012812": {
+   "name": "STXBP1-related epileptic encephalopathy early infantile",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "organizations_named": 2,
+   "page_live": 2,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 2,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1
+  }
+ },
+ "finished": "2026-10-03T22:12:30+00:00",
+ "seconds": 80,
+ "web_searches": 0,
+ "usd_tokens_known_prices": 0.0,
+ "ledger_tree_head": {
+  "size": 480,
+  "root": "34de8f6115c3d549221560361a6312476d2fb03178cae4e714d39f41c8cf1db4"
+ },
+ "log_verified": true
+}

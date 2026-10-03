@@ -116,7 +116,8 @@ def main(args: list[str]) -> None:
         for claim_id, claim, paper in proposed:
             term = resolver.onto.terms[claim["assertion"]["object"]]
             v = verify_symptom(c, term, claim, paper["text"])
-            ledger.review(claim_id, v["verdict"], v["reason"], agents["agent:verifier-sol"], model_family=MODEL_FAMILY, model=VERIFY_MODEL)
+            ledger.review(claim_id, v["verdict"], v["reason"], agents["agent:verifier-sol"], model_family=MODEL_FAMILY, model=VERIFY_MODEL,
+                          prompt="verify-symptom@1")
             r[f"review_{v['verdict']}"] += 1
         receipt["conditions"][cid] = {"name": c["name"], **r}
         print(f"  {dict(r)}")

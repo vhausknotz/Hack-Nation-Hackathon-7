@@ -3,7 +3,7 @@
 Reads contributed represented_by and has_asset claims from the ledger and keeps those the family policy
 accepts (kernel-checked and supported by a reviewer). Rules:
 - one entry per organization or study per condition, from its best-reviewed claim
-- an organization's kind is decided once, by majority over its supported claims, so it reads the same everywhere
+- an organization's kind is decided once, by its newest reviewed classification, so it reads the same everywhere
 - an organization that serves everything caused by a gene is shown on all conditions of that gene
 - every entry says how its page was read (live on a date, or a historical archive snapshot)
 """
@@ -11,7 +11,7 @@ accepts (kernel-checked and supported by a reviewer). Rules:
 import json
 import re
 import sys
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -41,12 +41,14 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         return (sources.read_text(dict(s)) or "") if s else ""
 
     # ---- organizations ------------------------------------------------------------------------------------
-    kinds: dict[str, Counter] = defaultdict(Counter)
+    latest: dict[str, tuple[str, str]] = {}  # org -> (created, kind): the newest reviewed classification wins
     for claim, *_ in rows:
         q = claim["assertion"]["qualifiers"]
         if claim["assertion"]["predicate"] == "represented_by" and q.get("org_type"):
-            kinds[claim["assertion"]["object"]][q["org_type"]] += 1
-    org_kind = {oid: c.most_common(1)[0][0] for oid, c in kinds.items()}
+            created = claim["provenance"]["created"]
+            if claim["assertion"]["object"] not in latest or latest[claim["assertion"]["object"]][0] < created:
+                latest[claim["assertion"]["object"]] = (created, q["org_type"])
+    org_kind = {oid: kind for oid, (_, kind) in latest.items()}
 
     by_gene: dict[str, list[str]] = defaultdict(list)
     for cid, c in conditions.items():

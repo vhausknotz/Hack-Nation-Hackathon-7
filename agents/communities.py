@@ -330,7 +330,7 @@ def main(args: list[str]) -> None:
                 if ledger.store.reviews_for(result.claim_id):
                     break
                 v = verify_community(c, org, src.title, text[start:end], text)
-                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL)
+                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt=VERIFY_PROMPT)
                 r[f"review_{v['verdict']}"] += 1
                 correction = (v["serves"] and v["verdict"] == "does_not_support" and v["org_type"] and v["scope"]
                               and (v["org_type"], v["scope"]) != (org["org_type"], org["scope"]))

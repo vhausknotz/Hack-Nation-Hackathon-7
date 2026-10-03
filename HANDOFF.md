@@ -33,13 +33,20 @@ Every stop is sourced. Where nothing is known, the panel says so honestly. The g
   - Sol classifies the kind (`patient_organization`, `research_program`, `information_service`, `professional_network` or `company`) and the scope (`this_condition`, `this_gene` or `broader_group`). When Sol corrects the kind or scope, the scout re-proposes once with the correction. The reviewer never writes claims.
   - Schema: `represented_by` gained the qualifiers `org_type`, `scope`, `name` and `homepage` (`ledger/schema.py`). All 70 ledger tests pass.
   - Tested: SNAP25 Foundation; Progeria Research Foundation (archived snapshot); STXBP1 Foundation; ThinkGenetic correctly classed as an information service.
-- **Family projection of the action layer** (`pipeline/project_actions.py`, written but **not yet wired in**). `load_actions(conditions)` returns, per condition, the communities and assets the family policy accepts:
-  - one kind per organization, by majority
+- **Family projection of the action layer** (`pipeline/project_actions.py`, **wired into `pipeline/export_app.py`**). `load_actions(conditions)` returns, per condition, the communities and assets the family policy accepts:
+  - one kind per organization, from its newest reviewed classification (older, looser test claims lose)
   - gene-wide organizations shown on all conditions of that gene
   - each entry carries how and when its page was read
+- **The export** now adds `communities` and `assets` to each condition bundle. Each neighbor row also gets `community` (its best patient organization's name), `asset_count`, `mech_known` and `sym_known`. The export has **not been re-run or deployed** since, and `app/src/lib/types.ts` doesn't have these fields yet.
+- **Reviews record their prompt version:** `Ledger.review(..., prompt=)` adds it to the event payload, and all three agents pass it. Earlier reviews don't have it, and the verifier manifests still show the first prompt version, because registration is first-write-wins.
+- **Plain summaries** (`pipeline/plain_summaries.py`): written and tested on 6 conditions, with good results. Examples:
+  - Cystic fibrosis: "…often causes repeated lung infections and salty-tasting skin…"
+  - SNAP25: "…may involve seizures, delayed speech and walking…"
+
+  **Not yet run on all conditions**, and the export does not read `data/build/plain.jsonl` yet.
 - **PLAN.md**: freshness events (reaffirmed, stale, superseded; section 2), a stale-evidence frontier task (section 7), the Directions panel (section 9), and build-order status (phase 5).
 
-## In progress when this was written
+## In progress when this was written (still running at handoff)
 
 - **Community scout run on the demo set** (background):
   - Command: `python -m agents.communities first-campaign-communities <25 pilot conditions + MONDO:0008310> --neighbors 3`
@@ -53,14 +60,8 @@ Every stop is sourced. Where nothing is known, the panel says so honestly. The g
 1. **Import Codex's v2 trial candidates**, once the scout has finished: `python -m agents.trials_import --from ../atlas-trials/data/enrichment/trials/v2`.
    - These are 48 improved candidates: the SCN2A trial is recovered and the biomarker type fixed.
    - Read `../atlas-trials/enrich/trials/NOTES.md` and `comparison.md` first. The exact-name prefilter loses some broader registries.
-2. **Wire `project_actions.load_actions` into `pipeline/export_app.py`:**
-   - Add `communities` and `assets` to each condition bundle.
-   - For each neighbor row, add the name of its best patient organization and its number of assets, so "nearest community" works.
-   - Extend `app/src/lib/types.ts`.
-3. **Plain-language "You are here" sentence for every condition:**
-   - Luna, grounded only in the MONDO definition, top HPO symptoms (layperson names), inheritance, onset and gene name.
-   - Under 40 words. No treatments or prognosis unless given.
-   - Labeled "summary written by AI from MONDO and HPO data". About USD 1 for all 7,328 conditions. Cache it and add it to the bundle.
+2. **Extend `app/src/lib/types.ts`** with `communities`, `assets` and the new neighbor fields. The export side is done; see `pipeline/project_actions.py` for the entry shapes.
+3. **Run `python pipeline/plain_summaries.py`** (about USD 1, Luna, 8 threads, cached). Then make `export_app.py` read `data/build/plain.jsonl` into `bundle["plain"]`. Label it in the UI as "summary written by AI from MONDO and HPO data".
 4. **Directions panel** (`app/src/pages/MapPage.tsx`, `ConditionPanel`). Rules:
    - Only `patient_organization` counts as "your people".
    - `research_program` entries are listed as studies families can join. `information_service` is never shown as a community.

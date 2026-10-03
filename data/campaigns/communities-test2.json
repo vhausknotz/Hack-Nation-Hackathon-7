@@ -1,0 +1,25 @@
+{
+ "campaign": "communities-test2",
+ "kind": "communities",
+ "started": "2026-10-03T22:05:39+00:00",
+ "conditions": {
+  "MONDO:0008310": {
+   "name": "LMNA-related Hutchinson-Gilford progeria syndrome",
+   "organizations_named": 4,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 2,
+   "review_does_not_support": 1,
+   "skipped_directory_or_platform": 1
+  }
+ },
+ "finished": "2026-10-03T22:06:04+00:00",
+ "seconds": 24,
+ "web_searches": 0,
+ "usd_tokens_known_prices": 0.0,
+ "ledger_tree_head": {
+  "size": 416,
+  "root": "2257e042549ff0084641a8d7d4d909ceaacc762c0003f8f68d631ab65a8b3d73"
+ },
+ "log_verified": true
+}

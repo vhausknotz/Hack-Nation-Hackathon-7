@@ -12,6 +12,8 @@ from collections import defaultdict
 from datetime import date
 from pathlib import Path
 
+from project_actions import load_actions
+
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "data" / "build"
 OUT = ROOT / "app" / "public" / "data"
@@ -47,6 +49,12 @@ def main() -> None:
     groups = {g["id"]: g for g in load("groups.jsonl")}
     report = json.loads((BUILD / "report.json").read_text())
     gene_by_symbol = {g["symbol"]: g for g in genes.values()}
+    actions = load_actions(conditions)  # reviewed patient organizations and studies, from the ledger
+
+    def nearest_people(cid: str) -> str | None:
+        """Name of the condition's best patient organization, for "nearest community" routes."""
+        orgs = [o for o in actions.get(cid, {}).get("communities", []) if o["kind"] == "patient_organization"]
+        return orgs[0]["name"] if orgs else None
 
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -76,7 +84,9 @@ def main() -> None:
             for m in x["mechanisms"]:
                 if m["k"] in ("complex", "pathway", "go"):
                     mech_dict[m["id"]] = mech_entry(m["id"])
-            rows.append({**brief(x["id"]), **{k: x[k] for k in ("score", "sym", "mech", "same_gene", "effect", "same_category", "symptoms", "mechanisms")}})
+            rows.append({**brief(x["id"]), **{k: x[k] for k in ("score", "sym", "mech", "same_gene", "effect", "same_category", "symptoms", "mechanisms")},
+                         "mech_known": x.get("mech_known"), "sym_known": x.get("sym_known"),
+                         "community": nearest_people(x["id"]), "asset_count": len(actions.get(x["id"], {}).get("assets", []))})
         looks = [{**brief(x["id"]), **{k: x[k] for k in ("family", "sym", "mech", "same_category")}} for x in nb.get("lookalikes", [])]
         phen = c["phenotypes"][:MAX_SYMPTOMS]
         for p in phen:
@@ -97,6 +107,7 @@ def main() -> None:
                           "partners": g.get("partners", [])[:12], "dosage": g.get("dosage")},
             "other_conditions_of_gene": [brief(o) for o in g.get("conditions", []) if o != cid],
             "neighbors": rows, "lookalikes": looks,
+            "communities": actions.get(cid, {}).get("communities", []), "assets": actions.get(cid, {}).get("assets", []),
             "dict": {"symptoms": sym_dict, "mechanisms": mech_dict},
         }
         shards["c"][shard_of("c", cid)][cid] = bundle
