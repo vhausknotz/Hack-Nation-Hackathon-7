@@ -34,6 +34,41 @@ class GeneAssociation:
         return self.association_type.startswith("Disease-causing germline")
 
 
+@dataclass
+class Prevalence:
+    orpha_code: str
+    kind: str  # Point prevalence, Prevalence at birth, Annual incidence, Cases/families, ...
+    qualification: str  # "Value and class", "Class only", "Case(s)", ...
+    klass: str  # e.g. "1-9 / 1 000 000"; "" for case counts
+    value: float | None  # mean value (per 100,000 for prevalence; number of cases for Cases/families)
+    geography: str
+    source: str  # "ORPHANET" or "<pmid>[PMID]"
+    validated: bool
+
+
+def load_prevalence(path: Path = RAW / "orphanet_prevalence.xml") -> dict[str, list[Prevalence]]:
+    out: dict[str, list[Prevalence]] = {}
+    for _, disorder in etree.iterparse(str(path), tag="Disorder"):
+        code = f"ORPHA:{disorder.findtext('OrphaCode')}"
+        items = []
+        for p in disorder.iterfind("PrevalenceList/Prevalence"):
+            value = p.findtext("ValMoy")
+            items.append(Prevalence(
+                orpha_code=code,
+                kind=p.findtext("PrevalenceType/Name") or "",
+                qualification=p.findtext("PrevalenceQualification/Name") or "",
+                klass=p.findtext("PrevalenceClass/Name") or "",
+                value=float(value) if value and float(value) > 0 else None,
+                geography=p.findtext("PrevalenceGeographic/Name") or "",
+                source=p.findtext("Source") or "",
+                validated=(p.findtext("PrevalenceValidationStatus/Name") or "") == "Validated",
+            ))
+        if items:
+            out[code] = items
+        disorder.clear()
+    return out
+
+
 def load_gene_associations(path: Path = RAW / "orphanet_genes.xml") -> list[GeneAssociation]:
     out: list[GeneAssociation] = []
     for _, disorder in etree.iterparse(str(path), tag="Disorder"):

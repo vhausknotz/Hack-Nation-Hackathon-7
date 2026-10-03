@@ -24,3 +24,6 @@ out/
 Thumbs.db
 .vscode/
 .idea/
+
+# built graph (reproducible with pipeline/build_graph.py)
+data/build/

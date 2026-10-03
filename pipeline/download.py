@@ -17,6 +17,8 @@ RAW = ROOT / "data" / "raw"
 
 HPO = "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download"
 ORPHA = "https://www.orphadata.com/data/xml"
+REACTOME = "https://reactome.org/download/current"
+STRING = "https://stringdb-downloads.org/download"
 
 # name -> (url, description, license)
 SOURCES = {
@@ -30,6 +32,20 @@ SOURCES = {
     "orphanet_phenotypes.xml": (f"{ORPHA}/en_product4.xml", "Orphanet disease -> HPO phenotypes with frequency", "CC BY 4.0"),
     "orphanet_prevalence.xml": (f"{ORPHA}/en_product9_prev.xml", "Orphanet epidemiology / prevalence", "CC BY 4.0"),
     "hgnc_complete_set.txt": ("https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt", "HGNC gene symbols, previous symbols, aliases", "CC0"),
+    # gene-disease validity and mechanism
+    "g2p_all.csv": ("https://www.ebi.ac.uk/gene2phenotype/api/panel/all/download/", "Gene2Phenotype: gene-disease records with molecular mechanism (LoF/GoF/dominant negative)", "EMBL-EBI terms of use (open)"),
+    "gencc_submissions.tsv": ("https://search.thegencc.org/download/action/submissions-export-tsv", "GenCC: gene-disease validity classifications from many curators", "CC0"),
+    "clingen_gene_validity.csv": ("https://search.clinicalgenome.org/kb/gene-validity/download", "ClinGen gene-disease validity", "CC0"),
+    "clingen_dosage.tsv": ("https://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv", "ClinGen dosage sensitivity (haploinsufficiency scores)", "CC0"),
+    # molecular machinery
+    "complexportal_human.tsv": ("https://ftp.ebi.ac.uk/pub/databases/intact/complex/current/complextab/9606.tsv", "Complex Portal: curated human protein complexes", "CC0"),
+    "reactome_uniprot_all_levels.txt": (f"{REACTOME}/UniProt2Reactome_All_Levels.txt", "Reactome: protein -> pathway (all hierarchy levels)", "CC BY 4.0"),
+    "reactome_pathways.txt": (f"{REACTOME}/ReactomePathways.txt", "Reactome pathway names", "CC BY 4.0"),
+    "reactome_relations.txt": (f"{REACTOME}/ReactomePathwaysRelation.txt", "Reactome pathway hierarchy", "CC BY 4.0"),
+    "goa_human.gaf.gz": ("https://current.geneontology.org/annotations/goa_human.gaf.gz", "Gene Ontology annotations for human proteins (incl. SynGO-curated synaptic terms)", "CC BY 4.0"),
+    "go-basic.obo": ("https://purl.obolibrary.org/obo/go/go-basic.obo", "Gene Ontology terms and hierarchy", "CC BY 4.0"),
+    "string_physical_links.txt.gz": (f"{STRING}/protein.physical.links.v12.0/9606.protein.physical.links.v12.0.txt.gz", "STRING: human physical protein interactions with confidence scores", "CC BY 4.0"),
+    "string_protein_info.txt.gz": (f"{STRING}/protein.info.v12.0/9606.protein.info.v12.0.txt.gz", "STRING protein IDs -> gene names", "CC BY 4.0"),
 }
 
 

@@ -35,6 +35,7 @@ class DiseaseAnnotations:
     name: str
     phenotypes: dict[str, Annotation] = field(default_factory=dict)
     inheritance: set[str] = field(default_factory=set)
+    course: set[str] = field(default_factory=set)  # clinical course incl. onset, e.g. HP:0003593 Infantile onset
 
 
 def _curie(uri: str) -> str:
@@ -101,7 +102,7 @@ def load_ontology(path: Path = RAW / "hp.json") -> Ontology:
 
 
 def load_annotations(ontology: Ontology, path: Path = RAW / "phenotype.hpoa") -> dict[str, DiseaseAnnotations]:
-    """Disease -> annotated symptoms (aspect P) and inheritance modes (aspect I). Negated annotations are skipped."""
+    """Disease -> annotated symptoms (aspect P), inheritance modes (I) and clinical course (C). Negated annotations are skipped."""
     diseases: dict[str, DiseaseAnnotations] = {}
     with open(path, encoding="utf-8") as f:
         header = None
@@ -121,6 +122,8 @@ def load_annotations(ontology: Ontology, path: Path = RAW / "phenotype.hpoa") ->
             disease = diseases.setdefault(rec["database_id"], DiseaseAnnotations(rec["database_id"], rec["disease_name"]))
             if rec["aspect"] == "I":
                 disease.inheritance.add(hpo_id)
+            elif rec["aspect"] == "C":
+                disease.course.add(hpo_id)
             elif rec["aspect"] == "P":
                 refs = [r for r in rec["reference"].split(";") if r]
                 existing = disease.phenotypes.get(hpo_id)

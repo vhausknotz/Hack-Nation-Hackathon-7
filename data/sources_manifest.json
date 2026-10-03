@@ -78,5 +78,101 @@
     "license": "CC0",
     "bytes": 16963116,
     "retrieved": "2026-10-03T18:54:06.665414+00:00"
+  },
+  "g2p_all.csv": {
+    "file": "g2p_all.csv",
+    "url": "https://www.ebi.ac.uk/gene2phenotype/api/panel/all/download/",
+    "description": "Gene2Phenotype: gene-disease records with molecular mechanism (LoF/GoF/dominant negative)",
+    "license": "EMBL-EBI terms of use (open)",
+    "bytes": 2453500,
+    "retrieved": "2026-10-03T19:12:41.414453+00:00"
+  },
+  "gencc_submissions.tsv": {
+    "file": "gencc_submissions.tsv",
+    "url": "https://search.thegencc.org/download/action/submissions-export-tsv",
+    "description": "GenCC: gene-disease validity classifications from many curators",
+    "license": "CC0",
+    "bytes": 26484449,
+    "retrieved": "2026-10-03T19:12:46.619238+00:00"
+  },
+  "clingen_gene_validity.csv": {
+    "file": "clingen_gene_validity.csv",
+    "url": "https://search.clinicalgenome.org/kb/gene-validity/download",
+    "description": "ClinGen gene-disease validity",
+    "license": "CC0",
+    "bytes": 1127611,
+    "retrieved": "2026-10-03T19:12:49.392939+00:00"
+  },
+  "clingen_dosage.tsv": {
+    "file": "clingen_dosage.tsv",
+    "url": "https://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv",
+    "description": "ClinGen dosage sensitivity (haploinsufficiency scores)",
+    "license": "CC0",
+    "bytes": 248538,
+    "retrieved": "2026-10-03T19:12:50.468099+00:00"
+  },
+  "complexportal_human.tsv": {
+    "file": "complexportal_human.tsv",
+    "url": "https://ftp.ebi.ac.uk/pub/databases/intact/complex/current/complextab/9606.tsv",
+    "description": "Complex Portal: curated human protein complexes",
+    "license": "CC0",
+    "bytes": 5292514,
+    "retrieved": "2026-10-03T19:12:51.959664+00:00"
+  },
+  "reactome_uniprot_all_levels.txt": {
+    "file": "reactome_uniprot_all_levels.txt",
+    "url": "https://reactome.org/download/current/UniProt2Reactome_All_Levels.txt",
+    "description": "Reactome: protein -> pathway (all hierarchy levels)",
+    "license": "CC BY 4.0",
+    "bytes": 117823518,
+    "retrieved": "2026-10-03T19:12:54.356853+00:00"
+  },
+  "reactome_pathways.txt": {
+    "file": "reactome_pathways.txt",
+    "url": "https://reactome.org/download/current/ReactomePathways.txt",
+    "description": "Reactome pathway names",
+    "license": "CC BY 4.0",
+    "bytes": 1592393,
+    "retrieved": "2026-10-03T19:12:55.319817+00:00"
+  },
+  "reactome_relations.txt": {
+    "file": "reactome_relations.txt",
+    "url": "https://reactome.org/download/current/ReactomePathwaysRelation.txt",
+    "description": "Reactome pathway hierarchy",
+    "license": "CC BY 4.0",
+    "bytes": 634259,
+    "retrieved": "2026-10-03T19:12:55.764148+00:00"
+  },
+  "goa_human.gaf.gz": {
+    "file": "goa_human.gaf.gz",
+    "url": "https://current.geneontology.org/annotations/goa_human.gaf.gz",
+    "description": "Gene Ontology annotations for human proteins (incl. SynGO-curated synaptic terms)",
+    "license": "CC BY 4.0",
+    "bytes": 15041996,
+    "retrieved": "2026-10-03T19:12:56.288253+00:00"
+  },
+  "go-basic.obo": {
+    "file": "go-basic.obo",
+    "url": "https://purl.obolibrary.org/obo/go/go-basic.obo",
+    "description": "Gene Ontology terms and hierarchy",
+    "license": "CC BY 4.0",
+    "bytes": 32227785,
+    "retrieved": "2026-10-03T19:12:57.541943+00:00"
+  },
+  "string_physical_links.txt.gz": {
+    "file": "string_physical_links.txt.gz",
+    "url": "https://stringdb-downloads.org/download/protein.physical.links.v12.0/9606.protein.physical.links.v12.0.txt.gz",
+    "description": "STRING: human physical protein interactions with confidence scores",
+    "license": "CC BY 4.0",
+    "bytes": 8954065,
+    "retrieved": "2026-10-03T19:12:58.259553+00:00"
+  },
+  "string_protein_info.txt.gz": {
+    "file": "string_protein_info.txt.gz",
+    "url": "https://stringdb-downloads.org/download/protein.info.v12.0/9606.protein.info.v12.0.txt.gz",
+    "description": "STRING protein IDs -> gene names",
+    "license": "CC BY 4.0",
+    "bytes": 1970090,
+    "retrieved": "2026-10-03T19:12:58.759235+00:00"
   }
 }
