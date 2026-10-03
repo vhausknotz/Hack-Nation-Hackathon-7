@@ -78,6 +78,7 @@ docs/             research notes and decisions
 - **Secrets:** server-side env vars only (e.g. `AZURE_OPENAI_API_KEY` for deployed services). Never put them in client code and never commit them. Keep them in `.env` (gitignored) and document variable names in `.env.example`.
 - **Cache every LLM call** on disk under `data/cache/`, keyed by a hash of model + prompt, and log token usage, so cost per task is measured, not guessed.
 - **Ask the owner before creating paid Azure resources** (databases, always-on hosting).
+- **Every Azure resource** gets the tag `project=rare-disease-atlas` and a row in [docs/operations.md](docs/operations.md). The owner checks what's on with `tools/azure_status.ps1` and switches everything off with `tools/azure_off.ps1`.
 
 ## Evidence rules (non-negotiable)
 

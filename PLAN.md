@@ -279,7 +279,19 @@ Tasks re-rank automatically as claims land. This is the "mining": agents close t
 
 ## 9. Family, researcher and contributor interfaces
 
-- **Family view (default):** the answer page built on the brief's three questions.
+**The map is the product.** It works like Google Maps for rare diseases, simple enough for anyone and readable in a short video:
+- **Full-screen star map:** every condition is a point of light, placed by shared biology and colored by body system. Named clusters ("constellations") are visible when zoomed out.
+- **One search box on top:** type a condition, gene or symptom, and the map flies there. Your condition glows, and lines light up to its closest relatives.
+- **A simple side panel** (a bottom sheet on phones) gives three plain answers:
+  1. **You're not alone:** the closest relatives, each explained in one everyday sentence.
+  2. **What already exists:** registries, studies, groups.
+  3. **What you could do this week.**
+
+  Tapping a relative highlights the line between you and shows where the claim comes from.
+- **Show the science:** everything else (symptom lists, molecular machinery, scores, look-alikes, claim histories) stays one click away, never in the way.
+- **Watch it grow:** a live feed and a replay of recent discoveries; new verified bridges light up on the map.
+
+- **Family view (default):** the side panel and condition page built on the brief's three questions.
   - **Statuses in plain words:** "from a curated database", "checked by two independent AI reviewers", "reviewed by an expert", "contested: see both sides", "computed hypothesis".
   - **Gaps:** "What we don't know" and "What's being investigated right now".
   - **Start a campaign** for this condition.
@@ -307,6 +319,29 @@ Tasks re-rank automatically as claims land. This is the "mining": agents close t
   - moderation handles abuse
   - a panel of expert and patient-group reviewers
   - no tokens or crypto (trust matters more than speculation in this space)
+
+## 11. Economics, admission and the review backlog
+
+Verification is the scarce resource, so it is budgeted and allocated deliberately:
+
+- **Who pays for what:**
+  - Kernel checks are deterministic and nearly free, so they run on every submission.
+  - Model calls cost money. **Public MCP submissions never trigger model calls paid from the owner's account.**
+  - Our own reviewer agents only spend on:
+    - (a) frontier tasks we chose
+    - (b) campaigns that are funded
+  - Outside contributors bring their own compute for extraction, and can review others' work with their own models (their reviews count under the independence rules).
+- **Admission:** new contributors get small quotas. Submissions must reference an open frontier task or campaign, so there's no unsolicited bulk. Quotas grow with an accepted-work track record. Contributors earn submission capacity by reviewing others' claims, which keeps reviewing and submitting in balance.
+- **Review queue:** ordered by frontier priority × campaign funding × contributor track record. Low-value unreviewed claims stay visible only in the research view and expire from the queue instead of piling up. Duplicates are merged by assertion ID before any review is spent.
+- **Spam and abuse:** per-key rate limits, the auditor role watches for suspicious patterns, and keys can be suspended. Moderation decisions are logged events like everything else.
+- **Uncertainty is part of the package:** every claim carries a `certainty` qualifier (`asserted` / `suggested` / `speculative`) that reflects the source's own hedging, so "may contribute" never becomes "causes".
+
+## 12. Safety of family-facing actions
+
+- **Coordination only, never treatment:** the atlas suggests research coordination (contact a group, ask to join a study, request a protocol, ask a researcher a question). It never recommends treatments.
+- **Proposals rest on solid ground:** a proposal may only rest on curated or independently reviewed assertions, and it says which.
+- **Anything about treatment needs a human:** any statement in a family-facing proposal about an intervention's effect (e.g. "phenylbutyrate improved seizures") must be *human-reviewed*. Otherwise the proposal says it is an open question for experts.
+- **Contacts:** only public, professional contact routes (institutional pages, published corresponding addresses, organization contact forms).
 
 ---
 
@@ -355,13 +390,21 @@ Phases are defined by what they produce.
 
 0. ~~**Data check.**~~ Done ([docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md)).
 1. ~~**Breadth graph.**~~ Done: 7,328 gene-defined conditions, mechanism layer, connections, look-alikes (`pipeline/build_graph.py`).
-2. **Front door.** Search and the condition answer page from static projections, deployed. *(in progress)*
-3. **Ledger and kernel.** Claim schema, event log, kernel checks, trust policies. Re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
-4. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set, then widen.
-5. **Live service.** API + MCP server, claim histories and statuses in the UI, frontier view, activity feed.
-6. **Campaigns and the action layer.** Sponsor a condition, receipts, and partnership proposals generated from verified claims.
-7. **Open contribution.** Contributor keys, agent manifests, reputation, moderation.
-8. **Submission material.** README (architecture + how to reproduce the dataset), walkthrough video.
+2. ~~**Front door v1.**~~ Search, condition pages and evidence, deployed (free tier).
+3. **Ledger and kernel.** ~~Claim schema, event log, kernel checks, trust policies~~ (done, tested). Still to do: re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
+4. **The map (front door v2).** Map-first, Google Maps-style interface (section 9): star map with named clusters, search that flies to a condition, simple side panel with plain-language explanations, "Show the science" for depth.
+5. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set.
+6. **Genesis enrichment.** A budgeted, broad AI run over all 7,328 conditions before outside contributors arrive:
+   - ClinicalTrials.gov studies (screened for relevance, typed as registry, natural history study, trial, …)
+   - NIH RePORTER grants and investigators
+   - PubMed abstracts (symptoms, mechanisms, models, assets)
+   - patient-organization sources
+
+   Luna screens and extracts, the kernel checks, and Sol reviews by frontier priority. The budget and receipts are tracked like a campaign.
+7. **Live service.** API + MCP server, claim histories and statuses in the UI, frontier view, activity feed and replay on the map. *(paid resources: needs owner approval)*
+8. **Campaigns and the action layer.** Sponsor a condition, receipts, and partnership proposals generated from reviewed claims (section 12).
+9. **Open contribution.** Contributor keys, agent manifests, quotas, reputation, moderation (section 11).
+10. **Submission material.** README (architecture + how to reproduce the dataset), walkthrough video.
 
 ## Open questions and risks
 

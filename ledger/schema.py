@@ -46,17 +46,17 @@ class Predicate:
 
 PREDICATES: dict[str, Predicate] = {
     "causes": Predicate(("gene",), ("condition",), ("inheritance",), "Germline variants in the gene cause the condition"),
-    "has_variant_effect": Predicate(("condition",), ("effect",), ("gene", "variant_class"), "How the causal gene change acts in this condition"),
-    "has_symptom": Predicate(("condition",), ("phenotype",), ("frequency", "onset", "population", "evidence_level"), "Patients with the condition show this feature"),
+    "has_variant_effect": Predicate(("condition",), ("effect",), ("gene", "variant_class", "certainty"), "How the causal gene change acts in this condition"),
+    "has_symptom": Predicate(("condition",), ("phenotype",), ("frequency", "onset", "population", "evidence_level", "certainty"), "Patients with the condition show this feature"),
     "has_name": Predicate(("condition",), ("text",), ("name_type", "naming_source"), "A name used for the condition"),
     "part_of_complex": Predicate(("gene",), ("complex",), (), "The gene's protein is part of the complex"),
     "in_pathway": Predicate(("gene",), ("pathway",), (), "The gene's protein acts in the pathway"),
     "involved_in": Predicate(("gene",), ("go_term",), (), "The gene's protein is involved in the process or located in the compartment"),
-    "interacts_with": Predicate(("gene",), ("gene",), ("score", "species", "evidence_level"), "The two proteins physically interact"),
+    "interacts_with": Predicate(("gene",), ("gene",), ("score", "species", "evidence_level", "certainty"), "The two proteins physically interact"),
     "has_asset": Predicate(("condition",), ("trial", "asset"), ("asset_type", "status"), "A registry, study, model, biomarker, outcome measure, biorepository, program or trial relevant to the condition"),
     "represented_by": Predicate(("condition",), ("organization",), (), "A patient organization serves this community"),
     "studied_by": Predicate(("condition",), ("person",), ("role",), "A researcher or clinician works on the condition"),
-    "tested_in": Predicate(("intervention",), ("condition",), ("species", "model_system", "evidence_level", "outcome"), "An intervention was tested for the condition"),
+    "tested_in": Predicate(("intervention",), ("condition",), ("species", "model_system", "evidence_level", "outcome", "certainty"), "An intervention was tested for the condition"),
     "has_prevalence": Predicate(("condition",), ("text",), ("prevalence_kind", "geography"), "How common the condition is"),
 }
 
@@ -71,6 +71,7 @@ QUALIFIER_VALUES: dict[str, set[str] | None] = {  # None = free text
     "species": {"human", "mouse", "rat", "zebrafish", "fly", "worm", "yeast", "cell"},
     "model_system": None,
     "outcome": {"improved", "no_effect", "worsened", "mixed", "unknown"},
+    "certainty": {"asserted", "suggested", "speculative"},  # the source's own hedging
     "name_type": {"preferred", "curated_name", "synonym", "obsolete_label"},
     "naming_source": None,
     "score": None,
