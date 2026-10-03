@@ -1,0 +1,82 @@
+{
+  "hp.json": {
+    "file": "hp.json",
+    "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/hp.json",
+    "description": "Human Phenotype Ontology (symptom terms + hierarchy)",
+    "license": "HPO license (free, attribution)",
+    "bytes": 21915519,
+    "retrieved": "2026-10-03T18:53:23.156118+00:00"
+  },
+  "phenotype.hpoa": {
+    "file": "phenotype.hpoa",
+    "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/phenotype.hpoa",
+    "description": "HPO disease -> phenotype annotations (OMIM/ORPHA/DECIPHER)",
+    "license": "HPO license (free, attribution)",
+    "bytes": 35816037,
+    "retrieved": "2026-10-03T18:53:53.135627+00:00"
+  },
+  "genes_to_phenotype.txt": {
+    "file": "genes_to_phenotype.txt",
+    "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/genes_to_phenotype.txt",
+    "description": "HPO gene -> phenotype (via disease)",
+    "license": "HPO license (free, attribution)",
+    "bytes": 20821704,
+    "retrieved": "2026-10-03T18:53:56.096799+00:00"
+  },
+  "genes_to_disease.txt": {
+    "file": "genes_to_disease.txt",
+    "url": "https://github.com/obophenotype/human-phenotype-ontology/releases/latest/download/genes_to_disease.txt",
+    "description": "HPO gene -> disease associations",
+    "license": "HPO license (free, attribution)",
+    "bytes": 1492039,
+    "retrieved": "2026-10-03T18:53:57.270200+00:00"
+  },
+  "mondo.obo": {
+    "file": "mondo.obo",
+    "url": "https://purl.obolibrary.org/obo/mondo.obo",
+    "description": "MONDO disease ontology (IDs, synonyms, xrefs)",
+    "license": "CC BY 4.0",
+    "bytes": 53134854,
+    "retrieved": "2026-10-03T18:54:01.670100+00:00"
+  },
+  "orphanet_genes.xml": {
+    "file": "orphanet_genes.xml",
+    "url": "https://www.orphadata.com/data/xml/en_product6.xml",
+    "description": "Orphanet genes associated with rare diseases (incl. LoF/GoF type)",
+    "license": "CC BY 4.0",
+    "bytes": 22612034,
+    "retrieved": "2026-10-03T18:54:02.383709+00:00"
+  },
+  "orphanet_nomenclature.xml": {
+    "file": "orphanet_nomenclature.xml",
+    "url": "https://www.orphadata.com/data/xml/en_product1.xml",
+    "description": "Orphanet disease nomenclature, synonyms, xrefs",
+    "license": "CC BY 4.0",
+    "bytes": 54026799,
+    "retrieved": "2026-10-03T18:54:03.555124+00:00"
+  },
+  "orphanet_phenotypes.xml": {
+    "file": "orphanet_phenotypes.xml",
+    "url": "https://www.orphadata.com/data/xml/en_product4.xml",
+    "description": "Orphanet disease -> HPO phenotypes with frequency",
+    "license": "CC BY 4.0",
+    "bytes": 47893357,
+    "retrieved": "2026-10-03T18:54:04.596366+00:00"
+  },
+  "orphanet_prevalence.xml": {
+    "file": "orphanet_prevalence.xml",
+    "url": "https://www.orphadata.com/data/xml/en_product9_prev.xml",
+    "description": "Orphanet epidemiology / prevalence",
+    "license": "CC BY 4.0",
+    "bytes": 16178169,
+    "retrieved": "2026-10-03T18:54:05.797710+00:00"
+  },
+  "hgnc_complete_set.txt": {
+    "file": "hgnc_complete_set.txt",
+    "url": "https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt",
+    "description": "HGNC gene symbols, previous symbols, aliases",
+    "license": "CC0",
+    "bytes": 16963116,
+    "retrieved": "2026-10-03T18:54:06.665414+00:00"
+  }
+}

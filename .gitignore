@@ -1,0 +1,26 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# data downloads and caches (rebuilt by the pipeline)
+data/raw/
+data/cache/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# node
+node_modules/
+.next/
+out/
+.vercel/
+
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
