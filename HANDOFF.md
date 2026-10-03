@@ -2,6 +2,19 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Latest milestone
+
+- The first Directions/globe release is **deployed** and pushed as `d233ee3`. The owner tried it and said it is clearer; continue in this direction. Keep the flat-map option.
+- A second deployment (`af3755b`) now includes the reviewed v2 findings, 7,326 plain descriptions and the reviewed Simons organization profile. Static data URLs carry the build version so a normal refresh loads the new bundles. Local and live desktop/phone interaction checks passed; 101 regression tests passed.
+- Deadline: **2026-10-04 15:00 Europe/Berlin**. The owner prioritizes a polished, reviewed family journey over exhaustive coverage.
+- V2 trial import finished: 48 kernel-accepted, 44 supported by Sol (42 qualified), 4 rejected. Receipt: `data/campaigns/trials-trial-screen-2.json`. Newer rejected study claims must not expose an older accepted version; omitted v1 studies remain available.
+- Plain descriptions: 7,326/7,328 produced, approximately USD 1.1087 in recorded Luna cost. Two use the factual fallback. The original final print failed on a blank log line after the output was already written; usage parsing now ignores blank lines and appends are serialized within a process.
+- Simons Searchlight now has a kernel-checked, Sol-reviewed organization profile quoting its own explicit research-program description. At equal trust, the profile outranks condition leaf-page classifications, and its evidence is exported. Receipt: `community-profile-simons.json`.
+- The original community scout **crashed on a Sol 429**, as the owner confirmed; it did not finish despite its launcher reporting zero. The repaired demo run is active again, checkpoints every condition, retries rate limits, records failures and returns nonzero if incomplete. Log: `data/build/community-resume.log`; incremental receipt: `data/campaigns/first-campaign-communities.json`. It remains the sole ledger writer while active.
+- Owner approved the approximately USD 30 Luna background run. Collection and screening are running under a USD 30 configured-price cap in `data/enrichment/trials/full/`, separate from the ledger. Read `enrich/trials/README.md` for commands, logs, reservations and coverage limits. No full-run candidate is automatically accepted or published.
+- The Luna deployment quota was reported by the owner as 1M TPM / 1,000 RPM; this is a ceiling, not a throughput guarantee. Use measured logs for any runtime discussion.
+- Full-atlas community scouting, paid live infrastructure and broad Sol review remain separate budget decisions.
+
 The owner has asked Codex to take over the main checkout and continue the plan, including deployment for visual feedback. The old parallel-only scope no longer applies to this lead role; `../atlas-trials` remains unchanged as the pilot archive.
 
 - Main baseline verified: 70 ledger tests and app build passed before edits.
@@ -9,9 +22,9 @@ The owner has asked Codex to take over the main checkout and continue the plan, 
 - Added action types and optional plain summaries to export. Asset display now prefers newer reviewed evidence at equal trust, including restrictive v2 claims, without withdrawing omitted v1 findings.
 - Export uses a read-only SQLite snapshot, so it can safely coexist with the scout. There must still be only one claim/review writer.
 - Tests now include read-only snapshot and v1/v2 projection regressions. `tools/check_directions.py` exercises all six stops and both maps at 1440 and 390 pixels.
-- The inherited community scout was still running during this milestone; v2 import waits for its completion. The all-condition plain-summary job was started with a separate usage log (`data/cache/plain_summary_usage.jsonl`).
+- The inherited scout exited before the v2 import. The repaired scout resumed only after both v2 import and Simons profile review finished. The completed plain-summary job used a separate usage log (`data/cache/plain_summary_usage.jsonl`).
 - Plan sections 5 and 12 require curated or independently reviewed support for a specific next-step proposal. Single-AI-reviewed listings can be explored, but do not become recommendations to join. The fallback prepares a diagnosis-based question for the care team.
-- Deployment and final data-job outcomes will be recorded below when complete. The earlier checklist is preserved as context; completed interface items above supersede its unchecked boxes.
+- The earlier checklist is preserved as context; completed interface items above supersede its unchecked boxes. The broad trial job and repaired demo scout remain in progress; inspect their logs and receipts before starting any replacement process.
 
 For the next agent picking up this repo. Read [AGENTS.md](AGENTS.md), [PLAN.md](PLAN.md) and [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md) first. This file only covers the current state and what to do next.
 

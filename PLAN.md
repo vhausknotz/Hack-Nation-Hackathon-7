@@ -402,8 +402,9 @@ Phases are defined by what they produce.
 0. ~~**Data check.**~~ Done ([docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md)).
 1. ~~**Breadth graph.**~~ Done: 7,328 gene-defined conditions, mechanism layer, connections, look-alikes (`pipeline/build_graph.py`).
 2. ~~**Front door v1.**~~ Search, condition pages and evidence, deployed (free tier).
-3. **Ledger and kernel.** ~~Claim schema, event log, kernel checks, trust policies~~ (done, tested). Still to do: re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
+3. ~~**Ledger and kernel.**~~ Claim schema, event log, kernel checks, trust policies and reference imports are built. The graph incorporates accepted contributed claims.
 4. ~~**The map (front door v2).**~~ Done and deployed: star map with named regions and constellations, search that flies to a condition, plain-language side panel, explore mode for genes/symptoms/groups, "Show the science" for depth. Still to come: "What you could do" (needs agents and assets) and the live feed and replay.
+   - Lead continuation: Directions with six stops, reviewed groups and studies, source/restriction details, conservative next-step questions, numbered route pins, interactive night-lights globe and flat-map alternative are built. The owner approved the visual direction. Live feed and replay remain planned.
 5. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set.
    - Done:
      - the literature campaign (`agents/campaign.py`: SNAP25 symptoms from papers)

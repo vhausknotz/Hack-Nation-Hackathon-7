@@ -48,7 +48,7 @@ agents/           campaign.py (literature), communities.py (patient-group scout)
 pipeline/project_actions.py  read-only family projection of reviewed organizations and studies
 pipeline/plain_summaries.py  cached, AI-labeled everyday descriptions
 api/              (planned) live API + MCP server
-enrich/           work by parallel agents (see docs/agent_tasks/)
+enrich/trials/    reviewed v2 screener and budget-capped, resumable bulk registry job (see its README)
 app/              web app (Vite + React + TypeScript + Tailwind, canvas globe and sigma.js flat map); reads app/public/data/
                     routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism
                     lit up · /c/:id/details, /g, /s, /group, /m  "Show the science" pages · /about
@@ -75,7 +75,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Visual check:** `MSYS_NO_PATHCONV=1 ./.venv/Scripts/python tools/screenshot.py <out_dir> http://localhost:4173 / "/c/MONDO:0014590" --width 390` (after `npx vite preview` in app/). Check both desktop and phone widths before deploying.
 
 **Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
-Projection regressions: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests`.
+Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials`.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 
 ## Azure OpenAI (Foundry)
