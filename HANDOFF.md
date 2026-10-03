@@ -19,6 +19,38 @@ The map is the product: "Google Maps for rare diseases". The owner's latest feed
 
 Every stop is sourced. Where nothing is known, the panel says so honestly. The globe with a city-lights-at-night look comes after the panel has real content.
 
+## Owner feedback not yet implemented (checklist; don't lose any of it)
+
+**The condition panel** (the owner: "very very hard to understand", "doesn't give me instructions"):
+- [ ] Replace the current panel with the six-step **Directions** path above, in everyday language, with clear instructions at every step. Answer the brief's questions, not show data.
+- [ ] Explain each relative in plain words: **"why this matters for you"**, not semi-technical sentences or bare scores.
+- [ ] Devon's case from the brief: "here is the patient group for your exact diagnosis; if none exists, here are the closest related communities and how to help build the missing one".
+- [ ] For every existing study or registry, say plainly whether it is usable: "includes your condition", "only some patients (restriction)" or "ask an expert".
+- [ ] One concrete, sourced **next step this week**, and an honest **"what we don't know yet"** with what would change that.
+- [ ] Never lose sight of what the family should get out of it. Technical depth belongs behind "Show the science".
+
+**The Google Maps idea** (the owner proposed it; it fits the guided path):
+- [ ] Directions drawn **on the map**: a glowing route from "you are here" through numbered stops to the next step.
+- [ ] Other ideas the owner liked:
+  - "Nearby" chips (communities, studies, researchers)
+  - layers (symptoms vs. biology)
+  - "reviews" (the evidence checks)
+  - "Suggest an edit" (propose a claim)
+
+**The map's look** (do this after the panel has real content):
+- [ ] Wrap the map onto a **globe/sphere** that spins and zooms like Google Earth. Zooming into a region should feel like flying into a city.
+- [ ] A **city-lights-at-night satellite look**. Each condition is a small warm light, dense clusters glow like cities, and regions read like countries with soft names.
+- [ ] Fix the zoomed-out view. Today the dots are **too big, overlapping, and show no connections or structure**. Connections should arc like **flight paths**: faint everywhere, bright for the selected condition.
+- [ ] Keep the zoomed-in view; the owner likes it.
+- [ ] It must stay **super simple for literally anyone**, and the graph stays the focus. The 1-minute video is not a design driver.
+
+**Data quality follow-ups from the owner's checks:**
+- [ ] Simons Searchlight is classed `research_program` for one condition and `information_service` for another. The "newest classification wins" rule picks one, so confirm it's right (it's a research registry families join).
+- [ ] Freshness (from the owner's other agent, now in PLAN.md section 2): recheck sources cheaply; mark claims reaffirmed, stale or superseded without overwriting history; show "last confirmed" dates.
+- [ ] Archived organization pages must always read as historical, never as proof the group is active today.
+
+**How to work with the owner:** clear briefings at each milestone (what, why, where we stand, what's next, open decisions). Keep to the agreed order, or say why you're changing it.
+
 ## Done in this session
 
 - **Search ranking** (`app/src/lib/search.ts`, `pipeline/export_app.py`): well-documented conditions first, groups ranked lower and labeled "group of N". "progeria" now gives Hutchinson-Gilford progeria first. Pushed.
