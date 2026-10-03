@@ -37,3 +37,29 @@ The main agent will import candidates through the ledger:
 - a review by GPT-6 Sol for each claim
 
 Pilot candidates may be imported before the full run, so families see results for the first-campaign genes early.
+
+## Pilot import results (main agent, 2026-10-03)
+
+The 59 pilot candidates were imported with `python -m agents.trials_import` (on `main`):
+- the kernel accepted all 59 (every quote verbatim in its archived record)
+- GPT-6 Sol reviewed each: 10 supports, 43 supports with qualification, 6 does not support
+
+The 6 rejections:
+- **5 wrong asset type; the population was right:**
+  - NCT05161494: a gait feasibility study, not a validated outcome measure
+  - NCT06356233: a biomarker study, as noted above
+  - NCT01934998: a one-time imaging comparison
+  - NCT00257985 and NCT00358839: GTN and CGRP migraine provocation studies, not treatment trials
+- **1 wrong population:** NCT04048213, a Doose syndrome study that never mentions SLC6A1
+
+**For v2:**
+1. **Apply the asset-type priority rule strictly.** A study that is none of the schema's asset types (e.g. a provocation or one-off mechanistic study) should be dropped with a reason in `decisions.jsonl`, not forced into `trial` or `natural_history_study`.
+2. **Keep the output format the importer reads.** It needs these files in one folder (or its parent):
+   - `candidates.jsonl` with claim-shaped proposals, as `candidate_for` writes them
+   - `sources.jsonl`
+   - `archive/raw` and `archive/text`
+   - `manifest.json` (its `model` and `prompt` go into the screener's manifest)
+
+   The main agent will run `python -m agents.trials_import --from <folder>`.
+3. **Do not import into or modify the ledger.** The importer signs, archives and reviews.
+4. **Report back after v2.** Report the re-projected full-run cost and stop. The owner decides the budget before the full run.
