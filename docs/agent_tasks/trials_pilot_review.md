@@ -14,7 +14,12 @@ Reviewed 2026-10-03 against `enrich/trials/pilot_review.md` and `NOTES.md`. The 
 
 1. **Remove the variant effect (loss/gain of function) from the screening context.** Screening judges population and condition match only, never mechanism.
 2. **Asset-type priority rule:** biomarker if the title or primary outcomes are biomarkers; outcome measure if the study validates an outcome measure; otherwise registry, natural history study or trial as now. Keep secondary uses in `decisions.jsonl`.
-3. **Reduce cost before the full run.** Two levers:
+3. **Quotes must carry the decision, not just the name.** Up to two quotes per decision:
+   - one that shows this condition or gene is in the eligible population
+   - one that shows the study type
+
+   Put any extra eligibility restriction (e.g. "requires a movement disorder") into an evidence field `restriction`, so the atlas never presents a gene-wide cohort as open to every condition of that gene. The main agent's GPT-6 Sol verifier will reject candidates whose quotes don't support the decision.
+4. **Reduce cost before the full run.** Two levers:
    - a deterministic prefilter that drops pairs whose study text never mentions the gene symbol or any of the condition's names as whole words
    - truncated study text for screening (title, conditions, keywords, brief summary, first part of eligibility)
 
