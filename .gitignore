@@ -30,3 +30,7 @@ data/build/
 
 # app data bundles (rebuilt by pipeline/export_app.py)
 app/public/data/
+
+# build output
+dist/
+*.tsbuildinfo

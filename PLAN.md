@@ -102,11 +102,29 @@ Inspired by nanopublications: one atomic assertion plus its evidence and provena
   - `task.claimed` / `task.completed`
   - `campaign.funded`
   - `policy.published`
-- **Every event has:** id, type, target, actor (contributor + agent manifest), payload, timestamp, hash of the previous event, its own hash, and a signature. Corrections are new events; nothing is deleted. Replaying the log up to a date gives "what did we know on that date".
+- **Every event has:** id, type, target, actor (contributor + agent manifest), payload, timestamp, content hash and the contributor's signature. Corrections are new events. Replaying the log up to a date gives "what did we know on that date".
+- **Authenticated log: a Merkle tree, not one linear hash chain.**
+  - The log is a Merkle tree, the same structure Certificate Transparency uses.
+  - The server sequences events and periodically publishes a signed tree head.
+  - Anyone can get a cheap proof that an event is included, and that a later log extends an earlier one without rewriting it.
+  - Each contributor's events are signed by that contributor's own key.
+  - It handles many concurrent writers, and federating later means several logs cross-checking each other's tree heads.
+- **Redaction (the one exception to "never delete"):** accidental patient data, leaked secrets, illegal content or legal deletion obligations are removed with a `content.redacted` event.
+  - The payload is deleted.
+  - The leaf hash, a tombstone and the reason category stay, so the log still verifies.
+  - The redacted content is never kept.
 - **There are two kinds of knowledge:**
   - **Reference imports:** bulk, deterministic loads of curated databases (MONDO, HPO, Orphanet, Gene2Phenotype, …). One import event per dataset version. They are verified by **reproducibility**: re-running the importer on the same file (same content hash) must produce the same claims.
   - **Contributed claims:** individual claims from agents or people. They are verified by kernel checks plus independent reviews.
-- **Storage:** SQLite during development (`data/ledger/`), PostgreSQL when hosted. The hash chain makes tampering visible. The full log is exported as open data.
+- **Sources are archived in canonical form.** Every source a claim cites is stored as:
+  - the fetched bytes
+  - a canonical text: extracted, Unicode NFC, whitespace-normalized, with a recorded extractor version
+  - a hash of each
+
+  Quote offsets point into the canonical text, so verification still works after a web page changes or disappears. Licensing decides what can be redistributed:
+  - PubMed abstracts and open-access (PMC OA) full texts are stored in full.
+  - For other sources, only the hash, the quote and its offsets are public; the archived copy is used for verification only.
+- **Storage:** SQLite during development (`data/ledger/`), PostgreSQL when hosted. The full log (minus redactions) is exported as open data.
 
 ## 3. Kernel guarantees and non-guarantees
 
@@ -115,10 +133,10 @@ The kernel is small, deterministic and contains no language model. It never deci
 **It guarantees, for every claim:**
 - **Structure:** the schema is valid, the predicate is allowed for these subject/object types, and the qualifiers are valid.
 - **Identity:** every ID exists in the pinned ontology versions (MONDO, HPO, HGNC, GO, …).
-- **Source integrity:** stored sources match their content hashes, and quotes appear verbatim at the stated offsets.
+- **Source integrity:** archived sources match their content hashes, and quotes appear verbatim at the stated offsets of the canonical text.
 - **Reproducibility:** computed claims (similarities, imports) reproduce from their declared inputs and recipe.
 - **Accountability:** signatures belong to registered contributors.
-- **Log integrity:** the hash chain is intact and nothing was altered or removed.
+- **Log integrity:** inclusion and consistency proofs verify against the published tree heads. Nothing was altered, and the only removals are recorded redactions.
 
 **It does not guarantee:**
 - that a quote *means* what the claim says (that's semantic review)
@@ -126,39 +144,58 @@ The kernel is small, deterministic and contains no language model. It never deci
 - that the graph is complete (absence of a claim is not evidence of absence)
 - that a preclinical result applies to patients
 
-## 4. Semantic review and independence policy
+## 4. Semantic review, evidence state and independence
 
-- **A review is a signed attestation:**
+There are two separate questions, answered at two separate levels:
+
+**(a) Is this claim faithful to its source? (per claim, decided by review)**
+- A review is a signed attestation that the cited passage supports the claim as stated, with its qualifiers:
   - *supports*
-  - *supports with qualification* (e.g. "in zebrafish only")
+  - *supports with qualification* (e.g. "in zebrafish only", which narrows the claim)
   - *does not support*
   - *out of scope*
 
   Each comes with a reason. Reviewers see the source passage, not just the claim.
-- **Independence:** a second review counts only if it comes from a different model family, a different source, or a human. The same model with a different prompt is **not** independent.
-- **Who reviews:**
-  - **Primary judge:** GPT-6 Sol.
-  - **Second, independent model family:** DeepSeek-V4-Flash (both deployed in our Foundry).
-  - **Humans:** experts and patient-group reviewers, for anything the family view will present as established.
+- **Claim review status:**
+  - `unreviewed`
+  - `reviewed` (one reviewer)
+  - `independently reviewed` (two reviewers from different model families, or one human)
+  - `human-reviewed`
+  - `rejected`
+- **Reviewer independence** means a different model family (GPT-6 Sol vs. DeepSeek-V4-Flash, both in our Foundry) or a human. The same model with a different prompt is **not** independent. A different *source* is not reviewer independence either; it is more evidence and counts under (b).
+
+**(b) How well supported is the assertion? (per assertion, computed from the claims)**
+- An assertion's **evidence state** is computed from its claims that passed review:
+  - how many **independent sources** (different papers, labs, cohorts or databases, not the same dataset reported twice)
+  - which **evidence types** (curated database, clinical study, case report, model organism, cell model, computed)
+  - whether there are **reviewed contradicting claims**
+- **Evidence states:**
+  - `single source`
+  - `multiple independent sources`
+  - `curated` (a reference database asserts it; the curator's own grade, e.g. ClinGen "Definitive", is shown)
+  - `contested` (reviewed claims on both sides)
+  - `refuted`
+
+  A claim can be faithfully reviewed while its assertion stays weakly supported. Both are shown.
 - **Forbidden shortcuts** (encoded as rules, enforced in reviews and projections):
   - shared pathway ≠ shared treatment
   - same gene ≠ same mechanism
   - similar symptoms ≠ common cause
   - preclinical ≠ clinical
   - absent from a database ≠ absent in reality
-- **Challenges:** anyone can challenge a claim with counter-evidence. The assertion becomes *contested*, and both sides stay visible.
-- **Status of an assertion:**
-
-  `proposed → checked → supported` (one independent review) `→ verified` (two independent reviews, or a human expert), or `contested` / `rejected` / `withdrawn`.
-
-  Reference-import claims start as *checked*, and the curator's own grade (e.g. ClinGen "Definitive") is shown.
+- **Challenges:** anyone can challenge a claim (wrong reading of the source) or an assertion (counter-evidence). Reviewed counter-evidence makes the assertion *contested*, and both sides stay visible.
 
 ## 5. Materialized graph projections
 
-- **Trust policies** are versioned and public:
-  - **family:** reference data plus verified claims; contested claims shown *as contested*; computed connections always labeled as hypotheses
-  - **research:** everything except rejected claims, with status flags
-  - **strict:** human-reviewed only
+- **Trust policies** are versioned and public. Each is an exact rule over claim review status and assertion evidence state:
+
+| Policy | Shows | Labels |
+|---|---|---|
+| **family** (default) | Reference-import (curated) assertions, plus assertions with ≥1 *independently reviewed* claim (two model families) | Model-reviewed assertions read "checked by two independent AI reviewers". Only *human-reviewed* assertions may be worded as established. *Contested* assertions are shown as contested, with both sides. Computed connections are always "hypothesis". Unreviewed and rejected claims are hidden. |
+| **research** | Everything except rejected claims | Full status flags |
+| **strict** | Curated reference data and *human-reviewed* claims only | — |
+
+  Whatever the family view highlights as a next step (the proposal) must rest on assertions that are curated or independently reviewed, and the proposal says which.
 - **The projection job** reads the claims accepted under a policy and produces:
   - the graph
   - connections (symptom, mechanism and combined similarity)
@@ -243,7 +280,7 @@ Tasks re-rank automatically as claims land. This is the "mining": agents close t
 ## 9. Family, researcher and contributor interfaces
 
 - **Family view (default):** the answer page built on the brief's three questions.
-  - **Statuses in plain words:** "checked by two independent reviewers", "contested: see both sides", "computed hypothesis".
+  - **Statuses in plain words:** "from a curated database", "checked by two independent AI reviewers", "reviewed by an expert", "contested: see both sides", "computed hypothesis".
   - **Gaps:** "What we don't know" and "What's being investigated right now".
   - **Start a campaign** for this condition.
 - **Researcher view:** full claim histories and derivations, contested claims, the frontier, filters by evidence type, exports.

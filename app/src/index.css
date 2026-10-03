@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  html,
+  body {
+    overflow-x: clip;
+  }
+  body {
+    @apply bg-white text-ink;
+  }
+  a {
+    @apply text-inherit;
+  }
+  ::selection {
+    @apply bg-machinery-soft;
+  }
+}
+
+@layer components {
+  .link {
+    @apply text-machinery underline decoration-machinery/30 underline-offset-2 hover:decoration-machinery;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-wider text-ink-faint;
+  }
+  .card {
+    @apply rounded-xl border border-ink-line bg-white;
+  }
+}
