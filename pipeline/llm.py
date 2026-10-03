@@ -8,6 +8,7 @@ Auth: Entra ID through the local Azure login (see AGENTS.md).
 import hashlib
 import json
 import time
+import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -18,6 +19,14 @@ BASE_URL = "https://valiopenai.cognitiveservices.azure.com/openai/v1/"
 PRICES = {"gpt-6-luna": (0.10, 0.50)}
 
 _client = None
+_usage_lock = threading.Lock()
+
+
+def log_usage(entry):
+    USAGE.parent.mkdir(parents=True, exist_ok=True)
+    with _usage_lock:
+        with open(USAGE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
 
 
 def client():
@@ -52,9 +61,7 @@ def chat(model: str, messages: list[dict], task: str, json_mode: bool = False, *
     if usage and model in PRICES:
         pin, pout = PRICES[model]
         entry["usd"] = round(usage.prompt_tokens / 1e6 * pin + usage.completion_tokens / 1e6 * pout, 6)
-    USAGE.parent.mkdir(parents=True, exist_ok=True)
-    with open(USAGE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry) + "\n")
+    log_usage(entry)
     return content
 
 
@@ -87,9 +94,7 @@ def search(model: str, prompt: str, task: str) -> dict:
     if usage and model in PRICES:
         pin, pout = PRICES[model]
         entry["usd"] = round(usage.input_tokens / 1e6 * pin + usage.output_tokens / 1e6 * pout, 6)  # excludes the per-search fee
-    USAGE.parent.mkdir(parents=True, exist_ok=True)
-    with open(USAGE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry) + "\n")
+    log_usage(entry)
     return result
 
 
@@ -102,6 +107,8 @@ def usage_summary() -> dict:
     totals: dict[str, dict] = {}
     if USAGE.exists():
         for line in USAGE.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
             e = json.loads(line)
             t = totals.setdefault(f"{e['task']} / {e['model']}", {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "web_searches": 0})
             t["calls"] += 1

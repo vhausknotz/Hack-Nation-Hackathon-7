@@ -1,9 +1,11 @@
 import json
+import pytest
 
 from pipeline.project_actions import load_actions
 
 
-def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tmp_path):
+@pytest.mark.parametrize("latest_verdict", ["supports_with_qualification", "does_not_support"])
+def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tmp_path, latest_verdict):
     """Import order must not erase v2 eligibility; omitted v1 studies remain visible."""
     from ledger import sources, store
     from pipeline import project_actions
@@ -33,7 +35,7 @@ def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tm
 
         def reviews_for(self, key):
             return [{"reviewer_kind": "model", "model_family": "openai", "reviewer": "sol",
-                     "verdict": "supports_with_qualification" if key == "new" else "supports",
+                     "verdict": latest_verdict if key == "new" else "supports",
                      "reason": "Eligibility checked", "seq": 20 if key == "new" else 10}]
 
         def source(self, _):
@@ -46,6 +48,9 @@ def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tm
     monkeypatch.setattr(sources, "read_text", lambda _: "Title: Test study")
     result = load_actions({"C1": {"gene": {"symbol": "SCN2A"}}})
     assets = {a["id"]: a for a in result["C1"]["assets"]}
+    if latest_verdict == "does_not_support":
+        assert set(assets) == {"NCT2"}
+        return
     assert set(assets) == {"NCT1", "NCT2"}
     assert assets["NCT1"]["restriction"] == "One participant only"
     assert assets["NCT1"]["claim_id"] == "new"

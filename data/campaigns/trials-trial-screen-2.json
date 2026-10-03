@@ -1,0 +1,12 @@
+{
+  "finished": "2026-10-03T23:03:47+00:00",
+  "input": "..\\atlas-trials\\data\\enrichment\\trials\\v2",
+  "review_prompt": "verify-asset@2",
+  "candidates": 48,
+  "kernel_accepted": 48,
+  "review_supports_with_qualification": 42,
+  "review_supports": 2,
+  "review_does_not_support": 4,
+  "ledger_size": 1124,
+  "log_verified": true
+}

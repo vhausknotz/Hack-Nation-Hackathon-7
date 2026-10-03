@@ -117,6 +117,7 @@ export interface ActionReview {
 }
 
 export interface Community {
+  kind_source?: { quote: string; url: string; page_date: string } | null;
   id: string;
   name: string;
   homepage: string;

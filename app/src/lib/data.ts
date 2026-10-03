@@ -1,5 +1,6 @@
 // Loads entity bundles from the sharded static data (see pipeline/export_app.py).
 import type { ConditionBundle, GeneBundle, GroupBundle, MechanismBundle, Meta, SymptomBundle } from "./types";
+import { dataUrl } from "./dataVersion";
 
 const BASE = "/data";
 const SHARDS: Record<Kind, number> = { c: 256, g: 128, s: 128, grp: 64, m: 128 };
@@ -21,7 +22,7 @@ function fetchJson<T>(url: string): Promise<T> {
   if (!cache.has(url)) {
     cache.set(
       url,
-      fetch(url).then((r) => {
+      fetch(dataUrl(url)).then((r) => {
         if (!r.ok) throw new Error(`${r.status} ${url}`);
         return r.json();
       }),

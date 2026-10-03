@@ -1,0 +1,43 @@
+{
+ "campaign": "community-profile-simons",
+ "kind": "communities",
+ "started": "2026-10-03T23:16:09+00:00",
+ "conditions": {
+  "MONDO:0014590": {
+   "name": "SNAP25-related epilepsy and intellectual disability",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 3,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "SNAP25 Foundation (patient_organization, this_gene, live) [supports]",
+    "RARE-X (research_program, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, broader_group, live) [supports]"
+   ]
+  }
+ },
+ "runs": [
+  {
+   "finished": "2026-10-03T23:16:23+00:00",
+   "seconds": 14,
+   "web_searches": 0,
+   "usd_tokens_known_prices": 0.0
+  }
+ ],
+ "cost_note": "Run deltas below exclude spending before checkpointing was introduced; token totals exclude Sol pricing and web-search fees.",
+ "complete": true,
+ "requested_conditions": [
+  "MONDO:0014590"
+ ],
+ "finished": "2026-10-03T23:16:23+00:00",
+ "web_searches": 0,
+ "usd_tokens_known_prices": 0.0,
+ "ledger_tree_head": {
+  "size": 1127,
+  "root": "08e930377893f8ed8990a8d898491f8730c2994bc95a6b5a5cedef999b995f88"
+ },
+ "log_verified": true
+}

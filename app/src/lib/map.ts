@@ -1,4 +1,5 @@
 // The star map: positions, regions and constellations from pipeline/build_map.py.
+import { dataUrl } from "./dataVersion";
 
 export interface MapNode {
   id: string;
@@ -40,7 +41,7 @@ let cached: Promise<StarMapData> | null = null;
 
 export function loadMap(): Promise<StarMapData> {
   if (!cached) {
-    cached = fetch("/data/map.json")
+    cached = fetch(dataUrl("/data/map.json"))
       .then((r) => r.json())
       .then((raw: { nodes: RawNode[]; edges: [number, number, number][]; regions: MapArea[]; constellations: MapArea[]; categories: string[] }) => {
         const nodes = raw.nodes.map(([id, name, gene, x, y, region, constellation, category, connections]) => ({ id, name, gene, x, y, region, constellation, category, connections }));

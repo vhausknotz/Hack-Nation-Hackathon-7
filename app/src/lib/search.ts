@@ -1,4 +1,5 @@
 // Client-side search over every name, synonym and symbol in the atlas (data/search.json).
+import { dataUrl } from "./dataVersion";
 
 export type SearchKind = "c" | "g" | "s" | "grp" | "m";
 /** [matched text, kind, id, label (if different from text), extra info, prominence 0..1] */
@@ -27,7 +28,7 @@ export const normalize = (s: string) =>
 
 export function loadIndex() {
   if (!index) {
-    index = fetch("/data/search.json")
+    index = fetch(dataUrl("/data/search.json"))
       .then((r) => r.json() as Promise<Entry[]>)
       .then((entries) => ({ entries, norm: entries.map((e) => normalize(e[0])) }));
   }

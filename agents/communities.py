@@ -32,6 +32,7 @@ import llm  # noqa: E402
 from ledger import identity, sources  # noqa: E402
 from ledger.api import Ledger, now  # noqa: E402
 from ledger.schema import make_claim  # noqa: E402
+from ledger.canonical import find_quote as locate_quote  # noqa: E402
 
 from .verify import MODEL_FAMILY, VERIFY_MODEL  # noqa: E402
 
@@ -55,6 +56,29 @@ ORG_TYPES = {  # what families see: only patient organizations count as "your pe
 }
 ORG_WORDS = re.compile(r"foundation|famil|mission|support|dedicated|cure|research|community|patients|children|advoca|connect",
                        re.IGNORECASE)
+
+# Organization-wide descriptions complement condition leaf pages. They are evidence,
+# not classification overrides: the kernel checks the quote and Sol still judges it.
+ORG_PROFILES = {
+    "org:simonssearchlight-org": {
+        "source_id": "src:sha256:9ef48869aa136c64be4cbc7c1c1d00f473456876a742ab175c0d887995df6222",
+        "quote": "Simons Searchlight is an online international research program, building an ever growing natural history database, biorepository, and resource network of over 175 rare genetic neurodevelopmental disorders.",
+    },
+}
+
+
+def organization_profile(oid, ledger):
+    profile = ORG_PROFILES.get(oid)
+    if not profile:
+        return None
+    source = ledger.store.source(profile["source_id"])
+    if source is None:
+        raise ValueError("Pinned organization profile source is missing from the ledger archive")
+    span = locate_quote(sources.read_text(source) or "", profile["quote"])
+    if span is None:
+        raise ValueError("Organization profile quote does not match its archived source")
+    return {"type": "organization_page", **profile, "start": span[0], "end": span[1], "supports": "organization_kind",
+            "url": source["url"], "page_read": "live", "page_date": source["retrieved"][:10]}
 
 
 def ask(condition: dict, model: str, recall: bool = False) -> list[dict] | None:
@@ -185,7 +209,7 @@ def find_quote(text: str, patterns: list[re.Pattern]) -> tuple[int, int] | None:
     return best
 
 
-def verify_community(condition: dict, org: dict, page_title: str, quote: str, page_text: str) -> dict:
+def verify_community(condition: dict, org: dict, page_title: str, quote: str, page_text: str, profile: dict | None = None) -> dict:
     reply = llm.chat_json(VERIFY_MODEL, [
         {"role": "system", "content": (
             "You check claims for a rare-disease evidence ledger. A claim says an organization of a given kind serves people "
@@ -198,13 +222,15 @@ def verify_community(condition: dict, org: dict, page_title: str, quote: str, pa
             "'supports_with_qualification' (true, but the page only mentions the condition in passing); 'does_not_support' "
             "(wrong kind, wrong scope, or it does not serve these patients); 'out_of_scope' (the page is about something else). "
             'Return JSON {"serves_these_patients": true|false, "kind": "...", "scope": "...", "verdict": "...", '
-            '"reason": "<one plain sentence>"}.')},
+            '"reason": "<one plain sentence>"}.' +
+            (" The organization_profile is a separate verbatim passage from this organization's own site. Use it to assess the organization's kind, while using the condition page to assess whom it serves. A registry's information page does not make the registry an information-only service." if profile else ""))},
         {"role": "user", "content": json.dumps({
             "condition": f"{condition['name']} (caused by {condition['gene']['symbol']} variants)",
             "organization": org["name"], "homepage": org["homepage"], "claimed_kind": org["org_type"], "claimed_scope": org["scope"],
             "page_title": page_title, "quote": quote, "page_text": page_text[:6000],
+            **({"organization_profile": profile} if profile else {}),
         }, ensure_ascii=False)},
-    ], task=VERIFY_PROMPT)
+    ], task="verify-community-profile@1" if profile else VERIFY_PROMPT)
     verdict = reply.get("verdict")
     if verdict not in ("supports", "supports_with_qualification", "does_not_support", "out_of_scope"):
         verdict = "out_of_scope"
@@ -248,6 +274,99 @@ def nearest_relatives(ids: list[str], n: int) -> list[str]:
     return out
 
 
+def reuse_claim(ledger, claim):
+    """Timestamp changes alone must not create duplicate claims on a cached rerun."""
+    a = claim["assertion"]
+    for row in ledger.store.claims_where("subject = ? AND predicate = ? AND object = ?", (a["subject"], a["predicate"], a["object"])):
+        old = json.loads(row["body"])
+        if old["assertion"] == a and old["evidence"] == claim["evidence"] and old["provenance"].get("prompt") == claim["provenance"].get("prompt"):
+            return old
+    return claim
+
+
+def save_receipt(path, receipt):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(receipt, indent=1, ensure_ascii=False), encoding="utf-8")
+    temporary.replace(path)
+
+
+def scout_condition(c, name, ledger, scout, verifier, pages):
+    cid = c["id"]
+    r = Counter()
+    orgs, discovery = ask(c, SCOUT_MODEL), "web_search"
+    if not orgs:
+        r["scout_fallback"] += 1
+        orgs = ask(c, FALLBACK_MODEL)
+    if not orgs:
+        r["scout_recall"] += 1
+        orgs, discovery = ask(c, FALLBACK_MODEL, recall=True) or [], "model_recall"
+    patterns = term_patterns(c)
+    found = []
+    for o in orgs[:8]:
+        if not isinstance(o, dict) or not o.get("homepage"):
+            continue
+        r["organizations_named"] += 1
+        oid = org_id(o["homepage"])
+        if oid is None:
+            r["skipped_directory_or_platform"] += 1
+            continue
+        org = {"name": str(o.get("name", ""))[:200], "homepage": o["homepage"], "scope": scope_of(o.get("focus", "")),
+               "org_type": type_of(o.get("kind", ""))}
+        quote_at = None
+        for url in dict.fromkeys(u for u in (o.get("page"), o["homepage"]) if u):
+            if url not in pages:
+                got = fetch_page(url)
+                if got is None:
+                    pages[url] = None
+                else:
+                    src = sources.archive(got[0], got[1], "html", "organization website, quoted for citation", False)
+                    ledger.add_source(src, scout)
+                    pages[url] = (src, sources.read_text(src) or "", got[2], got[3])
+            if pages[url] is None:
+                continue
+            src, text, read_as, page_date = pages[url]
+            if (quote_at := find_quote(text, patterns)) is not None:
+                break
+        if quote_at is None:
+            r["dropped_page_does_not_name_condition"] += 1
+            continue
+        r[f"page_{read_as}"] += 1
+        start, end = quote_at
+        evidence = [{"type": "organization_page", "source_id": src.source_id, "quote": text[start:end], "start": start, "end": end,
+                     "url": src.url, "page_read": read_as, "page_date": page_date}]
+        profile = organization_profile(oid, ledger)
+        if profile:
+            evidence.append(profile)
+        for attempt in range(2):  # a second attempt only to apply the reviewer's correction of kind or scope
+            claim = make_claim(cid, "represented_by", oid, evidence,
+                               {"contributor": "agent:community-scout", "agent": "community-scout", "model": SCOUT_MODEL,
+                                "prompt": SCOUT_PROMPT if discovery == "web_search" else RECALL_PROMPT, "discovery": discovery,
+                                "campaign": name, "created": now(),
+                                **({"corrected_after_review": True} if attempt else {})},
+                               scope=org["scope"], name=org["name"], homepage=org["homepage"], org_type=org["org_type"])
+            claim = reuse_claim(ledger, claim)
+            result = ledger.propose(claim, scout)
+            r["claims_proposed"] += 1
+            if not result.accepted:
+                r["claims_kernel_rejected"] += 1
+                break
+            r["claims_kernel_accepted"] += 1
+            v = verify_community(c, org, src.title, text[start:end], text, profile)
+            if not ledger.store.reviews_for(result.claim_id):
+                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt="verify-community-profile@1" if profile else VERIFY_PROMPT)
+            r[f"review_{v['verdict']}"] += 1
+            correction = (v["serves"] and v["verdict"] == "does_not_support" and v["org_type"] and v["scope"]
+                          and (v["org_type"], v["scope"]) != (org["org_type"], org["scope"]))
+            if attempt == 0 and correction:
+                r["corrected_kind_or_scope"] += 1
+                org = {**org, "org_type": v["org_type"], "scope": v["scope"]}
+                continue
+            found.append(f"{org['name']} ({org['org_type']}, {org['scope']}, {read_as}) [{v['verdict']}]")
+            break
+    return {"name": c["name"], "status": "complete", **r, "found": found}
+
+
 def main(args: list[str]) -> None:
     n_rel = int(args[args.index("--neighbors") + 1]) if "--neighbors" in args else 0
     positional = [a for i, a in enumerate(args) if not a.startswith("--") and (i == 0 or args[i - 1] != "--neighbors")]
@@ -265,94 +384,52 @@ def main(args: list[str]) -> None:
     verifier = ledger.register(identity.load_or_create("agent:community-verifier-sol"), kind="agent", manifest={
         "role": "verifier", "model": VERIFY_MODEL, "model_family": MODEL_FAMILY, "prompt": VERIFY_PROMPT,
     })
-    receipt = {"campaign": name, "kind": "communities", "started": now(), "conditions": {}}
-    pages: dict[str, tuple] = {}  # url -> (source, text) so one page serves many conditions
-
+    receipt_path = CAMPAIGNS / f"{name}.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8")) if receipt_path.exists() else {
+        "campaign": name, "kind": "communities", "started": now(), "conditions": {}, "runs": [],
+        "cost_note": "Run deltas below exclude spending before checkpointing was introduced; token totals exclude Sol pricing and web-search fees.",
+    }
+    receipt["complete"] = False
+    receipt["requested_conditions"] = ids
+    pages = {}
+    save_receipt(receipt_path, receipt)
+    from openai import RateLimitError
     for cid in ids:
         c = conditions.get(cid)
-        if c is None:
+        if c is None or receipt["conditions"].get(cid, {}).get("status") == "complete":
             continue
-        r = Counter()
-        orgs, discovery = ask(c, SCOUT_MODEL), "web_search"
-        if not orgs:
-            r["scout_fallback"] += 1
-            orgs = ask(c, FALLBACK_MODEL)
-        if not orgs:
-            r["scout_recall"] += 1
-            orgs, discovery = ask(c, FALLBACK_MODEL, recall=True) or [], "model_recall"
-        patterns = term_patterns(c)
-        found = []
-        for o in orgs[:8]:
-            if not isinstance(o, dict) or not o.get("homepage"):
-                continue
-            r["organizations_named"] += 1
-            oid = org_id(o["homepage"])
-            if oid is None:
-                r["skipped_directory_or_platform"] += 1
-                continue
-            org = {"name": str(o.get("name", ""))[:200], "homepage": o["homepage"], "scope": scope_of(o.get("focus", "")),
-                   "org_type": type_of(o.get("kind", ""))}
-            quote_at = None
-            for url in dict.fromkeys(u for u in (o.get("page"), o["homepage"]) if u):
-                if url not in pages:
-                    got = fetch_page(url)
-                    if got is None:
-                        pages[url] = None
-                    else:
-                        src = sources.archive(got[0], got[1], "html", "organization website, quoted for citation", False)
-                        ledger.add_source(src, scout)
-                        pages[url] = (src, sources.read_text(src) or "", got[2], got[3])
-                if pages[url] is None:
-                    continue
-                src, text, read_as, page_date = pages[url]
-                if (quote_at := find_quote(text, patterns)) is not None:
-                    break
-            if quote_at is None:
-                r["dropped_page_does_not_name_condition"] += 1
-                continue
-            r[f"page_{read_as}"] += 1
-            start, end = quote_at
-            evidence = [{"type": "organization_page", "source_id": src.source_id, "quote": text[start:end], "start": start, "end": end,
-                         "url": src.url, "page_read": read_as, "page_date": page_date}]
-            for attempt in range(2):  # a second attempt only to apply the reviewer's correction of kind or scope
-                claim = make_claim(cid, "represented_by", oid, evidence,
-                                   {"contributor": "agent:community-scout", "agent": "community-scout", "model": SCOUT_MODEL,
-                                    "prompt": SCOUT_PROMPT if discovery == "web_search" else RECALL_PROMPT, "discovery": discovery,
-                                    "campaign": name, "created": now(),
-                                    **({"corrected_after_review": True} if attempt else {})},
-                                   scope=org["scope"], name=org["name"], homepage=org["homepage"], org_type=org["org_type"])
-                result = ledger.propose(claim, scout)
-                r["claims_proposed"] += 1
-                if not result.accepted:
-                    r["claims_kernel_rejected"] += 1
-                    break
-                r["claims_kernel_accepted"] += 1
-                if ledger.store.reviews_for(result.claim_id):
-                    break
-                v = verify_community(c, org, src.title, text[start:end], text)
-                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt=VERIFY_PROMPT)
-                r[f"review_{v['verdict']}"] += 1
-                correction = (v["serves"] and v["verdict"] == "does_not_support" and v["org_type"] and v["scope"]
-                              and (v["org_type"], v["scope"]) != (org["org_type"], org["scope"]))
-                if attempt == 0 and correction:
-                    r["corrected_kind_or_scope"] += 1
-                    org = {**org, "org_type": v["org_type"], "scope": v["scope"]}
-                    continue
-                found.append(f"{org['name']} ({org['org_type']}, {org['scope']}, {read_as}) [{v['verdict']}]")
+        for attempt in range(3):
+            try:
+                receipt["conditions"][cid] = scout_condition(c, name, ledger, scout, verifier, pages)
+                print(f"{c['name'][:60]}: complete", flush=True)
                 break
-        receipt["conditions"][cid] = {"name": c["name"], **r}
-        print(f"{c['name'][:60]}: {'; '.join(found) or 'no organization confirmed'}")
+            except RateLimitError as error:
+                receipt["conditions"][cid] = {"name": c["name"], "status": "error", "error_type": type(error).__name__, "error": "Azure rate limit; safe to resume"}
+                save_receipt(receipt_path, receipt)
+                if attempt < 2:
+                    time.sleep(45)
+            except Exception as error:
+                receipt["conditions"][cid] = {"name": c["name"], "status": "error", "error_type": type(error).__name__, "error": str(error)[:300]}
+                print(f"{cid}: {type(error).__name__}; recorded for retry", flush=True)
+                break
+        save_receipt(receipt_path, receipt)
 
     usage1 = llm.usage_summary()
     searches = sum(v.get("web_searches", 0) for v in usage1.values()) - sum(v.get("web_searches", 0) for v in usage0.values())
     tokens_usd = sum(v["usd"] for v in usage1.values()) - sum(v["usd"] for v in usage0.values())
     head = ledger.publish_tree_head()
-    receipt.update({"finished": now(), "seconds": round(time.time() - t0), "web_searches": searches,
-                    "usd_tokens_known_prices": round(tokens_usd, 4), "ledger_tree_head": {"size": head["size"], "root": head["root"]},
-                    "log_verified": ledger.verify_log()["ok"]})
-    CAMPAIGNS.mkdir(parents=True, exist_ok=True)
-    (CAMPAIGNS / f"{name}.json").write_text(json.dumps(receipt, indent=1, ensure_ascii=False), encoding="utf-8")
-    print(json.dumps({k: v for k, v in receipt.items() if k != "conditions"}, indent=1))
+    receipt.setdefault("runs", []).append({"finished": now(), "seconds": round(time.time() - t0), "web_searches": searches,
+                                            "usd_tokens_known_prices": round(tokens_usd, 4)})
+    receipt.update({"finished": now(), "complete": all(receipt["conditions"].get(cid, {}).get("status") == "complete" for cid in ids),
+                    "web_searches": sum(r["web_searches"] for r in receipt["runs"]),
+                    "usd_tokens_known_prices": round(sum(r["usd_tokens_known_prices"] for r in receipt["runs"]), 4),
+                    "ledger_tree_head": {"size": head["size"], "root": head["root"]}, "log_verified": ledger.verify_log()["ok"]})
+    save_receipt(receipt_path, receipt)
+    print(json.dumps({k: v for k, v in receipt.items() if k not in ("conditions", "requested_conditions")}, indent=1))
+    ledger.store.close()
+    if not receipt["complete"]:
+        raise RuntimeError("Community campaign incomplete; failed conditions are saved for a resumable rerun")
+
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@
 Reads contributed represented_by and has_asset claims from the ledger and keeps those the family policy
 accepts (kernel-checked and supported by a reviewer). Rules:
 - one entry per organization or study per condition, from its best-reviewed claim
-- an organization's kind is decided once, by its newest reviewed classification, so it reads the same everywhere
+- an organization's kind is decided once; a reviewed organization-wide profile outranks a condition leaf page at equal trust
 - an organization that serves everything caused by a gene is shown on all conditions of that gene
 - every entry says how its page was read (live on a date, or a historical archive snapshot)
 """
@@ -38,9 +38,18 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
 
     store = Store(readonly=True)
     rows = []
+    asset_latest = {}
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1 AND predicate IN ('represented_by', 'has_asset')"):
         reviews = [dict(r) for r in store.reviews_for(row["claim_id"])]
         status = pol.claim_review_status(reviews)
+        if row["predicate"] == "has_asset" and reviews:
+            claim = json.loads(row["body"])
+            a = claim["assertion"]
+            trust = 3 if any(r["reviewer_kind"] == "human" for r in reviews) else min(2, len({r["model_family"] or r["reviewer"] for r in reviews}))
+            rank = (trust, reviews[-1]["seq"], claim["provenance"]["created"])
+            key = (a["subject"], a["object"])
+            if key not in asset_latest or asset_latest[key][0] < rank:
+                asset_latest[key] = (rank, row["claim_id"])
         if pol.visible("family", "contributed", status, {}, row["predicate"]):
             last = reviews[-1]
             rows.append((json.loads(row["body"]), status, last["verdict"], last["reason"], last["seq"], row["claim_id"]))
@@ -50,14 +59,16 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         return (sources.read_text(dict(s)) or "") if s else ""
 
     # ---- organizations ------------------------------------------------------------------------------------
-    latest: dict[str, tuple[str, str]] = {}  # org -> (created, kind): the newest reviewed classification wins
-    for claim, *_ in rows:
+    latest = {}  # stronger review, then explicit organization profile, then recency
+    for claim, status, *_ in rows:
         q = claim["assertion"]["qualifiers"]
         if claim["assertion"]["predicate"] == "represented_by" and q.get("org_type"):
             created = claim["provenance"]["created"]
-            if claim["assertion"]["object"] not in latest or latest[claim["assertion"]["object"]][0] < created:
-                latest[claim["assertion"]["object"]] = (created, q["org_type"])
-    org_kind = {oid: kind for oid, (_, kind) in latest.items()}
+            profile = next((e for e in claim["evidence"] if e.get("supports") == "organization_kind"), None)
+            rank = (STATUS_RANK.get(status, 0), profile is not None, created)
+            if claim["assertion"]["object"] not in latest or latest[claim["assertion"]["object"]][0] < rank:
+                latest[claim["assertion"]["object"]] = (rank, q["org_type"], profile)
+    org_kind = {oid: kind for oid, (_, kind, _) in latest.items()}
 
     by_gene: dict[str, list[str]] = defaultdict(list)
     for cid, c in conditions.items():
@@ -77,6 +88,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
                 "scope": q.get("scope", "broader_group"), "quote": ev[0]["quote"][:400], "page": ev[0].get("url", ""),
                 "page_read": ev[0].get("page_read", "live"), "page_date": ev[0].get("page_date", claim["provenance"]["created"][:10]),
                 "claim_id": claim_id,
+                "kind_source": latest[a["object"]][2],
                 "review": {"status": status, "verdict": verdict, "reason": reason},
             }
             targets = by_gene[conditions[a["subject"]]["gene"]["symbol"]] if entry["scope"] == "this_gene" else [a["subject"]]
@@ -87,6 +99,8 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
                 if key not in best or best[key][0] < rank:
                     best[key] = (rank, e)
         else:
+            if asset_latest[(a["subject"], a["object"])][1] != claim_id:
+                continue  # a newer rejection must not silently revive an older accepted display
             text = source_text(ev[0]["source_id"])
             title = re.search(r"^Title: (.+)$", text, re.MULTILINE)
             phase = re.search(r"^Phases?: (.+)$", text, re.MULTILINE)
