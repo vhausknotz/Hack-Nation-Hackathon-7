@@ -58,6 +58,41 @@ def chat(model: str, messages: list[dict], task: str, json_mode: bool = False, *
     return content
 
 
+def search(model: str, prompt: str, task: str) -> dict:
+    """Ask a model with the web_search tool (Responses API). Returns {"text", "citations", "searches"}, cached like chat().
+
+    The usage log records the number of web searches, which are billed per call on top of tokens.
+    """
+    key_material = json.dumps({"model": model, "input": prompt, "tools": ["web_search"]}, sort_keys=True)
+    key = hashlib.sha256(key_material.encode()).hexdigest()
+    path = CACHE / key[:2] / f"{key}.json"
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))["result"]
+    t0 = time.time()
+    resp = client().responses.create(model=model, tools=[{"type": "web_search"}], input=prompt)
+    searches, citations = 0, []
+    for item in resp.output:
+        if item.type == "web_search_call":
+            searches += 1
+        elif item.type == "message":
+            for part in item.content:
+                citations += [a.url for a in getattr(part, "annotations", None) or [] if getattr(a, "url", None)]
+    result = {"text": resp.output_text or "", "citations": list(dict.fromkeys(citations)), "searches": searches}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"model": model, "task": task, "result": result}, ensure_ascii=False), encoding="utf-8")
+    usage = resp.usage
+    entry = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "task": task, "model": model, "seconds": round(time.time() - t0, 1),
+             "input_tokens": usage.input_tokens if usage else None, "output_tokens": usage.output_tokens if usage else None,
+             "web_searches": searches}
+    if usage and model in PRICES:
+        pin, pout = PRICES[model]
+        entry["usd"] = round(usage.input_tokens / 1e6 * pin + usage.output_tokens / 1e6 * pout, 6)  # excludes the per-search fee
+    USAGE.parent.mkdir(parents=True, exist_ok=True)
+    with open(USAGE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry) + "\n")
+    return result
+
+
 def chat_json(model: str, messages: list[dict], task: str, **options) -> dict:
     return json.loads(chat(model, messages, task, json_mode=True, **options))
 
@@ -68,8 +103,9 @@ def usage_summary() -> dict:
     if USAGE.exists():
         for line in USAGE.read_text(encoding="utf-8").splitlines():
             e = json.loads(line)
-            t = totals.setdefault(f"{e['task']} / {e['model']}", {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0})
+            t = totals.setdefault(f"{e['task']} / {e['model']}", {"calls": 0, "input_tokens": 0, "output_tokens": 0, "usd": 0.0, "web_searches": 0})
             t["calls"] += 1
+            t["web_searches"] += e.get("web_searches") or 0
             t["input_tokens"] += e.get("input_tokens") or 0
             t["output_tokens"] += e.get("output_tokens") or 0
             t["usd"] += e.get("usd") or 0.0

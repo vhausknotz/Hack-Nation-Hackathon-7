@@ -54,7 +54,7 @@ PREDICATES: dict[str, Predicate] = {
     "involved_in": Predicate(("gene",), ("go_term",), (), "The gene's protein is involved in the process or located in the compartment"),
     "interacts_with": Predicate(("gene",), ("gene",), ("score", "species", "evidence_level", "certainty"), "The two proteins physically interact"),
     "has_asset": Predicate(("condition",), ("trial", "asset"), ("asset_type", "status"), "A registry, study, model, biomarker, outcome measure, biorepository, program or trial relevant to the condition"),
-    "represented_by": Predicate(("condition",), ("organization",), (), "A patient organization serves this community"),
+    "represented_by": Predicate(("condition",), ("organization",), ("org_type", "scope", "name", "homepage"), "An organization serves this community"),
     "studied_by": Predicate(("condition",), ("person",), ("role",), "A researcher or clinician works on the condition"),
     "tested_in": Predicate(("intervention",), ("condition",), ("species", "model_system", "evidence_level", "outcome", "certainty"), "An intervention was tested for the condition"),
     "has_prevalence": Predicate(("condition",), ("text",), ("prevalence_kind", "geography"), "How common the condition is"),
@@ -79,6 +79,10 @@ QUALIFIER_VALUES: dict[str, set[str] | None] = {  # None = free text
     "status": None,
     "role": None,
     "prevalence_kind": None,
+    "org_type": {"patient_organization", "research_program", "information_service", "professional_network", "company"},
+    "scope": {"this_condition", "this_gene", "broader_group"},  # whom the organization serves
+    "name": None,
+    "homepage": None,
     "geography": None,
 }
 

@@ -125,6 +125,13 @@ Inspired by nanopublications: one atomic assertion plus its evidence and provena
   - PubMed abstracts and open-access (PMC OA) full texts are stored in full.
   - For other sources, only the hash, the quote and its offsets are public; the archived copy is used for verification only.
 - **Storage:** SQLite during development (`data/ledger/`), PostgreSQL when hosted. The full log (minus redactions) is exported as open data.
+- **Freshness: claims age, history stays.** A claim is a statement about a source at a date, so it is never edited. Freshness is recorded as new events:
+  - `source.rechecked`: the source was fetched again. Cheap change detection comes first: HTTP ETag / Last-Modified, a content hash, ClinicalTrials.gov's last-update date, PubMed retraction flags, and dataset release diffs (HPO, MONDO).
+  - `claim.reaffirmed`: the quote is still in the new version of the source (same hash, or the quote found again).
+  - `claim.stale`: the quote is gone, or the source no longer answers. The claim stays in the log and loses family visibility after a grace period.
+  - `claim.superseded`: a newer claim replaces it and links back (e.g. a trial moving from recruiting to completed, an organization renaming itself).
+
+  Families see the date the evidence was last confirmed ("seen on their website, March 2027"; "archived copy from June 2026, may not reflect current activity"). Pages read from the Internet Archive are historical: they show what a site said, not that an organization is active today.
 
 ## 3. Kernel guarantees and non-guarantees
 
@@ -246,6 +253,7 @@ The graph writes its own to-do list. Examples from the current data:
 - **Unreviewed connections:** strong computed connections nobody has checked.
 - **Missing assets:** a condition has no known registry, natural history study, model, patient group or trial.
 - **New sources:** papers and trials published since the last check.
+- **Stale evidence:** sources due for a recheck, ranked by how many family-visible claims depend on them (trial statuses and organization pages age fastest).
 - **Contested claims** waiting for review.
 
 **Priority = impact × uncertainty × feasibility × campaign boost**
@@ -282,12 +290,15 @@ Tasks re-rank automatically as claims land. This is the "mining": agents close t
 **The map is the product.** It works like Google Maps for rare diseases, simple enough for anyone and readable in a short video:
 - **Full-screen star map:** every condition is a point of light, placed by shared biology and colored by body system. Named clusters ("constellations") are visible when zoomed out.
 - **One search box on top:** type a condition, gene or symptom, and the map flies there. Your condition glows, and lines light up to its closest relatives.
-- **A simple side panel** (a bottom sheet on phones) gives three plain answers:
-  1. **You're not alone:** the closest relatives, each explained in one everyday sentence.
-  2. **What already exists:** registries, studies, groups.
-  3. **What you could do this week.**
+- **Directions: a guided path in everyday words.** The side panel (a bottom sheet on phones) works like Google Maps directions, from where the family is to a next step, and the route is drawn on the map:
+  1. **You are here:** what the condition is, in one plain sentence.
+  2. **Find your people:** the patient organization for this condition or gene. If none is known: the nearest related communities, and how to help start the missing one.
+  3. **You're not alone:** two or three relatives, each with "why this matters for you" in plain words.
+  4. **What already exists:** registries, natural history studies, trials and research programs families can join. Each is marked "includes your condition", "only some patients" or "ask an expert".
+  5. **Your next step this week:** one concrete, sourced action.
+  6. **What we don't know yet:** and what would change that.
 
-  Tapping a relative highlights the line between you and shows where the claim comes from.
+  Only patient organizations count as "your people". Research programs are listed as studies to join, and information services are not shown as communities. Tapping a stop highlights it on the map and shows where the claim comes from. Other Google Maps ideas that fit: "Nearby" (communities, studies, researchers around a condition), layers (symptoms vs. biology), reviews (evidence checks) and "Suggest an edit" (propose a claim).
 - **Show the science:** everything else (symptom lists, molecular machinery, scores, look-alikes, claim histories) stays one click away, never in the way.
 - **Watch it grow:** a live feed and a replay of recent discoveries; new verified bridges light up on the map.
 
@@ -394,6 +405,14 @@ Phases are defined by what they produce.
 3. **Ledger and kernel.** ~~Claim schema, event log, kernel checks, trust policies~~ (done, tested). Still to do: re-route the Phase 1 importers as reference imports, and turn `build_graph.py` into the projection job.
 4. ~~**The map (front door v2).**~~ Done and deployed: star map with named regions and constellations, search that flies to a condition, plain-language side panel, explore mode for genes/symptoms/groups, "Show the science" for depth. Still to come: "What you could do" (needs agents and assets) and the live feed and replay.
 5. **Internal agents v1.** Scout, screener, extractor, verifier, skeptic, resolver and gap hunter, run on the first campaign. Measure model quality and cost against a hand-checked set.
+   - Done:
+     - the literature campaign (`agents/campaign.py`: SNAP25 symptoms from papers)
+     - the trial import (`agents/trials_import.py`: Codex's screener findings, reviewed by Sol)
+     - the community scout (`agents/communities.py`: patient organizations from web search, quoted from their own sites, classified and reviewed by Sol)
+   - Next:
+     - researchers
+     - the next-step proposer
+     - freshness rechecks
 6. **Genesis enrichment.** A budgeted, broad AI run over all 7,328 conditions before outside contributors arrive:
    - ClinicalTrials.gov studies (screened for relevance, typed as registry, natural history study, trial, …)
    - NIH RePORTER grants and investigators

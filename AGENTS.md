@@ -12,6 +12,7 @@ One developer working with AI agents. The aim is a genuinely ambitious, meaningf
 
 ## Read first
 
+0. [HANDOFF.md](HANDOFF.md): the current state, work in progress and the next steps. Start here.
 1. [PLAN.md](PLAN.md): architecture, principles and build order. This is the source of truth for decisions.
 2. [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md): the challenge brief, transcribed. Use it instead of the PDF.
 3. [docs/buffalo_initiative.md](docs/buffalo_initiative.md): who the sponsor is and what they care about.
