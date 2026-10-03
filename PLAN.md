@@ -88,7 +88,9 @@ Contradicting evidence shows as a red marker on the link.
 | Orphanet (Orphadata) | Gene → disease links typed *loss of function* or *gain of function*, prevalence | Open download |
 | HGNC | Gene IDs and old gene names | Open download |
 | ClinVar | Variants and their consequences | Open download |
-| Reactome / Gene Ontology | Gene → pathway or biological process | Open download |
+| Reactome / Gene Ontology / SynGO | Gene → pathway, biological process, synaptic function | Open download |
+| Complex Portal | Gene → protein complex (e.g. the SNARE complex) | Open download |
+| Gene2Phenotype, ClinGen dosage | Variant effect: loss of function, dominant negative, gain of function | Open download (to evaluate) |
 | ClinicalTrials.gov | Studies, conditions, interventions, eligibility | API v2 |
 | NIH RePORTER | Grants, investigators, institutions | API |
 | PubMed / PMC | Papers, abstracts, authors, open full text | E-utilities API |
@@ -111,6 +113,7 @@ OMIM restricts redistribution, so we reference OMIM IDs through the HPO and MOND
 Symptom similarity weights **rare symptoms more than common ones**: "you both have seizures (hundreds of diseases do), but you also share X (only a handful do)." That is the brief's "broad vs. unusually informative symptoms."
 
 ### 3.3 The graph
+- **The unit of a "community" is the gene-defined condition** (e.g. "SNAP25-related disorder"), because patient groups, Buffalo's tracker and families all think by gene. A condition groups its OMIM, Orphanet and MONDO entries, and splits only when variant effects differ (e.g. SCN2A gain vs. loss of function).
 - **Nodes:** disease, gene, variant class, mechanism, pathway, symptom, patient group, researcher, paper, study/trial, asset (registry, natural history study, model, biomarker, outcome measure, biorepository), therapy program, funder/grant.
 - **Every edge carries:**
   - relationship type
@@ -125,6 +128,7 @@ Symptom similarity weights **rare symptoms more than common ones**: "you both ha
 
 | Job | Model | Guardrail |
 |---|---|---|
+| **Filter** whether a paper, trial or grant is actually about the condition (a "SNAP25" search returns Botox and Alzheimer's trials; "NSF" returns the National Science Foundation) | `gpt-6-luna` | Every keyword hit is checked before it becomes an edge |
 | **Extract** claims, mechanisms, assets and people from papers, trials and group sites | `gpt-6-luna` | Structured output; must return an exact quote that is found verbatim in the source, or the claim is dropped |
 | **Reconcile** names to stable IDs (MONDO, HPO, HGNC) | `text-embedding-3-large` shortlists, `gpt-6-sol` decides | Low-confidence matches are flagged, not merged |
 | **Verify** with a second pass: does the quote really support the claim? Is there a contradiction? | `gpt-6-sol` | Disagreement lowers confidence |
@@ -157,21 +161,30 @@ download → normalize → extract (Azure) → verify      search → answer pag
 
 ---
 
-## 4. The demo neighborhood (hypothesis, confirmed or rejected in Phase 0)
+## 4. The deep-dive neighborhood (confirmed in Phase 0)
 
-**STXBP1 and the SNARE-complex disorders** (STXBP1, SNAP25, STX1B, VAMP2, SYT1, …). The SNARE complex is the protein machinery nerve cells use to release signals.
+**STXBP1 and the SNARE-machinery disorders** (STXBP1, SNAP25, STX1B, VAMP2, SYT1, CPLX1, …). The SNARE complex is the protein machinery nerve cells use to release signals. Full findings: [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
 
-Why this neighborhood:
-- **Buffalo's home turf:** pediatric, neurogenetic, monogenic.
-- **Untreated:** no approved disease-modifying therapy (to confirm).
-- **Maria fits:** it mixes well-organized communities with tiny ones, so Maria's disease can be one of the tiny ones.
-- **A real precedent to test against:** a 4-phenylbutyrate trial enrolled STXBP1 *and* SLC6A1 children together on a shared-mechanism rationale ([NCT04937062](https://clinicaltrials.gov/study/NCT04937062)). Would the atlas have suggested it?
-- **A built-in counterexample:** variants that *remove* the protein and variants that *poison* the complex need different therapy strategies.
-- **Real shared infrastructure nearby:** COMBINEDBrain's biorepository and natural history efforts.
+**The anchor story: Maria's child has SNAP25-related disorder.**
+- About 32 known patients, no trial, no natural history study.
+- The databases still file it as a myasthenic syndrome, while the literature describes an epileptic encephalopathy.
+- **The atlas connects her through mechanism.** STXBP1 is part of the same SNARE machinery (the "SNAREopathies" literature), where symptom matching alone fails.
+- **It finds real assets:**
+  - Simons Searchlight already covers SNAP25.
+  - A multi-gene STXBP1 + SYNGAP1 natural history study is recruiting at CHOP.
+  - A European STXBP1 trial-readiness study is running.
+  - The STXBP1 Foundation has a phenylbutyrate program.
+- **It shows contradictions:** phenylbutyrate for STXBP1 has both supporting and opposing 2026 evidence.
+- **It shows lessons:** a terminated gene-therapy trial.
+- **It finds bridge people:** e.g. Weill Cornell partners with several communities.
 
-**Fallbacks:**
-- Laminopathies (LMNA and ZMPSTE24: same gene with different mechanisms, different genes with the same mechanism)
-- A neighborhood around a Buffalo Therapy Tracker program
+**Why it fits:**
+- Buffalo's home turf (pediatric, neurogenetic, monogenic) and in Buffalo's own tracker.
+- Untreated.
+- A real backtest: from SLC6A1's side, STXBP1 ranks #12 of 10,739 diseases by symptoms, the pairing the real phenylbutyrate trial made.
+- Clean counterexamples the graph finds on its own: STXBP2, the same protein family, causes an immune disease; SYT2 and VAMP1 belong to the neuromuscular cluster.
+
+The breadth layer still covers every monogenic disease. This neighborhood is where the deep evidence layer is built and checked first.
 
 ---
 
@@ -207,7 +220,7 @@ Why this neighborhood:
 
 Phases are defined by what they produce. Each one ends with something we can look at.
 
-0. **Data check.** Real records confirm or kill the demo story. Output: a short recon note and a go/no-go on the neighborhood.
+0. ~~**Data check.**~~ Done: go. See [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
 1. **Breadth graph.** Every monogenic rare disease with IDs, synonyms, genes (with loss/gain of function), symptoms and trials. Output: searchable graph data.
 2. **App skeleton.** Search plus the answer page, wired to real breadth data and deployed. Output: a live URL.
 3. **Depth layer.** AI extraction and verification for the neighborhood (papers, trials, group sites, tracker). Output: evidence-backed claims and assets.
