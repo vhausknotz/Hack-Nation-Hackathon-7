@@ -49,6 +49,8 @@ export interface Neighbor extends Brief {
   effect: "same" | "different" | "unknown" | "not_comparable";
   mech_known?: boolean; // both genes have interaction-level data
   sym_known?: boolean;
+  community?: string | null;
+  asset_count?: number;
   same_category: boolean;
   symptoms: string[];
   mechanisms: SharedMechanism[];
@@ -80,6 +82,9 @@ export type SymptomDict = Record<string, [string, string | null, number]>;
 export type MechanismDict = Record<string, [string, number]>;
 
 export interface ConditionBundle {
+  plain?: { summary: string; model: string; prompt: string } | null;
+  communities?: Community[];
+  assets?: ResearchAsset[];
   id: string;
   name: string;
   also_known_as: string[];
@@ -103,6 +108,41 @@ export interface ConditionBundle {
   neighbors: Neighbor[];
   lookalikes: Lookalike[];
   dict: { symptoms: SymptomDict; mechanisms: MechanismDict };
+}
+
+export interface ActionReview {
+  status: "reviewed" | "independently_reviewed" | "human_reviewed";
+  verdict: "supports" | "supports_with_qualification";
+  reason: string;
+}
+
+export interface Community {
+  id: string;
+  name: string;
+  homepage: string;
+  kind: "patient_organization" | "research_program" | "information_service" | "professional_network" | "company";
+  scope: "this_condition" | "this_gene" | "broader_group";
+  quote: string;
+  page: string;
+  page_read: "live" | "archived_snapshot";
+  page_date: string;
+  claim_id: string;
+  via?: string;
+  review: ActionReview;
+}
+
+export interface ResearchAsset {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  phase: string;
+  restriction: string | null;
+  quotes: string[];
+  url: string;
+  source_date: string;
+  claim_id: string;
+  review: ActionReview;
 }
 
 export interface GeneBundle {

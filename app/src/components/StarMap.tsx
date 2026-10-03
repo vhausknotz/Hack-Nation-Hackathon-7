@@ -10,7 +10,9 @@ export interface Related {
   strength: number; // 0..1, line brightness
 }
 
-interface Props {
+export interface RouteStop { id: string; step: number; label: string }
+
+export interface MapProps {
   data: StarMapData;
   focus: string | null; // the selected condition
   related: Related[]; // its closest relatives, drawn as lines
@@ -18,6 +20,9 @@ interface Props {
   emphasized: string | null; // the relative currently pointed at in the panel
   onSelect: (id: string) => void;
   onBackground: () => void;
+  route: RouteStop[];
+  activeStep: number;
+  onStop: (step: number) => void;
 }
 
 const DIM = "#26324f"; // faint, unselected stars
@@ -34,13 +39,16 @@ interface LabelBox {
 
 const shorten = (text: string, max: number) => (text.length > max ? text.slice(0, max - 1).trimEnd() + "…" : text);
 
-export function StarMap({ data, focus, related, highlight, emphasized, onSelect, onBackground }: Props) {
+export function StarMap({ data, focus, related, highlight, emphasized, onSelect, onBackground, route, activeStep, onStop }: MapProps) {
   const container = useRef<HTMLDivElement>(null);
   const sigma = useRef<Sigma | null>(null);
   const state = useRef({ focus, related, highlight, emphasized });
   const [labels, setLabels] = useState<LabelBox[]>([]);
   const [marker, setMarker] = useState<{ x: number; y: number } | null>(null);
   const [hover, setHover] = useState<{ x: number; y: number; name: string; gene: string } | null>(null);
+  const routeRef = useRef(route);
+  routeRef.current = route;
+  const [pins, setPins] = useState<(RouteStop & { x: number; y: number })[]>([]);
   const handlers = useRef({ onSelect, onBackground });
   handlers.current = { onSelect, onBackground };
 
@@ -49,7 +57,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
     if (!container.current) return;
     const graph = new Graph();
     for (const n of data.nodes) {
-      graph.addNode(n.id, { x: n.x, y: -n.y, size: 3.4 + Math.min(n.connections, 30) / 10, color: regionColor(n.region), label: n.name, gene: n.gene, region: n.region });
+      graph.addNode(n.id, { x: n.x, y: -n.y, size: 1.1 + Math.min(n.connections, 30) / 35, color: "#e3c698", label: n.name, gene: n.gene, region: n.region });
     }
     const renderer = new Sigma(graph, container.current, {
       labelColor: { color: "#f1f5f9" },
@@ -108,6 +116,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
         const out: LabelBox[] = [];
         const tryPlace = (box: LabelBox, w: number, h: number) => {
           const b = { x0: box.x - w / 2, x1: box.x + w / 2, y0: box.y - h / 2, y1: box.y + h / 2 };
+          if (b.x0 < 4 || b.y0 < 4 || b.x1 > renderer.getDimensions().width - 4 || b.y1 > renderer.getDimensions().height - 4) return;
           if (placed.some((p) => !(b.x1 < p.x0 || b.x0 > p.x1 || b.y1 < p.y0 || b.y0 > p.y1))) return;
           placed.push(b);
           out.push(box);
@@ -134,6 +143,10 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
           tryPlace({ key: `${a.level}:${a.id}`, text: a.name, x: p.x, y: p.y, level: a.level, color: regionColor(a.level === "region" ? a.id : -1, 0.8) }, w, h);
         }
         setLabels(out);
+        setPins(routeRef.current.filter(s => graph.hasNode(s.id)).map(s => {
+          const a = graph.getNodeAttributes(s.id);
+          return { ...s, ...renderer.graphToViewport({ x: a.x, y: a.y }) };
+        }));
         if (f && graph.hasNode(f)) {
           const fa = graph.getNodeAttributes(f);
           setMarker(renderer.graphToViewport({ x: fa.x, y: fa.y }));
@@ -165,7 +178,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
       }
     }
     renderer.refresh();
-  }, [focus, related, highlight, emphasized]);
+  }, [focus, related, highlight, emphasized, route]);
 
   // ---- fly the camera to the selection ---------------------------------------------------------------------
   useEffect(() => {
@@ -192,8 +205,16 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
   };
 
   return (
-    <div className="absolute inset-x-0 top-0 bottom-[46dvh] sm:bottom-0 sm:left-[432px]" style={{ background: SKY }}>
+    <div className="absolute inset-x-0 top-0 bottom-[58dvh] overflow-hidden sm:bottom-0 sm:left-[432px]" style={{ background: SKY }}>
       <div ref={container} className="absolute inset-0" />
+      {pins.length > 0 && <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden" aria-hidden>
+        {pins.slice(1).filter((p, i) => p.id !== pins[i].id).map((p, i) => {
+          const a = pins[i];
+          const d = `M ${a.x} ${a.y} Q ${(a.x + p.x) / 2 + 25} ${(a.y + p.y) / 2 - 40} ${p.x} ${p.y}`;
+          return <g key={`${p.step}-${i}`}><path d={d} fill="none" stroke="#f7cf86" strokeWidth="8" opacity="0.08" /><path d={d} fill="none" stroke="#f7cf86" strokeWidth="1.5" strokeDasharray="5 4" opacity="0.9" /></g>;
+        })}
+      </svg>}
+      {pins.filter(p => p.step === activeStep || !pins.some(q => q.id === p.id && q.step === activeStep) && pins.find(q => q.id === p.id)?.step === p.step).map(p => <button key={p.step} onClick={() => onStop(p.step)} aria-label={`Directions stop ${p.step + 1}: ${p.label}`} style={{ left: p.x, top: p.y }} className={`absolute z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-xs font-bold shadow-lg ${p.step === activeStep ? "border-white bg-amber-100 text-slate-900" : "border-amber-200/70 bg-slate-900 text-amber-100"}`}>{p.step + 1}</button>)}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         {labels.map((l) => (
           <span

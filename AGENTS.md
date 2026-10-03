@@ -42,12 +42,14 @@ pipeline/         Python data pipeline:
                     export_app.py       sharded static bundles for the app
                     llm.py              cached Azure OpenAI client with token/cost log
                     inspect_condition.py, recon_*.py   review tools and Phase 0 checks
-ledger/           claims ledger (built and tested; importers not yet routed through it): schema, kernel, Merkle log,
+ledger/           claims ledger (reference imports and contributed claims are routed through it): schema, kernel, Merkle log,
                   signatures, policies, source archive. Tests in ledger/tests (run: python -m pytest ledger/tests)
-agents/           (planned) scout, screener, extractor, verifier, skeptic, resolver, gap hunter, proposer
+agents/           campaign.py (literature), communities.py (patient-group scout), trials_import.py (trial import + Sol review)
+pipeline/project_actions.py  read-only family projection of reviewed organizations and studies
+pipeline/plain_summaries.py  cached, AI-labeled everyday descriptions
 api/              (planned) live API + MCP server
 enrich/           work by parallel agents (see docs/agent_tasks/)
-app/              web app (Vite + React + TypeScript + Tailwind, sigma.js map); reads app/public/data/
+app/              web app (Vite + React + TypeScript + Tailwind, canvas globe and sigma.js flat map); reads app/public/data/
                     routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism
                     lit up · /c/:id/details, /g, /s, /group, /m  "Show the science" pages · /about
 tools/            screenshot.py (visual QA with overflow check), map_preview.py, azure_status.ps1, azure_off.ps1
@@ -71,6 +73,10 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Review a condition's connections:** `./.venv/Scripts/python pipeline/inspect_condition.py SNAP25`
 
 **Visual check:** `MSYS_NO_PATHCONV=1 ./.venv/Scripts/python tools/screenshot.py <out_dir> http://localhost:4173 / "/c/MONDO:0014590" --width 390` (after `npx vite preview` in app/). Check both desktop and phone widths before deploying.
+
+**Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
+Projection regressions: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests`.
+Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 
 ## Azure OpenAI (Foundry)
 

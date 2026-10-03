@@ -1,16 +1,15 @@
 // The atlas as a map: search, fly to a condition, see who shares its biology. Like Google Maps for rare diseases.
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useEvidence } from "../components/EvidenceDrawer";
+import { DirectionsPanel, STOPS } from "../components/DirectionsPanel";
 import { Logo } from "../components/Layout";
 import { SearchBox } from "../components/SearchBox";
 import { StarMap, type Related } from "../components/StarMap";
+import { GlobeMap } from "../components/GlobeMap";
 import { getCondition, getGene, getGroup, getMechanism, getSymptom } from "../lib/data";
-import { external, routes } from "../lib/links";
-import { loadMap, regionColor, type StarMapData } from "../lib/map";
-import { closeness, plainRarity, plainReason } from "../lib/plain";
-import { connectionPanel, mechanismReason } from "../lib/reasons";
-import type { Brief, ConditionBundle, Neighbor } from "../lib/types";
+import { routes } from "../lib/links";
+import { loadMap, type StarMapData } from "../lib/map";
+import type { Brief, ConditionBundle } from "../lib/types";
 
 type Explore = { kind: "g" | "s" | "grp" | "m"; title: string; subtitle: string; conditions: Brief[]; total: number; science: string };
 
@@ -20,6 +19,8 @@ export default function MapPage() {
   const [map, setMap] = useState<StarMapData | null>(null);
   const [condition, setCondition] = useState<ConditionBundle | null>(null);
   const [explore, setExplore] = useState<Explore | null>(null);
+  const [step, setStep] = useState(0);
+  const [globe, setGlobe] = useState(true);
   const [emphasized, setEmphasized] = useState<string | null>(null);
   const conditionId = !kind && id ? decodeURIComponent(id) : null;
 
@@ -28,9 +29,12 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
+    let active = true;
     setCondition(null);
+    setStep(0);
     setEmphasized(null);
-    if (conditionId) getCondition(conditionId).then((c) => setCondition(c));
+    if (conditionId) getCondition(conditionId).then((c) => { if (active) setCondition(c); });
+    return () => { active = false; };
   }, [conditionId]);
 
   useEffect(() => {
@@ -50,22 +54,38 @@ export default function MapPage() {
   const neighbors = useMemo(() => (condition ? condition.neighbors.filter((n) => !n.same_gene).sort((a, b) => b.score - a.score) : []), [condition]);
   const related: Related[] = useMemo(() => neighbors.slice(0, 8).map((n) => ({ id: n.id, strength: Math.min(1, n.score / 0.6) })), [neighbors]);
   const highlight = useMemo(() => (explore ? new Set(explore.conditions.map((c) => c.id)) : null), [explore]);
+  const route = useMemo(() => condition ? STOPS.map((label, index) => ({
+    label, step: index, id: index === 1 && !(condition.communities ?? []).some(o => o.kind === "patient_organization") ? neighbors.find(n => n.community)?.id ?? condition.id : index === 2 ? neighbors[0]?.id ?? condition.id : condition.id,
+  })) : [], [condition, neighbors]);
+  const selectStep = (next: number) => {
+    setStep(next);
+    setEmphasized(route[next]?.id === condition?.id ? null : route[next]?.id ?? null);
+  };
+  const MapView = globe ? GlobeMap : StarMap;
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-[#04060e]">
       {map ? (
-        <StarMap
+        <MapView
           data={map}
           focus={condition ? condition.id : null}
           related={condition ? related : []}
           highlight={highlight}
           emphasized={emphasized}
+          route={route}
+          activeStep={step}
+          onStop={selectStep}
           onSelect={(nodeId) => navigate(routes.condition(nodeId))}
           onBackground={() => (conditionId || kind) && navigate("/")}
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center text-sm text-slate-400">Drawing the map…</div>
       )}
+
+      <div className="absolute right-3 top-[72px] z-20 flex rounded-full border border-white/15 bg-slate-950/85 p-1 text-[11px] text-white shadow-lg sm:top-4" aria-label="Map view">
+        <button aria-pressed={globe} onClick={() => setGlobe(true)} className={`rounded-full px-3 py-1.5 ${globe ? "bg-white/15" : "text-slate-400"}`}>Globe</button>
+        <button aria-pressed={!globe} onClick={() => setGlobe(false)} className={`rounded-full px-3 py-1.5 ${!globe ? "bg-white/15" : "text-slate-400"}`}>Flat map</button>
+      </div>
 
       {/* search, top left like a maps app */}
       <div className="absolute left-3 right-3 top-3 z-20 sm:left-4 sm:right-auto sm:top-4 sm:w-[400px]">
@@ -80,7 +100,7 @@ export default function MapPage() {
       {/* the panel: a side card on desktop, a bottom sheet on phones */}
       <Panel open>
         {conditionId && condition && map ? (
-          <ConditionPanel c={condition} neighbors={neighbors} map={map} emphasized={emphasized} setEmphasized={setEmphasized} onClose={() => navigate("/")} />
+          <DirectionsPanel key={condition.id} c={condition} neighbors={neighbors} step={step} onStep={selectStep} emphasized={emphasized} onEmphasize={setEmphasized} onClose={() => navigate("/")} />
         ) : conditionId ? (
           <PanelMessage>Loading…</PanelMessage>
         ) : explore ? (
@@ -130,7 +150,7 @@ function Welcome({ map }: { map: StarMapData | null }) {
       <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
         Every point of light is one condition. Conditions that share symptoms or work through the same biology sit close together, even when their names have nothing in common.
       </p>
-      <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">Search for yours, or tap any point, to see who shares its biology.</p>
+      <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">Search for yours, or tap a light. Follow the directions to find people, explore studies, and decide what to ask next.</p>
       <div className="mt-5 flex flex-wrap gap-2">
         {examples.map(([label, to]) => (
           <Link key={label} to={to} className="rounded-full border border-ink-line px-3 py-1 text-sm text-ink-soft transition hover:border-machinery/40 hover:text-machinery">
@@ -145,140 +165,6 @@ function Welcome({ map }: { map: StarMapData | null }) {
         </Link>
       </p>
     </div>
-  );
-}
-
-// ---- a condition --------------------------------------------------------------------------------------------
-function ConditionPanel({ c, neighbors, map, emphasized, setEmphasized, onClose }: {
-  c: ConditionBundle; neighbors: Neighbor[]; map: StarMapData; emphasized: string | null; setEmphasized: (id: string | null) => void; onClose: () => void;
-}) {
-  const [showAll, setShowAll] = useState(false);
-  const node = map.byId.get(c.id);
-  const region = node ? map.regionById.get(node.region) : undefined;
-  const constellation = node ? map.constellationById.get(node.constellation) : undefined;
-  const rarity = plainRarity(c);
-  const list = showAll ? neighbors.slice(0, 10) : neighbors.slice(0, 4);
-  return (
-    <div className="p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2 text-xs font-medium text-ink-soft">
-          {node && <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: regionColor(node.region) }} />}
-          <span className="truncate" title={constellation?.blurb || region?.blurb}>
-            {constellation?.name || region?.name || "Rare genetic condition"}
-          </span>
-        </div>
-        <CloseButton onClose={onClose} />
-      </div>
-      <h1 className="mt-2 text-2xl font-semibold leading-tight tracking-tight">{c.name}</h1>
-      <p className="mt-2 text-[15px] text-ink-soft">
-        Caused by changes in the <b className="font-mono text-ink">{c.gene.symbol}</b> gene{rarity ? <> · {rarity}</> : null}
-      </p>
-
-      <h2 className="mt-7 text-lg font-semibold">You're not alone</h2>
-      {neighbors.length ? (
-        <>
-          <p className="mt-1 text-sm text-ink-soft">These conditions share its biology. Tap one to see why.</p>
-          <ul className="mt-3 space-y-2">
-            {list.map((n) => (
-              <RelativeRow key={n.id} c={c} n={n} open={emphasized === n.id} onToggle={() => setEmphasized(emphasized === n.id ? null : n.id)} />
-            ))}
-          </ul>
-          {neighbors.length > 4 && (
-            <button onClick={() => setShowAll(!showAll)} className="mt-3 text-sm font-medium text-machinery hover:underline">
-              {showAll ? "Show fewer" : `Show ${Math.min(10, neighbors.length) - 4} more`}
-            </button>
-          )}
-        </>
-      ) : (
-        <p className="mt-2 text-sm text-ink-soft">Too little is recorded about this condition to compare it with others yet.</p>
-      )}
-
-      <SameGene c={c} />
-
-      <h2 className="mt-7 text-lg font-semibold">What already exists</h2>
-      <p className="mt-1 text-sm text-ink-soft">Studies, registries and patient groups for this condition are not mapped in the atlas yet. Meanwhile, these trusted sources list them:</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <ExternalChip href={external.trialsSearch(c.gene.symbol)}>Clinical studies</ExternalChip>
-        {c.xrefs.Orphanet?.[0] && <ExternalChip href={external.orphanet(c.xrefs.Orphanet[0])}>Orphanet</ExternalChip>}
-        {c.xrefs.GARD?.[0] && <ExternalChip href={external.gard(c.xrefs.GARD[0])}>GARD (NIH)</ExternalChip>}
-      </div>
-
-      <Link to={routes.conditionDetails(c.id)} className="mt-8 flex items-center justify-between rounded-xl bg-ink-wash px-4 py-3 text-sm font-medium transition hover:bg-machinery-soft hover:text-machinery">
-        Show the science
-        <span aria-hidden>→</span>
-      </Link>
-      <p className="mt-3 text-xs leading-relaxed text-ink-faint">Connections are computed from open data: leads for experts to check, not medical advice.</p>
-    </div>
-  );
-}
-
-function SameGene({ c }: { c: ConditionBundle }) {
-  const same = c.neighbors.filter((n) => n.same_gene).sort((a, b) => b.sym - a.sym);
-  if (!same.length) return null;
-  const overlap = (n: Neighbor) => (n.sym >= 0.25 ? "Many shared symptoms" : n.sym >= 0.1 ? "Some shared symptoms" : "Mostly different symptoms");
-  return (
-    <>
-      <h2 className="mt-7 text-lg font-semibold">Same gene, different condition</h2>
-      <p className="mt-1 text-sm text-ink-soft">
-        Changes in {c.gene.symbol} can cause other conditions too. They may work in different ways, so they are not automatically close.
-      </p>
-      <ul className="mt-3 space-y-1.5">
-        {same.slice(0, 5).map((n) => (
-          <li key={n.id}>
-            <Link to={routes.condition(n.id)} className="flex items-baseline justify-between gap-3 rounded-lg px-1 py-1 text-sm hover:text-machinery">
-              <span className="min-w-0 truncate">{n.name}</span>
-              <span className={`shrink-0 text-[11px] ${n.effect === "different" ? "text-caution" : "text-ink-faint"}`}>
-                {n.effect === "different" ? "Acts differently" : overlap(n)}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {same.length > 5 && <p className="mt-1 text-xs text-ink-faint">and {same.length - 5} more</p>}
-    </>
-  );
-}
-
-function RelativeRow({ c, n, open, onToggle }: { c: ConditionBundle; n: Neighbor; open: boolean; onToggle: () => void }) {
-  const openEvidence = useEvidence();
-  const navigate = useNavigate();
-  const tag = closeness(n);
-  const sources = [...new Set(n.mechanisms.map((m) => mechanismReason(m, c.gene.symbol, n.gene, c.dict.mechanisms).source.split(/[ ,·]/)[0]).concat(n.symptoms.length ? ["HPO"] : []))];
-  return (
-    <li className={`rounded-xl border transition ${open ? "border-machinery/40 bg-machinery-soft/40" : "border-ink-line hover:border-ink-faint"}`}>
-      <button onClick={onToggle} className="w-full px-4 py-3 text-left">
-        <div className="flex items-baseline justify-between gap-3">
-          <span className="font-medium leading-snug">{n.name}</span>
-          <span className={`shrink-0 text-[11px] font-semibold ${tag === "Very close" ? "text-machinery" : "text-ink-faint"}`}>{tag}</span>
-        </div>
-        <p className="mt-1 text-sm leading-snug text-ink-soft">{plainReason(c, n)}</p>
-      </button>
-      {open && (
-        <div className="border-t border-machinery/20 px-4 py-3 text-xs text-ink-soft">
-          <div>
-            Where this comes from: <span className="text-ink">{sources.join(", ") || "computed from open data"}</span>
-          </div>
-          {n.effect === "different" && <div className="mt-1 text-caution">Note: the two gene changes act differently, so treatments may not transfer.</div>}
-          {n.mech_known === false && <div className="mt-1 text-ink-faint">How these two genes relate has not been recorded yet. This link rests on shared symptoms.</div>}
-          <div className="mt-2 flex gap-4">
-            <button onClick={() => openEvidence(connectionPanel(c, n))} className="font-medium text-machinery hover:underline">
-              See the evidence
-            </button>
-            <button onClick={() => navigate(routes.condition(n.id))} className="font-medium text-machinery hover:underline">
-              Go there on the map
-            </button>
-          </div>
-        </div>
-      )}
-    </li>
-  );
-}
-
-function ExternalChip({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <a href={href} target="_blank" rel="noreferrer" className="rounded-full border border-ink-line px-3 py-1 text-sm text-ink-soft transition hover:border-ink-faint hover:text-ink">
-      {children} <span aria-hidden>↗</span>
-    </a>
   );
 }
 

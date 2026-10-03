@@ -91,13 +91,17 @@ CREATE TABLE IF NOT EXISTS tree_heads (
 
 
 class Store:
-    def __init__(self, path: Path = LEDGER_DIR / "ledger.db"):
-        path.parent.mkdir(parents=True, exist_ok=True)
+    def __init__(self, path: Path = LEDGER_DIR / "ledger.db", *, readonly: bool = False):
+        if not readonly:
+            path.parent.mkdir(parents=True, exist_ok=True)
         self.path = path
-        self.db = sqlite3.connect(path)
+        self.db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True) if readonly else sqlite3.connect(path)
         self.db.row_factory = sqlite3.Row
-        self.db.execute("PRAGMA journal_mode=WAL")
-        self.db.executescript(SCHEMA)
+        if readonly:
+            self.db.execute("BEGIN")  # one consistent snapshot while a campaign appends
+        else:
+            self.db.execute("PRAGMA journal_mode=WAL")
+            self.db.executescript(SCHEMA)
 
     def close(self) -> None:
         self.db.close()

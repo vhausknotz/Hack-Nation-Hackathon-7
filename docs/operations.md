@@ -30,6 +30,8 @@ Every resource created for this project must be listed here, tagged, and approve
 ## What can cost money
 
 - **Model calls** (Luna, Sol, embeddings) are billed per token, only while the pipeline or agents run. Every call is cached and its token usage logged, so reruns are free and spend is measurable.
+- **Web search** is billed separately from tokens. The earlier planning range was USD 10–35 per 1,000 searches; confirm current pricing before scaling. Campaign receipts count searches. Do not interpret `usd_tokens_known_prices` as the total bill: it excludes search fees and models without configured prices.
+- The full plain-summary run uses `data/cache/plain_summary_usage.jsonl` so it does not contaminate the concurrent community scout's usage delta.
 - **Future live service** (database, API + MCP server): not created yet. These will be paid resources and need the owner's approval first.
 - **Public MCP submissions** must never trigger model calls paid from this account. Reviews of outside submissions run only for prioritized or funded work (see PLAN.md, section 11).
 

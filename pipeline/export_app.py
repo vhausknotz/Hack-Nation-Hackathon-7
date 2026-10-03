@@ -50,6 +50,7 @@ def main() -> None:
     report = json.loads((BUILD / "report.json").read_text())
     gene_by_symbol = {g["symbol"]: g for g in genes.values()}
     actions = load_actions(conditions)  # reviewed patient organizations and studies, from the ledger
+    plain = {p["id"]: p for p in load("plain.jsonl")} if (BUILD / "plain.jsonl").exists() else {}
 
     def nearest_people(cid: str) -> str | None:
         """Name of the condition's best patient organization, for "nearest community" routes."""
@@ -108,6 +109,7 @@ def main() -> None:
             "other_conditions_of_gene": [brief(o) for o in g.get("conditions", []) if o != cid],
             "neighbors": rows, "lookalikes": looks,
             "communities": actions.get(cid, {}).get("communities", []), "assets": actions.get(cid, {}).get("assets", []),
+            "plain": plain.get(cid),
             "dict": {"symptoms": sym_dict, "mechanisms": mech_dict},
         }
         shards["c"][shard_of("c", cid)][cid] = bundle

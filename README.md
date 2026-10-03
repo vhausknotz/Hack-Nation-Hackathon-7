@@ -8,8 +8,9 @@ Built for Hack-Nation's 7th Global AI Hackathon, Challenge 05 ("AI Atlas for the
 
 ## What it does
 
-- **The map:** 7,328 gene-defined rare conditions, each a point of light. Conditions that share symptoms or molecular machinery sit close together, and GPT-6 Sol names the regions and constellations from what their members share (e.g. "Brain Synapse Signaling", "Cell Waste Breakdown").
-- **Search** a condition, gene or symptom. The map flies there, lights up the closest relatives, and a simple panel answers *"Who shares your biology?"* in plain language.
+- **The map:** 7,328 gene-defined rare conditions, each a warm point of light on an interactive globe, with a flat-map alternative. The sphere wraps the existing biological layout; it is not geography. GPT-6 Sol names regions and constellations from what their members share.
+- **Directions:** search a condition and follow six stops: your diagnosis, patient groups, related conditions, existing research, a question to take forward, and what remains unknown. Numbered pins connect the panel to the map.
+- **Groups and studies:** the family view displays kernel-checked, reviewed listings, with source dates, historical-page labels, eligibility restrictions and reviewer reasons. Listings remain separate from recommendations: a specific next-step proposal requires independent or human review.
 - **Evidence everywhere:** every connection shows what it rests on:
   - proteins that bind each other (STRING)
   - shared protein complexes (Complex Portal) and pathways (Reactome, Gene Ontology)
@@ -31,7 +32,7 @@ The atlas is becoming a self-improving evidence network (see [PLAN.md](PLAN.md))
 - **Log:** everything is recorded in a signed, append-only Merkle log, and the map is a projection of accepted claims.
 - **Campaigns:** patient communities can direct and fund agent work on their disease.
 
-The kernel and log are built and tested ([ledger/](ledger/)); the agents and the live service come next.
+The kernel, log, reference imports, literature campaign, trial importer and patient-group scout are built ([ledger/](ledger/), [agents/](agents/)). The live service and external-contributor interface remain planned.
 
 ## Architecture
 
@@ -41,7 +42,7 @@ open datasets ──► pipeline/ (parse, link, compute similarity) ──► da
                  pipeline/build_map.py (UMAP layout,               pipeline/export_app.py
                  clusters, names by GPT-6 Sol)                     (sharded static bundles)
                                                                    │
-ledger/ (claims, kernel, Merkle log, policies) ◄── agents (next)   app/ (React + sigma.js map, static on Azure)
+ledger/ (claims, kernel, Merkle log, policies) ◄── agents          app/ (React, globe + flat map, static on Azure)
 ```
 
 ## Reproduce the dataset
@@ -57,7 +58,8 @@ python -m venv .venv && ./.venv/Scripts/python -m pip install -r pipeline/requir
 cd app && npm install && npm run dev
 ```
 
-Tests: `./.venv/Scripts/python -m pytest ledger/tests`.
+Tests: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests`.
+Interactive desktop/phone check: `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
 
 ## Data sources
 

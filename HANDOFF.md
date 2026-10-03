@@ -1,5 +1,18 @@
 # Handoff: where the work stands (2026-10-04)
 
+## Lead-agent continuation (2026-10-04)
+
+The owner has asked Codex to take over the main checkout and continue the plan, including deployment for visual feedback. The old parallel-only scope no longer applies to this lead role; `../atlas-trials` remains unchanged as the pilot archive.
+
+- Main baseline verified: 70 ledger tests and app build passed before edits.
+- Added six-stop Directions, reviewed group/study cards, eligibility and archived-source labels, conservative next-step templates, numbered map stops, an interactive night-lights globe and the original flat-map alternative.
+- Added action types and optional plain summaries to export. Asset display now prefers newer reviewed evidence at equal trust, including restrictive v2 claims, without withdrawing omitted v1 findings.
+- Export uses a read-only SQLite snapshot, so it can safely coexist with the scout. There must still be only one claim/review writer.
+- Tests now include read-only snapshot and v1/v2 projection regressions. `tools/check_directions.py` exercises all six stops and both maps at 1440 and 390 pixels.
+- The inherited community scout was still running during this milestone; v2 import waits for its completion. The all-condition plain-summary job was started with a separate usage log (`data/cache/plain_summary_usage.jsonl`).
+- Plan sections 5 and 12 require curated or independently reviewed support for a specific next-step proposal. Single-AI-reviewed listings can be explored, but do not become recommendations to join. The fallback prepares a diagnosis-based question for the care team.
+- Deployment and final data-job outcomes will be recorded below when complete. The earlier checklist is preserved as context; completed interface items above supersede its unchecked boxes.
+
 For the next agent picking up this repo. Read [AGENTS.md](AGENTS.md), [PLAN.md](PLAN.md) and [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md) first. This file only covers the current state and what to do next.
 
 ## The goal, in one paragraph

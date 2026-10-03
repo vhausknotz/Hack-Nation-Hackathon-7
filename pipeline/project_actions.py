@@ -18,6 +18,15 @@ ROOT = Path(__file__).resolve().parent.parent
 STATUS_RANK = {"human_reviewed": 3, "independently_reviewed": 2, "reviewed": 1}
 
 
+def asset_rank(status: str, review_seq: int, claim: dict) -> tuple:
+    """Keep the latest reviewed evidence at a given trust tier, including narrower eligibility.
+
+    A qualified newer claim must not lose to an older unrestricted claim. This selects
+    a display entry only: it never retracts earlier claims or omitted v1 candidates.
+    """
+    return (STATUS_RANK.get(status, 0), review_seq, claim["provenance"]["created"])
+
+
 def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     """condition id -> {"communities": [...], "assets": [...]} (only conditions that have any)."""
     if not (ROOT / "data" / "ledger" / "ledger.db").exists():
@@ -27,14 +36,14 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     from ledger import sources
     from ledger.store import Store
 
-    store = Store()
+    store = Store(readonly=True)
     rows = []
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1 AND predicate IN ('represented_by', 'has_asset')"):
         reviews = [dict(r) for r in store.reviews_for(row["claim_id"])]
         status = pol.claim_review_status(reviews)
         if pol.visible("family", "contributed", status, {}, row["predicate"]):
             last = reviews[-1]
-            rows.append((json.loads(row["body"]), status, last["verdict"], last["reason"]))
+            rows.append((json.loads(row["body"]), status, last["verdict"], last["reason"], last["seq"], row["claim_id"]))
 
     def source_text(source_id: str) -> str:
         s = store.source(source_id)
@@ -55,7 +64,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         by_gene[c["gene"]["symbol"]].append(cid)
 
     best: dict[tuple[str, str, str], tuple] = {}
-    for claim, status, verdict, reason in rows:
+    for claim, status, verdict, reason, review_seq, claim_id in rows:
         a, ev = claim["assertion"], claim["evidence"]
         q = a["qualifiers"]
         if a["subject"] not in conditions:
@@ -67,6 +76,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
                 "id": a["object"], "name": q.get("name", ""), "homepage": q.get("homepage", ""), "kind": org_kind[a["object"]],
                 "scope": q.get("scope", "broader_group"), "quote": ev[0]["quote"][:400], "page": ev[0].get("url", ""),
                 "page_read": ev[0].get("page_read", "live"), "page_date": ev[0].get("page_date", claim["provenance"]["created"][:10]),
+                "claim_id": claim_id,
                 "review": {"status": status, "verdict": verdict, "reason": reason},
             }
             targets = by_gene[conditions[a["subject"]]["gene"]["symbol"]] if entry["scope"] == "this_gene" else [a["subject"]]
@@ -84,11 +94,13 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
                 "id": a["object"], "title": title.group(1).strip() if title else a["object"], "type": q.get("asset_type", ""),
                 "status": q.get("status", ""), "phase": phase.group(1).strip() if phase else "",
                 "restriction": next((e.get("restriction") for e in ev if e.get("restriction")), None),
-                "quotes": [e["quote"][:300] for e in ev], "url": f"https://clinicaltrials.gov/study/{a['object']}",
+                "quotes": [e["quote"] for e in ev], "url": f"https://clinicaltrials.gov/study/{a['object']}",
+                "claim_id": claim_id,
+                "source_date": ((store.source(ev[0]["source_id"]) or {}).get("retrieved", ""))[:10],
                 "review": {"status": status, "verdict": verdict, "reason": reason},
             }
             key = ("asset", a["subject"], a["object"])
-            rank = (STATUS_RANK.get(status, 0), verdict == "supports", True)
+            rank = asset_rank(status, review_seq, claim)
             if key not in best or best[key][0] < rank:
                 best[key] = (rank, entry)
     store.close()
