@@ -177,6 +177,8 @@ def main() -> None:
             entries.append([r["text"], kind, ref, r["label"] if r["label"] != r["text"] else "", extra])
     (OUT / "search.json").write_text(json.dumps(entries, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
+    shutil.copyfile(BUILD / "map.json", OUT / "map.json")
+
     meta = {
         "built": date.today().isoformat(), "shards": SHARDS, "counts": report,
         "sources": json.loads((ROOT / "data" / "sources_manifest.json").read_text()),

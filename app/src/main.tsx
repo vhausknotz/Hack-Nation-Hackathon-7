@@ -8,16 +8,20 @@ import "./index.css";
 import About from "./pages/About";
 import ConditionPage from "./pages/ConditionPage";
 import GenePage from "./pages/GenePage";
-import Home from "./pages/Home";
+import MapPage from "./pages/MapPage";
 import { GroupPage, MechanismPage, SymptomPage } from "./pages/ListPages";
 
 const router = createBrowserRouter([
+  // the map is the product: home, a condition, or a gene/symptom/group/mechanism lit up
+  { path: "/", element: <MapPage /> },
+  { path: "/c/:id", element: <MapPage /> },
+  { path: "/explore/:kind/:id", element: <MapPage /> },
+  // "Show the science": the detailed pages
   {
     element: <Layout />,
     children: [
-      { path: "/", element: <Home /> },
       { path: "/about", element: <About /> },
-      { path: "/c/:id", element: <ConditionPage /> },
+      { path: "/c/:id/details", element: <ConditionPage /> },
       { path: "/g/:symbol", element: <GenePage /> },
       { path: "/s/:id", element: <SymptomPage /> },
       { path: "/group/:id", element: <GroupPage /> },

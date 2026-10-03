@@ -12,18 +12,7 @@ const KIND: Record<SearchKind, { label: string; className: string }> = {
 };
 
 function hrefFor(r: SearchResult): string {
-  switch (r.kind) {
-    case "c":
-      return routes.condition(r.id);
-    case "g":
-      return routes.gene(r.id);
-    case "s":
-      return routes.symptom(r.id);
-    case "grp":
-      return routes.group(r.id);
-    case "m":
-      return routes.mechanism(r.id);
-  }
+  return r.kind === "c" ? routes.condition(r.id) : routes.explore(r.kind, r.id);
 }
 
 function extraText(r: SearchResult): string {
@@ -34,7 +23,7 @@ function extraText(r: SearchResult): string {
   return "";
 }
 
-export function SearchBox({ size = "lg", autoFocus = false }: { size?: "lg" | "sm"; autoFocus?: boolean }) {
+export function SearchBox({ size = "lg", autoFocus = false, placeholder, bare = false }: { size?: "lg" | "sm"; autoFocus?: boolean; placeholder?: string; bare?: boolean }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [active, setActive] = useState(0);
@@ -77,7 +66,7 @@ export function SearchBox({ size = "lg", autoFocus = false }: { size?: "lg" | "s
   const big = size === "lg";
   return (
     <div ref={box} className="relative w-full">
-      <div className={`flex items-center gap-3 rounded-2xl border border-ink-line bg-white shadow-sm transition focus-within:border-machinery/50 focus-within:shadow-md ${big ? "px-5 py-4" : "px-3 py-2"}`}>
+      <div className={`flex items-center gap-3 ${bare ? "py-1" : `rounded-2xl border border-ink-line bg-white shadow-sm transition focus-within:border-machinery/50 focus-within:shadow-md ${big ? "px-5 py-4" : "px-3 py-2"}`}`}>
         <svg aria-hidden viewBox="0 0 20 20" className={`${big ? "h-5 w-5" : "h-4 w-4"} shrink-0 text-ink-faint`} fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="9" cy="9" r="6" />
           <path d="M13.5 13.5L18 18" strokeLinecap="round" />
@@ -106,7 +95,7 @@ export function SearchBox({ size = "lg", autoFocus = false }: { size?: "lg" | "s
               setOpen(false);
             }
           }}
-          placeholder={big ? "Search a condition, gene or symptom" : "Search the atlas"}
+          placeholder={placeholder ?? (big ? "Search a condition, gene or symptom" : "Search the atlas")}
           className={`w-full bg-transparent outline-none placeholder:text-ink-faint ${big ? "text-lg" : "text-sm"}`}
           aria-label="Search the atlas"
           role="combobox"
@@ -115,7 +104,7 @@ export function SearchBox({ size = "lg", autoFocus = false }: { size?: "lg" | "s
         {loading && <span className="h-1.5 w-1.5 animate-ping rounded-full bg-machinery" />}
       </div>
       {open && query.trim() && (
-        <ul className="absolute z-30 mt-2 max-h-[28rem] w-full overflow-y-auto rounded-xl border border-ink-line bg-white p-1.5 shadow-xl" role="listbox">
+        <ul className={`absolute z-30 mt-2 max-h-[28rem] overflow-y-auto rounded-xl border border-ink-line bg-white p-1.5 shadow-xl ${bare ? "-left-12 w-[calc(100%+3.5rem)] sm:-left-14 sm:w-[calc(100%+4rem)]" : "w-full"}`} role="listbox">
           {results.length === 0 && !loading && <li className="px-3 py-3 text-sm text-ink-soft">No match. Try a gene symbol, a condition name or a symptom.</li>}
           {results.map((r, i) => (
             <li key={`${r.kind}:${r.id}`} role="option" aria-selected={i === active}>

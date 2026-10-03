@@ -1,7 +1,9 @@
 // Internal routes and links to the original sources.
 
 export const routes = {
-  condition: (id: string) => `/c/${encodeURIComponent(id)}`,
+  condition: (id: string) => `/c/${encodeURIComponent(id)}`, // on the map
+  conditionDetails: (id: string) => `/c/${encodeURIComponent(id)}/details`, // "Show the science"
+  explore: (kind: "g" | "s" | "grp" | "m", id: string) => `/explore/${kind}/${encodeURIComponent(id)}`, // light up on the map
   gene: (symbol: string) => `/g/${encodeURIComponent(symbol)}`,
   symptom: (id: string) => `/s/${encodeURIComponent(id)}`,
   group: (id: string) => `/group/${encodeURIComponent(id)}`,

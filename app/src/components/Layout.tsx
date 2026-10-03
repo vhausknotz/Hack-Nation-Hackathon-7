@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { SearchBox } from "./SearchBox";
 
-export function Logo({ compact = false }: { compact?: boolean }) {
+export function Logo({ compact = false, iconOnly = false }: { compact?: boolean; iconOnly?: boolean }) {
   return (
     <Link to="/" className="flex shrink-0 items-center gap-2.5 font-semibold tracking-tight" aria-label="Rare Disease Atlas home">
       <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden>
@@ -11,7 +11,7 @@ export function Logo({ compact = false }: { compact?: boolean }) {
         <circle cx="27" cy="10" r="2.5" fill="#94a3b8" />
         <circle cx="24" cy="26" r="2.5" fill="#94a3b8" />
       </svg>
-      <span className={`whitespace-nowrap ${compact ? "hidden sm:inline" : ""}`}>Rare Disease Atlas</span>
+      {!iconOnly && <span className={`whitespace-nowrap ${compact ? "hidden sm:inline" : ""}`}>Rare Disease Atlas</span>}
     </Link>
   );
 }
