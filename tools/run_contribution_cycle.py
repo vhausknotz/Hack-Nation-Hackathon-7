@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from atlas_mcp.cycle import Cycle, publish_stages
+from atlas_mcp.publication_inputs import publication_fingerprint
 from ledger import identity, sources
 from ledger.api import Ledger
 from ledger.canonical import sha256
@@ -124,8 +125,8 @@ class Backend:
                     raise ValueError("The latest ledger state has no signed tree head")
                 if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip():
                     raise ValueError("Commit and review repository changes before automatic publication")
-                code = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-                revision = f'{head["size"]}:{head["root"]}:{code}'
+                inputs = publication_fingerprint(ROOT, website=plan["publish_website"])
+                revision = f'{head["size"]}:{head["root"]}:{inputs}'
             finally:
                 store.close()
             py = sys.executable

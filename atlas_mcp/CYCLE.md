@@ -62,7 +62,7 @@ ledger revision. Intake remains available.
   website deployment and live checks. A failure leaves its stage pending; retry
   resumes there. Network side effects may be repeated if their successful reply
   was lost. Cloud snapshots use an atomic pointer and website deployment is
-  replayable. A new ledger/code revision restarts publication checks.
+  replayable. A new signed ledger revision, tracked runtime/configuration change or changed generated graph input restarts publication checks. Operator documentation/checkpoint edits alone do not.
 
 No recurring operator service is installed by this command. The lead can invoke
 it from the already-authorized temporary continuation workflow. Stopping the
@@ -76,3 +76,9 @@ general research organization. Independent model-family review, funding/admissio
 for other contributors, continuous discovery and freshness scheduling still need
 their own policies and evaluation. The website's shared-study cards are questions
 to investigate, not independently reviewed partnership recommendations.
+
+## Publication input fingerprint
+
+The revision now combines the signed ledger head with `atlas_mcp/publication_inputs.py`'s content fingerprint. It includes tracked runtime/configuration files and the exact generated input files read by the app exporter (including the optional plain descriptions and source manifest). Cloud-only publication needs only the conditions input. Operator Markdown and documentation/checkpoint/evaluation folders are excluded; app content stays included. A missing required input or a file changing while it is hashed stops the cycle. The existing dirty-repository gate remains.
+
+This avoids uploading another full cloud snapshot for a handoff edit, and detects ignored graph rebuilds even when Git HEAD is unchanged. The first run after switching from the old HEAD-only revision will perform a fresh checked publication. Never edit a receipt to pretend that publication has already happened. Add newly introduced external build inputs to the fingerprint list. Generated inputs must stay stable through publication; the ledger writer lease does not lock a separately launched graph-builder process.
