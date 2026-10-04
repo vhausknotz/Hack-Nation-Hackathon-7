@@ -2,6 +2,8 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+**Newest owner direction:** prioritize one complete patient-leader collaboration journey and the bounded automated MCP contribution/review/publication loop over broad coverage. The owner authorized continued work while napping, usage monitoring and a possible Claude fallback. See [nap continuation](docs/agent_tasks/nap_continuation.md) for scope, ownership, temporary schedule, usage thresholds and the currently unverified Cursor handoff. Codex remains lead; no transfer has occurred.
+
 ### Hosted contribution milestone (newest)
 
 **Release deployed and verified:** website release `3d000e7` is live on the existing free Static Web App (JS `index-BRDlOih9.js`). Actual live STXBP1 desktop, SNAP25 phone and Rett phone checks passed: copied links/restrictions/dates match the export, brief keyboard closing restores the page, no overflow or browser errors, and Rett shows its new foundation. Local full four-condition desktop/phone brief checks and Directions map checks also passed. The repo is pushed. Luna remains active; last measured cost was $11.49 of its $30 configured-price cap, ~539k actual TPM / 393 RPM, zero errors in the latest minute.
