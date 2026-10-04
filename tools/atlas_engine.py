@@ -485,6 +485,49 @@ def upload_calibration(engine):
     log(f"calibration set: {len(cases)} cases ({sum(c['answer'] == 'reject' for c in cases)} negatives)")
 
 
+# ---- keeping the diff base equal to what the website actually serves ---------------------------------------
+SITE = os.environ.get("ATLAS_SITE_URL", "https://salmon-island-04aa8f603.1.azurestaticapps.net")
+
+
+def sync_base(engine):
+    """If a new website release was deployed (from anywhere), download its data as the new diff base.
+
+    Returns True when the base changed: the next publication then re-uploads everything newer than that
+    release as the live overlay, so a deploy made from an older data snapshot heals itself within minutes."""
+    import requests
+    if time.time() - engine.state.get("base_checked", 0) < 300:
+        return False
+    engine.state["base_checked"] = time.time()
+    save_json(STATE / "state.json", engine.state)
+    meta = requests.get(f"{SITE}/data/meta.json", params={"v": str(time.time())}, timeout=30).json()
+    if meta.get("data_id") == load_json(BASE / "meta.json", {}).get("data_id"):
+        return False
+    log(f"website now serves data {meta.get('data_id')}; downloading it as the new diff base")
+    staging = STATE / "base-download"
+    if staging.exists():
+        import shutil
+        shutil.rmtree(staging)
+    session = requests.Session()
+    for kind, count in meta["shards"].items():
+        (staging / kind).mkdir(parents=True, exist_ok=True)
+        for n in range(count):
+            r = session.get(f"{SITE}/data/{kind}/{n}.json", params={"v": meta["data_id"]}, timeout=60)
+            if r.status_code == 404:
+                continue
+            r.raise_for_status()
+            (staging / kind / f"{n}.json").write_bytes(r.content)
+    (staging / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
+    import shutil
+    old = BASE.with_name("data.old")
+    if old.exists():
+        shutil.rmtree(old)
+    if BASE.exists():
+        BASE.rename(old)
+    staging.rename(BASE)
+    shutil.rmtree(old, ignore_errors=True)
+    return True
+
+
 # ---- the loop --------------------------------------------------------------------------------------------
 class Engine:
     def __init__(self):
@@ -520,6 +563,11 @@ class Engine:
 
     def once(self, force=False):
         from atlas_mcp.cloud_worker import pull_and_drain
+        try:
+            if sync_base(self):
+                force = True  # republish everything newer than the freshly deployed release
+        except Exception as error:
+            log(f"base sync skipped: {type(error).__name__}: {error}")
         receipt = pull_and_drain(self.intake, ROOT / "data/contributions/cloud-bridge", LEDGER, limit=50)
         processed = receipt.get("processed", [])
         if processed:
@@ -540,10 +588,12 @@ class Engine:
                 store.close()
         size = self.ledger_size()
         if force or (size != self.state["published_size"] and subjects) or (reviewed and subjects):
+            if not subjects:
+                subjects = set()
             self.state["pending_subjects"] = sorted(subjects)
             save_json(STATE / "state.json", self.state)
             publish(self, subjects)
-            self.state = {"published_size": size, "pending_subjects": [], "published_at": time.time()}
+            self.state.update(published_size=size, pending_subjects=[], published_at=time.time())
             save_json(STATE / "state.json", self.state)
         elif size != self.state["published_size"] and not subjects:
             self.state["published_size"] = size  # e.g. rejected claims only: nothing visible changed
