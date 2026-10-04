@@ -17,6 +17,7 @@ from ledger.policy import claim_review_status, family_key
 from ledger.schema import PREDICATES, QUALIFIER_VALUES, REVIEW_VERDICTS, TEXT_EVIDENCE
 from ledger.store import Store
 from .intake import Intake
+from .challenge_view import challenge_view
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATE = ROOT / "data/contributions"
@@ -82,10 +83,11 @@ class Atlas:
             if not row:
                 raise ValueError("Unknown claim ID")
             reviews = [dict(r) for r in store.reviews_for(cid)]
+            challenges = challenge_view(store, row)
             history = [{"seq": r["seq"], "type": r["type"], "actor": r["actor"], "at": r["ts"],
                         "redacted": bool(r["redacted"])} for r in store.events_for(cid)]
         return {"claim_id": cid, "claim": json.loads(row["body"]), "origin": row["origin"], "kernel_accepted": bool(row["kernel_ok"]),
-                "review_status": claim_review_status(reviews), "reviews": reviews, "history": history}
+                "review_status": claim_review_status(reviews), "reviews": reviews, "history": history, **challenges}
 
     def schema(self):
         return {"predicates": {k: asdict(v) for k, v in PREDICATES.items()},

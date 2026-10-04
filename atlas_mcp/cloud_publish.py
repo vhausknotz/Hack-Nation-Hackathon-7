@@ -9,6 +9,7 @@ from pathlib import Path
 from ledger import sources
 from ledger.policy import claim_review_status
 from ledger.store import Store
+from .challenge_view import challenge_view
 
 
 def publish(cloud, ledger_path, data_root):
@@ -26,7 +27,8 @@ def publish(cloud, ledger_path, data_root):
             status = claim_review_status(reviews)
             history = [{"seq": r["seq"], "type": r["type"], "actor": r["actor"], "at": r["ts"], "redacted": bool(r["redacted"])} for r in store.events_for(cid)]
             objects["claims/"+cid.split(":")[-1]+".json"] = {"claim_id": cid, "claim": claim, "origin": row["origin"],
-                "kernel_accepted": bool(row["kernel_ok"]), "review_status": status, "reviews": reviews, "history": history}
+                "kernel_accepted": bool(row["kernel_ok"]), "review_status": status, "reviews": reviews, "history": history,
+                **challenge_view(store, row)}
             recent[row["subject"]].append({"claim_id": cid, "predicate": row["predicate"], "kernel_ok": row["kernel_ok"], "review_status": status, "seq": row["created_seq"]})
             if row["kernel_ok"] and row["subject"] in conditions and status not in {"independently_reviewed", "human_reviewed", "rejected"}:
                 frontier.append({"claim_id": cid, "condition_id": row["subject"], "contributor": row["contributor"],

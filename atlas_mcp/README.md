@@ -66,6 +66,10 @@ Local inbox, profiles, keys, sources and operational events live in `data/contri
 
 ## Validation
 
+`get_claim` includes `challenges`, their claim/assertion targets, reasons, dates and counter-claim IDs, plus `challenge_status`. `pending_review` means an objection exists; it does not establish that the original claim is false. `contested` requires a kernel-accepted counter-claim with independent-family or human support. Original and counter-claim review statuses remain separate. Inspect the counter-claim with `get_claim` to read its sources. Related challenges against another accepted claim for the same assertion are included. Redacted challenges and removed counter-claims cannot establish contested status. Hosted reads gain this data when the operator publishes the next snapshot.
+
+This is contributor-facing evidence inspection. The family listing UI does not yet show a full two-sided dispute panel; that remains necessary before publishing a real contested listing as an ordinary family lead. The production ledger had zero challenges when this read path was introduced.
+
 ```powershell
 ./.venv/Scripts/python -m pytest atlas_mcp/tests ledger/tests pipeline/tests agents/tests enrich/trials
 ./.venv/Scripts/python tools/check_mcp.py data/campaigns/mcp-local-smoke.json
