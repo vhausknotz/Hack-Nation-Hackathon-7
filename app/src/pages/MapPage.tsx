@@ -8,7 +8,9 @@ import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
 import { LiveConditionBanner, LivePanel, LiveToasts, SparseInvite, useLiveLayers } from "../components/LiveActivity";
 import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
-import { ageSeconds, useLive } from "../lib/live";
+import { ageSeconds, useLive, type LiveState } from "../lib/live";
+import { useReducedMotion } from "../lib/useReducedMotion";
+import type { Pulse } from "../components/StarMap";
 import { routes } from "../lib/links";
 import { loadMap, type StarMapData } from "../lib/map";
 import type { Brief, ConditionBundle } from "../lib/types";
@@ -27,6 +29,7 @@ export default function MapPage() {
   const conditionId = !kind && id ? decodeURIComponent(id) : null;
   const live = useLive();
   const layers = useLiveLayers(live);
+  const echo = useEcho(live, !conditionId && !kind);
   const [revision, setRevision] = useState("base");
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export default function MapPage() {
           onSelect={(nodeId) => navigate(routes.condition(nodeId))}
           onBackground={() => (conditionId || kind) && navigate("/")}
           agents={layers.agents}
-          pulses={layers.pulses}
+          pulses={echo ? [...layers.pulses, echo.pulse] : layers.pulses}
           ripples={layers.ripples}
         />
       ) : (
@@ -105,6 +108,7 @@ export default function MapPage() {
       </div>
 
       <LivePanel nameOf={(nodeId) => map?.byId.get(nodeId)?.name} />
+      {echo && <div className="pointer-events-none absolute bottom-[calc(58dvh+8px)] left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-950/70 px-3 py-1 text-[10.5px] text-emerald-200/90 motion-safe:animate-[toast-in_.5s_ease-out] sm:bottom-12 sm:left-[calc(50%+216px)]">Recently connected by reviewed evidence: {echo.from} ↔ {echo.to}</div>}
       <LiveToasts onOpen={(nodeId) => navigate(routes.condition(nodeId))} />
 
       {/* search, top left like a maps app */}
@@ -137,6 +141,28 @@ export default function MapPage() {
       </Panel>
     </div>
   );
+}
+
+/** On the home view, now and then redraw one real, recently published connection, captioned. Never invented. */
+function useEcho(live: LiveState, home: boolean) {
+  const [echo, setEcho] = useState<{ pulse: Pulse; from: string; to: string } | null>(null);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (!home || reduce) { setEcho(null); return; }
+    const pick = () => {
+      const recent = (live.overlay?.changes ?? []).filter((c) => c.new_connections.length && ageSeconds(c.at, live) < 7 * 86400);
+      if (!recent.length) return;
+      const c = recent[Math.floor(Math.random() * recent.length)];
+      const n = c.new_connections[Math.floor(Math.random() * c.new_connections.length)];
+      setEcho({ pulse: { from: c.condition_id, to: n.id, at: Date.now() }, from: c.name, to: n.name });
+      window.setTimeout(() => setEcho(null), 9000);
+    };
+    const first = window.setTimeout(pick, 4000);
+    const every = window.setInterval(pick, 22000);
+    return () => { window.clearTimeout(first); window.clearInterval(every); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [home, reduce, live.overlay?.version]);
+  return echo;
 }
 
 function Panel({ children }: { open: boolean; children: ReactNode }) {

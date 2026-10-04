@@ -37,6 +37,10 @@ export function GlobeMap(props: MapProps) {
     const byId = new Map(nodes.map(n => [n.id, n]));
     const camera = { yaw: 0, pitch: 0.08, zoom: 1 };
     let width = 1, height = 1, radius = 1, cx = 0, cy = 0, frame = 0;
+    // Ambient life on the home view: a slow drift after a few idle seconds, and stars that softly flare.
+    let lastInteraction = Date.now(), prevT = 0, idleTimer = 0;
+    const twinkles: { i: number; born: number }[] = [];
+    const idle = () => !motion.current && !current.current.focus && !current.current.highlight && !target && Date.now() - lastInteraction > 5000;
     let target: typeof camera | null = null;
     let disposed = false;
     let hitNodes: { id: string; x: number; y: number; name: string }[] = [];
@@ -73,6 +77,10 @@ export function GlobeMap(props: MapProps) {
     const draw = () => {
       if (disposed) return;
       frame = 0;
+      const tNow = performance.now();
+      const drifting = idle();
+      if (drifting) camera.yaw += Math.min(0.1, prevT ? (tNow - prevT) / 1000 : 0) * 0.035;
+      prevT = drifting ? tNow : 0;
       if (target) {
         const diff = ((target.yaw - camera.yaw + Math.PI * 3) % (Math.PI*2)) - Math.PI;
         const t = motion.current ? 1 : .13;
@@ -107,6 +115,20 @@ export function GlobeMap(props: MapProps) {
         hitNodes.push({id:n.id,x:p.x,y:p.y,name:n.name});
       }
       ctx.globalAlpha=1;
+      if (!motion.current && !focus && !highlight) {
+        const now = Date.now();
+        if (Math.random() < 0.12 && twinkles.length < 14) twinkles.push({ i: Math.floor(Math.random() * nodes.length), born: now });
+        for (let k = twinkles.length - 1; k >= 0; k--) {
+          const age = (now - twinkles[k].born) / 1600;
+          if (age >= 1) { twinkles.splice(k, 1); continue; }
+          const p = screen(nodes[twinkles[k].i].v);
+          if (p.z < .15) continue;
+          const size = 14 + 22 * Math.sin(Math.PI * age);
+          ctx.globalAlpha = 0.85 * Math.sin(Math.PI * age) * Math.sqrt(p.z);
+          ctx.drawImage(glow, p.x - size / 2, p.y - size / 2, size, size);
+        }
+        ctx.globalAlpha = 1;
+      }
       const origin=focus ? byId.get(focus) : null;
       if (origin) {
         for (const r of related) { const n=byId.get(r.id); if (!n) continue; ctx.strokeStyle=r.id===emphasized ? "rgba(255,247,215,.95)" : "rgba(228,195,133,.45)";ctx.lineWidth=r.id===emphasized?2:1;arc(origin.v,n.v,true); }
@@ -144,6 +166,7 @@ export function GlobeMap(props: MapProps) {
       setPins(nextPins);
       view.notify();
       if(target)frame=requestAnimationFrame(draw);
+      else if(drifting&&!idleTimer)idleTimer=window.setTimeout(()=>{idleTimer=0;schedule();},width<600?66:40);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(draw);};
     redraw.current=schedule;
@@ -161,7 +184,7 @@ export function GlobeMap(props: MapProps) {
     let down={x:0,y:0},moved=false,pinch=0;
     const distance=()=>{const p=[...pointers.values()];return p.length===2?Math.hypot(p[1].x-p[0].x,p[1].y-p[0].y):0;};
     const nearest=(x:number,y:number)=>hitNodes.reduce<{id:string;x:number;y:number;name:string}|null>((best,n)=>Math.hypot(n.x-x,n.y-y)<12&&(!best||Math.hypot(n.x-x,n.y-y)<Math.hypot(best.x-x,best.y-y))?n:best,null);
-    const pointerDown=(e:PointerEvent)=>{target=null;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});down={x:e.clientX,y:e.clientY};moved=false;pinch=distance();el.setPointerCapture(e.pointerId);};
+    const pointerDown=(e:PointerEvent)=>{lastInteraction=Date.now();target=null;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});down={x:e.clientX,y:e.clientY};moved=false;pinch=distance();el.setPointerCapture(e.pointerId);};
     const pointerMove=(e:PointerEvent)=>{
       const prev=pointers.get(e.pointerId);
       if(prev){pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>4)moved=true;
@@ -171,11 +194,12 @@ export function GlobeMap(props: MapProps) {
     };
     const pointerUp=(e:PointerEvent)=>{if(!moved&&pointers.size===1){const r=el.getBoundingClientRect(),n=nearest(e.clientX-r.left,e.clientY-r.top);if(n)current.current.onSelect(n.id);}pointers.delete(e.pointerId);pinch=0;};
     const cancel=(e:PointerEvent)=>{pointers.delete(e.pointerId);pinch=0;moved=true;};
-    const wheel=(e:WheelEvent)=>{e.preventDefault();zoom.current(Math.exp(-e.deltaY*.001));};
-    const key=(e:KeyboardEvent)=>{if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","+","=","-"].includes(e.key)){e.preventDefault();target=null;if(e.key==="ArrowLeft")camera.yaw-=.12;if(e.key==="ArrowRight")camera.yaw+=.12;if(e.key==="ArrowUp")camera.pitch=clamp(camera.pitch+.12,-1.5,1.5);if(e.key==="ArrowDown")camera.pitch=clamp(camera.pitch-.12,-1.5,1.5);if(e.key==="+"||e.key==="=")zoom.current(1.3);if(e.key==="-")zoom.current(1/1.3);schedule();}};
+    const wheel=(e:WheelEvent)=>{lastInteraction=Date.now();e.preventDefault();zoom.current(Math.exp(-e.deltaY*.001));};
+    const key=(e:KeyboardEvent)=>{lastInteraction=Date.now();if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","+","=","-"].includes(e.key)){e.preventDefault();target=null;if(e.key==="ArrowLeft")camera.yaw-=.12;if(e.key==="ArrowRight")camera.yaw+=.12;if(e.key==="ArrowUp")camera.pitch=clamp(camera.pitch+.12,-1.5,1.5);if(e.key==="ArrowDown")camera.pitch=clamp(camera.pitch-.12,-1.5,1.5);if(e.key==="+"||e.key==="=")zoom.current(1.3);if(e.key==="-")zoom.current(1/1.3);schedule();}};
     el.addEventListener("pointerdown",pointerDown);el.addEventListener("pointermove",pointerMove);el.addEventListener("pointerup",pointerUp);el.addEventListener("pointercancel",cancel);el.addEventListener("wheel",wheel,{passive:false});el.addEventListener("keydown",key);
     fly.current();
-    return()=>{disposed=true;cancelAnimationFrame(frame);observer.disconnect();el.removeEventListener("pointerdown",pointerDown);el.removeEventListener("pointermove",pointerMove);el.removeEventListener("pointerup",pointerUp);el.removeEventListener("pointercancel",cancel);el.removeEventListener("wheel",wheel);el.removeEventListener("keydown",key);};
+    const ticker=window.setInterval(()=>{if(idle())schedule();},1000);
+    return()=>{disposed=true;window.clearInterval(ticker);window.clearTimeout(idleTimer);cancelAnimationFrame(frame);observer.disconnect();el.removeEventListener("pointerdown",pointerDown);el.removeEventListener("pointermove",pointerMove);el.removeEventListener("pointerup",pointerUp);el.removeEventListener("pointercancel",cancel);el.removeEventListener("wheel",wheel);el.removeEventListener("keydown",key);};
   },[props.data]);
   useEffect(()=>{fly.current();},[props.focus,props.highlight]);
   useEffect(()=>{redraw.current();},[props.related,props.emphasized,props.route,props.activeStep]);
