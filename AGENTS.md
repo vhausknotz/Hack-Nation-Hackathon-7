@@ -90,6 +90,7 @@ New Ledger instances enforce an OS writer lease. The community scout is complete
   - `gpt-6-sol`: verification, challenges, entity resolution decisions, explanations, proposals
   - `text-embedding-3-large`: entity matching and semantic search (3072 dimensions)
   - Also deployed: `gpt-5.4-mini`, `gpt-5.4-nano`, `o4-mini`
+  - Read-only inventory also confirmed `Phi-4-mini-instruct` (Microsoft), not full Phi-4. Review quality is untested; do not enable it as an independent reviewer solely because it is deployed. See `docs/independent_review_readiness.md`.
 - **Local auth:** Entra ID through the user's Az PowerShell login. Azure CLI is *not* installed. No API key needed. If auth fails, ask the user to run `Connect-AzAccount`. Tested and working:
 
   ```python

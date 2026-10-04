@@ -1,4 +1,4 @@
-# Lead handoff — 2026-10-04, 03:35 UTC
+# Lead handoff — 2026-10-04, 03:41 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
@@ -32,7 +32,7 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
 - Latest full backend suite: **154 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 46% used / 54% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Codex account usage at checkpoint: 50% used / 50% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 
@@ -47,6 +47,6 @@ Website deployment uses `./.venv/Scripts/python tools/deploy_website.py`, creden
 1. When Luna stops, run the updated offline full-run export before importing anything. A source-renderer compatibility fix preserves original quote offsets and marks omitted structured eligibility; it was checked read-only against all 10,235 then-positive candidates. Fix committed/pushed as 12a8950. The current running process remains unchanged. Do not bulk-import or start a broad paid review campaign.
 2. Use [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for the patient-leader story and genuine contribution/rejection/retry. Check challenge coverage and any remaining usability problems.
 3. Keep background Luna within its cap, and leave a clean, recoverable repo. Its candidates still require review before family publication.
-4. Assess independent review options without silently spending on a broad new campaign. All current semantic review uses Azure GPT-6 Sol; Luna screening is Azure too. Both are one model family. Different prompts or external coding assistance do not make the published claims independently reviewed.
+4. Independent-review readiness is documented in [docs/independent_review_readiness.md](docs/independent_review_readiness.md). Read-only Azure inventory confirmed the existing non-OpenAI option is **Phi-4-mini-instruct**, not full Phi-4. Six constructed, source-hash-verified offline challenge cases are prepared; no evaluation or model call was run, no reviewer was enrolled, and no trust label changed. A bounded evaluation allowance and representative quality assessment are still needed. All current semantic review uses Azure GPT-6 Sol; Luna screening is Azure too. Both are one model family. Different prompts or external coding assistance do not make the published claims independently reviewed.
 
 Still missing: independently reviewed collaboration recommendations, broader professional collaborator/contact evidence, continuous funded discovery/review operations, contributor governance and systematic freshness scheduling. Cute agent presence and a family navigation assistant remain later enhancements. Broad coverage can grow through the loop, but still requires bounded spending and meaningful review; more agents alone do not establish truth.
