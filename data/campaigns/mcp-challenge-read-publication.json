@@ -1,0 +1,14 @@
+{
+  "prefix": "published/ca91ebc00e9b434fa4545d46477be2a7",
+  "published_at": "2026-10-04T05:18:00.035851+00:00",
+  "ledger_tree_head": {
+    "size": 1704,
+    "root": "7f65eb1e6b7dad7835944c670f90c1ff975d392890abe6911be1b0101c865884",
+    "ts": "2026-10-04T02:58:47+00:00",
+    "signature": "ed25519:e-jsr0uaGZCVqYpe3Px7C7BIp0LsMMBh0RXCysdXk6SGfawJpIdJ8LJJ7IJKl7ZqsiOYX3H1sHTTogJ51ITNAQ"
+  },
+  "conditions": 7328,
+  "records": 8054,
+  "claim_coverage": "Contributed claims; bulk reference evidence remains in the local ledger.",
+  "website_updated": false
+}
