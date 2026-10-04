@@ -7,6 +7,7 @@ import { NotFoundBox } from "./components/ui";
 import "./index.css";
 import About from "./pages/About";
 import Agents from "./pages/Agents";
+import Impact from "./pages/Impact";
 import ConditionPage from "./pages/ConditionPage";
 import GenePage from "./pages/GenePage";
 import MapPage from "./pages/MapPage";
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/about", element: <About /> },
       { path: "/agents", element: <Agents /> },
+      { path: "/impact", element: <Impact /> },
       { path: "/c/:id/details", element: <ConditionPage /> },
       { path: "/g/:symbol", element: <GenePage /> },
       { path: "/s/:id", element: <SymptomPage /> },

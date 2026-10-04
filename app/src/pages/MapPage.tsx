@@ -223,7 +223,7 @@ function Welcome({ map }: { map: StarMapData | null }) {
       )}
       <p className="mt-5 text-xs leading-relaxed text-ink-faint">
         Built from open biomedical data and reviewed agent contributions. Connections are leads for experts to check, not medical advice.{" "}
-        <Link to="/about" className="underline hover:text-ink">How it works</Link> · <Link to="/agents" className="underline hover:text-ink">For agents</Link>
+        <Link to="/about" className="underline hover:text-ink">How it works</Link> · <Link to="/impact" className="underline hover:text-ink">The 10× case</Link> · <Link to="/agents" className="underline hover:text-ink">For agents</Link>
       </p>
     </div>
   );

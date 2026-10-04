@@ -31,6 +31,9 @@ export function Layout() {
           )}
           {home && (
             <nav className="ml-auto flex gap-5 text-sm text-ink-soft">
+              <Link to="/impact" className="hover:text-ink">
+                The 10× case
+              </Link>
               <Link to="/agents" className="hover:text-ink">
                 For agents
               </Link>
