@@ -5,6 +5,7 @@
     python tools/azure_engine_vm.py migrate    # stop the PC engine, ship code + state, start the VM engine
     python tools/azure_engine_vm.py update     # ship current code only (keeps VM state), restart the service
     python tools/azure_engine_vm.py variants   # install the weekly ClinVar refresh timer and run it once now
+    python tools/azure_engine_vm.py assistant [--enable|--disable]   # family navigation assistant (off by default)
     python tools/azure_engine_vm.py status | stop | start | logs
 
 `stop` deallocates the VM: compute billing stops (disk and IP, about $6/month, remain). The engine's queue
@@ -277,6 +278,42 @@ systemctl is-active atlas-variants.service || true
 """
         return self.run(script)
 
+    def assistant(self, switch=None):
+        """Install the family navigation assistant service; --enable/--disable flips the owner's switch (hard caps stay)."""
+        flag = "" if switch is None else f"""
+sudo -u atlas /opt/atlas/venv/bin/python - <<'PY'
+import json, pathlib
+p = pathlib.Path('/opt/atlas/repo/data/assistant/config.json'); p.parent.mkdir(parents=True, exist_ok=True)
+c = json.loads(p.read_text()) if p.exists() else {{}}
+c['enabled'] = {switch}
+c.setdefault('daily_usd_cap', 0.15); c.setdefault('monthly_usd_cap', 3.0)
+p.write_text(json.dumps(c, indent=1)); print('assistant', c)
+PY"""
+        script = r"""set -e
+cat > /etc/systemd/system/atlas-assistant.service <<'UNIT'
+[Unit]
+Description=Rare Disease Atlas family navigation assistant (answers from the atlas only; owner switch + hard caps)
+After=network-online.target
+[Service]
+User=atlas
+WorkingDirectory=/opt/atlas/repo
+EnvironmentFile=/etc/atlas/engine.env
+ExecStart=/opt/atlas/venv/bin/python tools/assistant.py
+Restart=always
+RestartSec=30
+[Install]
+WantedBy=multi-user.target
+UNIT
+systemctl daemon-reload
+""" + flag + """
+systemctl enable atlas-assistant >/dev/null 2>&1
+systemctl restart atlas-assistant
+sleep 8
+systemctl is-active atlas-assistant
+journalctl -u atlas-assistant -n 4 --no-pager
+"""
+        return self.run(script)
+
     def site(self):
         """Full website release from the cloud's current data: VM exports, PC builds the frontend and deploys."""
         import shutil
@@ -316,12 +353,14 @@ echo uploaded""")
 
     def update(self):
         out = self.ship(with_state=False)
-        return out + self.run("systemctl restart atlas-engine && (systemctl is-enabled atlas-scouts >/dev/null 2>&1 && systemctl restart atlas-scouts || true) && sleep 15 && systemctl is-active atlas-engine && journalctl -u atlas-engine -n 8 --no-pager")
+        return out + self.run("systemctl restart atlas-engine && (systemctl is-enabled atlas-scouts >/dev/null 2>&1 && systemctl restart atlas-scouts || true) && (systemctl is-enabled atlas-assistant >/dev/null 2>&1 && systemctl restart atlas-assistant || true) && sleep 15 && systemctl is-active atlas-engine && journalctl -u atlas-engine -n 8 --no-pager")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "variants", "site", "status", "stop", "start", "logs"))
+    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "variants", "assistant", "site", "status", "stop", "start", "logs"))
+    parser.add_argument("--enable", action="store_true", help="assistant: switch answering on (hard caps apply)")
+    parser.add_argument("--disable", action="store_true", help="assistant: switch answering off")
     args = parser.parse_args()
     vm = EngineVM()
     if args.command == "create":
@@ -336,6 +375,8 @@ def main():
         print(vm.scouts())
     elif args.command == "variants":
         print(vm.variants())
+    elif args.command == "assistant":
+        print(vm.assistant(True if args.enable else False if args.disable else None))
     elif args.command == "site":
         print(vm.site())
     elif args.command == "status":

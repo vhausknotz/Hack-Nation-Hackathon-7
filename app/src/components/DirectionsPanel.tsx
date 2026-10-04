@@ -15,6 +15,7 @@ import { DisputeNote } from "./Dispute";
 import { PeopleSection } from "./People";
 import { VariantSection } from "./Variants";
 import { RequestButton } from "./Requests";
+import { AskAtlas } from "./Assistant";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -99,6 +100,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
         </div>}
       </section>)}
     </div>
+    <AskAtlas conditionId={c.id} name={c.name} />
     <Link to={routes.conditionDetails(c.id)} className="mt-4 flex items-center justify-between rounded-xl bg-ink-wash px-4 py-3 text-sm font-medium">Show the science <span aria-hidden>→</span></Link>
     <p className="mt-3 text-[11px] leading-relaxed text-ink-faint">Research coordination, not treatment advice. Connections are computed leads for experts to check.</p>
     {brief.isOpen && <FamilyBrief c={c} neighbors={neighbors} onClose={brief.close} />}
