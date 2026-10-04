@@ -23,7 +23,7 @@ export function teamAddress(t?: StudyTeam) {
   const contact = t.contacts.find(c => c.email);
   if (!lead && !contact) return null;
   return {
-    greeting: lead ? `Dear ${/(MD|M\.D\.|PhD|Ph\.D\.|DPhil|MBBS)/i.test(lead.name) ? "Dr. " : ""}${lead.name.split(",")[0]}` : "Dear study team",
+    greeting: lead ? `Dear ${/,\s*(MD|M\.D\.|PhD|Ph\.D\.|DPhil|MBBS)\b/i.test(lead.name) ? "Dr. " : ""}${lead.name.split(",")[0]}` : "Dear study team",
     to: [lead ? `${lead.name}${lead.affiliation ? `, ${lead.affiliation}` : ""} (${lead.role || "investigator"})` : null,
          contact ? `Study contact: ${contact.name ? contact.name + " " : ""}<${contact.email}>` : null].filter(Boolean).join("\n"),
     email: contact?.email ?? null,
