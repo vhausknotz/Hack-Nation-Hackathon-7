@@ -90,13 +90,27 @@ def main() -> None:
         nb = neighbors.get(cid, {"neighbors": [], "lookalikes": []})
         sym_dict, mech_dict = {}, {}
         rows = []
-        for x in nb["neighbors"][:MAX_NEIGHBORS]:
+        own = [p["id"] for p in c["phenotypes"]]  # most informative first (build order)
+        for rank, x in enumerate(nb["neighbors"][:MAX_NEIGHBORS]):
             for s in x["symptoms"]:
                 sym_dict[s] = symptom_entry(s)
+            if rank < 8:  # contrast for the connections shown on the map: what differs, not only what is shared
+                other = conditions[x["id"]]
+                theirs = [p["id"] for p in other["phenotypes"]]
+                shared = set(x["symptoms"])
+                x = {**x, "contrast": {
+                    "only_here": [h for h in own if h not in set(theirs) and h not in shared][:4],
+                    "only_there": [h for h in theirs if h not in set(own) and h not in shared][:4],
+                    "their_effect": other["variant_effect"]["value"], "their_inheritance": other["inheritance"][:2],
+                    "their_onset": other["onset"][:2], "their_symptom_count": len(theirs)}}
+                for h in x["contrast"]["only_here"] + x["contrast"]["only_there"]:
+                    sym_dict[h] = symptom_entry(h)
+                nb["neighbors"][rank] = x
             for m in x["mechanisms"]:
                 if m["k"] in ("complex", "pathway", "go"):
                     mech_dict[m["id"]] = mech_entry(m["id"])
             rows.append({**brief(x["id"]), **{k: x[k] for k in ("score", "sym", "mech", "same_gene", "effect", "same_category", "symptoms", "mechanisms")},
+                         **({"contrast": x["contrast"]} if "contrast" in x else {}),
                          "mech_known": x.get("mech_known"), "sym_known": x.get("sym_known"),
                          "community": nearest_people(x["id"]), "asset_count": len(actions.get(x["id"], {}).get("assets", []))})
         looks = [{**brief(x["id"]), **{k: x[k] for k in ("family", "sym", "mech", "same_category")}} for x in nb.get("lookalikes", [])]

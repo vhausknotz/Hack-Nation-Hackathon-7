@@ -10,6 +10,7 @@ import { plainReason } from "../lib/plain";
 import { connectionPanel } from "../lib/reasons";
 import type { Community, ConditionBundle, Neighbor, ResearchAsset } from "../lib/types";
 import { StudyTeamCard } from "./StudyTeam";
+import { Contrast } from "./Contrast";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -193,6 +194,6 @@ function Relative({ c, n, open, onToggle }: { c: ConditionBundle; n: Neighbor; o
   const evidence = useEvidence();
   return <article className={`mb-2 rounded-xl border ${open ? "border-machinery/40 bg-machinery-soft/30" : "border-ink-line"}`}>
     <button aria-expanded={open} onClick={onToggle} className="w-full p-3 text-left"><span className="block font-semibold text-ink">{n.name}</span><span className="mt-1 block text-xs">{plainReason(c, n)}</span><span className="mt-2 block text-[11px] font-medium text-machinery">{n.community ? `A community to explore: ${n.community}` : n.asset_count ? `${n.asset_count} research listings to explore` : "A lead for comparing research questions"}</span></button>
-    {open && <div className="border-t border-ink-line p-3 text-xs"><p>Shared features make this a lead to investigate. They do not establish shared treatment or study eligibility.</p><div className="mt-3 flex flex-wrap gap-3"><button onClick={() => evidence(connectionPanel(c, n))} className="font-medium text-machinery underline">Why connected?</button><Link to={routes.condition(n.id)} className="font-medium text-machinery underline">Explore on the map →</Link></div></div>}
+    {open && <div className="border-t border-ink-line p-3 text-xs"><p>Shared features make this a lead to investigate. They do not establish shared treatment or study eligibility.</p><Contrast c={c} n={n} /><div className="mt-3 flex flex-wrap gap-3"><button onClick={() => evidence(connectionPanel(c, n))} className="font-medium text-machinery underline">Why connected?</button><Link to={routes.condition(n.id)} className="font-medium text-machinery underline">Explore on the map →</Link></div></div>}
   </article>;
 }

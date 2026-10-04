@@ -54,6 +54,7 @@ export interface Neighbor extends Brief {
   same_category: boolean;
   symptoms: string[];
   mechanisms: SharedMechanism[];
+  contrast?: { only_here: string[]; only_there: string[]; their_effect: string; their_inheritance: string[]; their_onset: string[]; their_symptom_count: number };
 }
 
 export interface Lookalike extends Brief {
