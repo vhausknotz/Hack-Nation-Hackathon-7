@@ -23,7 +23,7 @@ BUILD = ROOT / "data" / "build"
 # The live engine exports into a staging folder and publishes only the changed shards.
 OUT = Path(os.environ.get("ATLAS_EXPORT_OUT") or ROOT / "app" / "public" / "data")
 SHARDS = {"c": 256, "g": 128, "s": 128, "grp": 64, "m": 128}
-MAX_NEIGHBORS = 14  # Azure Static Web Apps (free) caps a deployment at 250 MB
+MAX_NEIGHBORS = 10  # the map highlights 8, Directions shows 3; keeps the static site under the free 250 MB
 MAX_SYMPTOMS = 80
 MAX_LIST = 120  # long lists on symptom/group/mechanism pages; keeps the site under the 250 MB hosting cap
 
