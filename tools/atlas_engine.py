@@ -596,6 +596,7 @@ def upload_track_records(engine):
                     return None, [("profile", actor, {**current, "base_quota": base, "daily_quota": quota, "reputation": lvl})]
                 engine.cloud.atomic(decide)
                 log(f"{actor}: level {rec['level']}, daily limit {quota}")
+            public[-1]["daily_limit"] = quota
     public.sort(key=lambda r: (-r["accepted"], -r["reviews_given"], r["id"]))
     engine.cloud.container.upload_blob("live/contributors.json", json.dumps({"at": time.time(), "contributors": public}).encode(), overwrite=True)
 

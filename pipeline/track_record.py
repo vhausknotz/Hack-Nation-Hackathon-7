@@ -19,9 +19,11 @@ def level(accepted: int, rejected: int) -> str:
     if judged < 5:
         return "new"
     rate = accepted / judged
-    if judged >= 10 and rate >= 0.8:
-        return "reliable"
-    return "unreliable" if rate < 0.5 else "mixed"
+    if rate < 0.5:
+        return "unreliable"
+    if rate < 0.8:
+        return "mixed"
+    return "reliable" if judged >= 10 else "new"
 
 
 def earned_quota(base: int, lvl: str) -> int:
