@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS } from "sigma/settings";
 import type { MapArea, StarMapData } from "../lib/map";
 import { regionColor } from "../lib/map";
 import { useReducedMotion } from "../lib/useReducedMotion";
+import { LiveLayer, viewNotifier, type Project } from "./LiveLayer";
 
 export interface Related {
   id: string;
@@ -27,10 +28,12 @@ export interface MapProps {
   onStop: (step: number) => void;
   agents?: AgentMarker[]; // live presence: agents working near a condition (status, never evidence)
   pulses?: Pulse[]; // newly published connections, drawn bright for a while
+  ripples?: Ripple[]; // one ripple per workflow step at its condition
 }
 
-export interface AgentMarker { key: string; id: string; name: string; family: string | null; doing: string; color: string; role: string }
+export interface AgentMarker { key: string; id: string; name: string; family: string | null; doing: string; color: string; role: string; active: boolean; opacity: number; since: string }
 export interface Pulse { from: string; to: string; at: number }
+export interface Ripple { key: string; id: string; at: number; color: string; size: number }
 
 const DIM = "#26324f"; // faint, unselected stars
 const SKY = "radial-gradient(ellipse at 50% 45%, #111a33 0%, #070b18 55%, #04060e 100%)";
@@ -46,7 +49,7 @@ interface LabelBox {
 
 const shorten = (text: string, max: number) => (text.length > max ? text.slice(0, max - 1).trimEnd() + "…" : text);
 
-export function StarMap({ data, focus, related, highlight, emphasized, onSelect, onBackground, route, activeStep, onStop }: MapProps) {
+export function StarMap({ data, focus, related, highlight, emphasized, onSelect, onBackground, route, activeStep, onStop, agents, pulses, ripples }: MapProps) {
   const reduceMotion = useReducedMotion();
   const container = useRef<HTMLDivElement>(null);
   const sigma = useRef<Sigma | null>(null);
@@ -57,6 +60,8 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
   const routeRef = useRef(route);
   routeRef.current = route;
   const [pins, setPins] = useState<(RouteStop & { x: number; y: number })[]>([]);
+  const project = useRef<Project>(() => null);
+  const [view] = useState(viewNotifier);
   const handlers = useRef({ onSelect, onBackground });
   handlers.current = { onSelect, onBackground };
 
@@ -162,6 +167,12 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
       });
     };
     renderer.on("afterRender", placeLabels);
+    renderer.on("afterRender", view.notify);
+    project.current = (id) => {
+      if (!graph.hasNode(id)) return null;
+      const a = graph.getNodeAttributes(id);
+      return renderer.graphToViewport({ x: a.x, y: a.y });
+    };
     sigma.current = renderer;
     return () => {
       cancelAnimationFrame(frame);
@@ -231,6 +242,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
   return (
     <div className="absolute inset-x-0 top-0 bottom-[58dvh] overflow-hidden sm:bottom-0 sm:left-[432px]" style={{ background: SKY }}>
       <div ref={container} className="absolute inset-0" />
+      <LiveLayer project={project} subscribe={view.subscribe} agents={agents ?? []} pulses={pulses ?? []} ripples={ripples ?? []} reduceMotion={reduceMotion} onSelect={onSelect} />
       {pins.length > 0 && <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden" aria-hidden>
         {pins.slice(1).filter((p, i) => p.id !== pins[i].id).map((p, i) => {
           const a = pins[i];

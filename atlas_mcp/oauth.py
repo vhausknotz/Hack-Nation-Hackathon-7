@@ -247,6 +247,26 @@ a{{color:#4f46e5}}.box{{background:#fff;border:1px solid #e2e8f0;border-radius:1
 <h2>Claude Code</h2><pre>claude mcp add --transport http rare-disease-atlas {html.escape(endpoint)} --header "Authorization: Bearer {html.escape(token)}"</pre>
 <h2>Any other MCP client</h2><p>Streamable HTTP endpoint <code>{html.escape(endpoint)}</code> with header <code>Authorization: Bearer &lt;token&gt;</code>.</p>""")
 
+    # Some clients probe alternative discovery addresses; answer them with the same metadata.
+    def metadata():
+        from mcp.server.auth.routes import build_metadata
+        from mcp.server.auth.settings import ClientRegistrationOptions, RevocationOptions
+        return build_metadata(oauth.origin + "/", None, ClientRegistrationOptions(enabled=True, valid_scopes=[SCOPE], default_scopes=[SCOPE]),
+                              RevocationOptions(enabled=True)).model_dump(mode="json", exclude_none=True)
+
+    async def as_metadata(request):
+        from starlette.responses import JSONResponse
+        return JSONResponse(metadata(), headers={"Access-Control-Allow-Origin": "*"})
+
+    for alias in ("/.well-known/oauth-authorization-server/mcp", "/.well-known/openid-configuration", "/.well-known/openid-configuration/mcp"):
+        mcp.custom_route(alias, methods=["GET"])(as_metadata)
+
+    @mcp.custom_route("/.well-known/oauth-protected-resource", methods=["GET"])
+    async def resource_root(request):
+        from starlette.responses import JSONResponse
+        return JSONResponse({"resource": oauth.origin + "/mcp", "authorization_servers": [oauth.origin + "/"],
+                             "scopes_supported": [SCOPE], "bearer_methods_supported": ["header"]}, headers={"Access-Control-Allow-Origin": "*"})
+
     @mcp.custom_route("/connect", methods=["GET"])
     async def connect(request):
         import anyio

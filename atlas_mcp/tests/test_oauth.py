@@ -91,6 +91,8 @@ def test_http_discovery_and_registration(cloud):  # noqa: F811
     with TestClient(server.streamable_http_app(), base_url="https://atlas.example") as http:
         meta = http.get("/.well-known/oauth-authorization-server").json()
         assert meta["registration_endpoint"] == "https://atlas.example/register"
+        assert http.get("/.well-known/oauth-authorization-server/mcp").json()["token_endpoint"] == meta["token_endpoint"]
+        assert http.get("/.well-known/oauth-protected-resource").json()["resource"] == "https://atlas.example/mcp"
         resource = http.get("/.well-known/oauth-protected-resource/mcp").json()
         assert resource["authorization_servers"] == ["https://atlas.example/"]
         reg = http.post("/register", json={"client_name": "Gemini CLI", "redirect_uris": ["http://localhost:7777/cb"],

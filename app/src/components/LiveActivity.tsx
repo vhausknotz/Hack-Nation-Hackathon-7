@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ageSeconds, describe, familyColor, familyName, roleOf, useLive, type LiveEvent, type LiveState } from "../lib/live";
 import { routes } from "../lib/links";
-import type { AgentMarker, Pulse } from "./StarMap";
+import type { AgentMarker, Pulse, Ripple } from "./StarMap";
 
 export function AgentAvatar({ color, role, size = 22, pulse = false }: { color: string; role: string; size?: number; pulse?: boolean }) {
   return (
@@ -28,28 +28,91 @@ export function AgentAvatar({ color, role, size = 22, pulse = false }: { color: 
 const seen = new Map<string, number>(); // when this browser first saw each published connection
 
 /** Map-ready live layers: agent markers at their conditions and pulses for fresh connections. */
-export function useLiveLayers(live: LiveState): { agents: AgentMarker[]; pulses: Pulse[] } {
+const ACTIVE_S = 120; // working right now
+const LINGER_S = 900; // then fades out over a quarter of an hour
+const mountedAt = Date.now() / 1000;
+const RIPPLE_COLOR: Record<string, string> = {
+  task_claimed: "#c4b5fd", source_fetched: "#93c5fd", queued: "#fde68a", kernel_accepted: "#86efac",
+  kernel_rejected: "#fda4af", rejected: "#fda4af", review_recorded: "#a7f3d0", published: "#fef3c7",
+};
+
+/** Map-ready live layers: agents (working or recently here), ripples for each step, and fresh connections. */
+export function useLiveLayers(live: LiveState): { agents: AgentMarker[]; pulses: Pulse[]; ripples: Ripple[] } {
   const [tick, setTick] = useState(0);
   useEffect(() => {
-    const t = window.setInterval(() => setTick((n) => n + 1), 15000);
+    const t = window.setInterval(() => setTick((n) => n + 1), 10000);
     return () => window.clearInterval(t);
   }, []);
   return useMemo(() => {
     const agents = live.presence
-      .filter((p) => p.condition_id && ageSeconds(p.at, live) < 180)
-      .map((p) => ({ key: p.name, id: p.condition_id!, name: p.name, family: p.family, doing: p.doing, color: familyColor(p.family), role: roleOf(p.doing) }));
+      .filter((p) => p.condition_id && ageSeconds(p.at, live) < LINGER_S)
+      .map((p) => {
+        const age = ageSeconds(p.at, live);
+        const active = age < ACTIVE_S;
+        return {
+          key: p.name, id: p.condition_id!, name: p.name, family: p.family, doing: p.doing, color: familyColor(p.family),
+          role: roleOf(p.doing), active, opacity: active ? 1 : Math.max(0.3, 0.85 - ((age - ACTIVE_S) / (LINGER_S - ACTIVE_S)) * 0.55),
+          since: `was here ${ago(age)}`,
+        };
+      });
     const pulses: Pulse[] = [];
     for (const change of live.overlay?.changes ?? []) {
       if (ageSeconds(change.at, live) > 900) continue;
-      for (const n of change.new_connections) {
+      change.new_connections.forEach((n, i) => {
         const key = `${change.version}:${change.condition_id}:${n.id}`;
-        if (!seen.has(key)) seen.set(key, Date.now());
+        if (!seen.has(key)) seen.set(key, Date.now() + i * 450); // connections draw one after another
         pulses.push({ from: change.condition_id, to: n.id, at: seen.get(key)! });
-      }
+      });
     }
-    return { agents, pulses };
+    // Only steps that happen while the page is open ripple; history stays in the panel.
+    const ripples: Ripple[] = [];
+    for (const e of live.events) {
+      if (!e.condition_id || e.at < mountedAt - 20 || !RIPPLE_COLOR[e.stage]) continue;
+      const key = `ev:${e.seq}`;
+      if (!seen.has(key)) seen.set(key, Date.now());
+      const verdictBad = e.stage === "review_recorded" && !String(e.detail?.verdict).startsWith("supports");
+      ripples.push({ key, id: e.condition_id, at: seen.get(key)!, color: verdictBad ? "#fda4af" : RIPPLE_COLOR[e.stage], size: e.stage === "published" ? 2.2 : 1 });
+    }
+    return { agents, pulses, ripples };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live, tick]);
+}
+
+/** Toasts for the moments that matter: a condition gains evidence or connections. */
+export function LiveToasts({ onOpen }: { onOpen: (id: string) => void }) {
+  const live = useLive();
+  const [toasts, setToasts] = useState<{ key: string; id: string; title: string; body: string }[]>([]);
+  const shown = useRef(new Set<string>());
+  useEffect(() => {
+    for (const e of live.events) {
+      const key = `t:${e.seq}`;
+      if (shown.current.has(key) || e.at < mountedAt - 20 || !e.condition_id) continue;
+      const d = e.detail ?? {};
+      let toast: { title: string; body: string } | null = null;
+      if (e.stage === "published" && ((d.new_connections ?? []).length || d.new_symptoms > 0)) {
+        const names = (d.new_connections ?? []).slice(0, 2).map((n: { name: string }) => n.name);
+        toast = { title: `${d.name ?? "A condition"} grew`, body: [d.new_symptoms > 0 ? `+${d.new_symptoms} symptoms` : "", names.length ? `now connected to ${names.join(" and ")}${(d.new_connections ?? []).length > 2 ? " and more" : ""}` : ""].filter(Boolean).join(" · ") };
+      } else if (e.stage === "task_claimed") {
+        toast = { title: `${e.agent} joined`, body: "started working on a condition" };
+      }
+      shown.current.add(key);
+      if (!toast) continue;
+      const item = { key, id: e.condition_id, ...toast };
+      setToasts((t) => [...t.slice(-2), item]);
+      window.setTimeout(() => setToasts((t) => t.filter((x) => x.key !== key)), 9000);
+    }
+  }, [live.events]);
+  if (!toasts.length) return null;
+  return (
+    <div className="pointer-events-none absolute bottom-[calc(58dvh+12px)] left-3 right-3 z-30 flex flex-col items-start gap-2 sm:bottom-10 sm:left-[448px] sm:right-auto" aria-live="polite">
+      {toasts.map((t) => (
+        <button key={t.key} onClick={() => onOpen(t.id)} className="pointer-events-auto flex max-w-[360px] items-start gap-2.5 rounded-2xl border border-emerald-300/30 bg-slate-950/90 px-3.5 py-2.5 text-left text-[12.5px] text-slate-100 shadow-2xl backdrop-blur motion-safe:animate-[toast-in_.35s_ease-out]">
+          <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]" />
+          <span><b className="block text-white">{t.title}</b><span className="text-slate-300">{t.body}</span></span>
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function ago(seconds: number) {
@@ -66,7 +129,7 @@ export function LivePanel({ nameOf }: { nameOf: (id: string) => string | undefin
   const [open, setOpen] = useState(false);
   const [flash, setFlash] = useState(false);
   const last = useRef(0);
-  const working = live.presence.filter((p) => ageSeconds(p.at, live) < 180);
+  const working = live.presence.filter((p) => ageSeconds(p.at, live) < ACTIVE_S);
   const events = live.events.filter((e) => !QUIET.has(e.stage)).slice(-14).reverse();
   useEffect(() => {
     const newest = live.events[live.events.length - 1]?.seq ?? 0;

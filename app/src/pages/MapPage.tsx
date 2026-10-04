@@ -6,7 +6,7 @@ import { Logo } from "../components/Layout";
 import { SearchBox } from "../components/SearchBox";
 import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
-import { LiveConditionBanner, LivePanel, SparseInvite, useLiveLayers } from "../components/LiveActivity";
+import { LiveConditionBanner, LivePanel, LiveToasts, SparseInvite, useLiveLayers } from "../components/LiveActivity";
 import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
 import { useLive } from "../lib/live";
 import { routes } from "../lib/links";
@@ -93,6 +93,7 @@ export default function MapPage() {
           onBackground={() => (conditionId || kind) && navigate("/")}
           agents={layers.agents}
           pulses={layers.pulses}
+          ripples={layers.ripples}
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center text-sm text-slate-400">Drawing the map…</div>
@@ -104,6 +105,7 @@ export default function MapPage() {
       </div>
 
       <LivePanel nameOf={(nodeId) => map?.byId.get(nodeId)?.name} />
+      <LiveToasts onOpen={(nodeId) => navigate(routes.condition(nodeId))} />
 
       {/* search, top left like a maps app */}
       <div className="absolute left-3 right-3 top-3 z-20 sm:left-4 sm:right-auto sm:top-4 sm:w-[400px]">

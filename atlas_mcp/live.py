@@ -11,7 +11,7 @@ import time
 
 from azure.core.exceptions import ResourceNotFoundError
 
-PRESENCE_TTL = 180  # seconds an agent stays visible after its last tool call
+PRESENCE_TTL = 900  # seconds an agent stays on the map (fading) after its last tool call
 FEED_EVENTS = 80
 OVERLAY_PATH = re.compile(r"[a-f0-9]{16}/(c|g|s|grp|m)/\d{1,3}\.json")
 
