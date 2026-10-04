@@ -8,7 +8,7 @@ import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
 import { LiveConditionBanner, LivePanel, LiveToasts, SparseInvite, useLiveLayers } from "../components/LiveActivity";
 import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
-import { useLive } from "../lib/live";
+import { ageSeconds, useLive } from "../lib/live";
 import { routes } from "../lib/links";
 import { loadMap, type StarMapData } from "../lib/map";
 import type { Brief, ConditionBundle } from "../lib/types";
@@ -162,31 +162,42 @@ function CloseButton({ onClose }: { onClose: () => void }) {
 
 // ---- nothing selected ----------------------------------------------------------------------------------------
 function Welcome({ map }: { map: StarMapData | null }) {
-  const examples: [string, string][] = [
-    ["SNAP25", routes.condition("MONDO:0014590")],
-    ["STXBP1", routes.condition("MONDO:0012812")],
-    ["Dravet syndrome", routes.condition("MONDO:0100135")],
-    ["Atonic seizures", routes.explore("s", "HP:0010819")],
+  const live = useLive();
+  const journeys: { title: string; text: string; to: string }[] = [
+    { title: "I organize a patient group", text: "STXBP1: a shared natural-history study, who runs it, and a partnership proposal", to: `${routes.condition("MONDO:0012812")}` },
+    { title: "We were just diagnosed", text: "MELAS (MT-TL1): what it is, people to contact, studies, questions to ask", to: routes.condition("MONDO:0800032") },
+    { title: "My condition looks empty", text: "Ask an AI agent to expand it from published research, and watch it here", to: "/agents" },
   ];
+  const day = live.events.filter((e) => ageSeconds(e.at, live) < 86400);
+  const agents = new Set(day.filter((e) => e.stage === "queued").map((e) => e.agent)).size;
+  const checked = day.filter((e) => e.stage === "kernel_accepted" || e.stage === "kernel_rejected").length;
+  const latest = [...(live.overlay?.changes ?? [])].reverse().find((c) => c.new_connections.length);
   return (
     <div className="p-6">
-      <h1 className="text-xl font-semibold leading-snug tracking-tight">A map of {map ? map.nodes.length.toLocaleString("en-US") : "7,000+"} rare genetic conditions</h1>
+      <h1 className="text-xl font-semibold leading-snug tracking-tight">A living map of {map ? map.nodes.length.toLocaleString("en-US") : "7,000+"} rare genetic conditions</h1>
       <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
-        Every point of light is one condition. Conditions that share symptoms or work through the same biology sit close together, even when their names have nothing in common.
+        Every point of light is one condition. Conditions that share symptoms or work through the same biology sit close together, even when their names have nothing in common. Search for yours, or start from a journey:
       </p>
-      <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">Search for yours, or tap a light. Follow the directions to find people, explore studies, and decide what to ask next.</p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {examples.map(([label, to]) => (
-          <Link key={label} to={to} className="rounded-full border border-ink-line px-3 py-1 text-sm text-ink-soft transition hover:border-machinery/40 hover:text-machinery">
-            {label}
+      <div className="mt-4 space-y-2">
+        {journeys.map((j) => (
+          <Link key={j.title} to={j.to} className="block rounded-xl border border-ink-line p-3 transition hover:border-machinery/40 hover:bg-machinery-soft/30">
+            <span className="block text-sm font-semibold text-ink">{j.title} →</span>
+            <span className="mt-0.5 block text-xs text-ink-soft">{j.text}</span>
           </Link>
         ))}
       </div>
-      <p className="mt-6 text-xs leading-relaxed text-ink-faint">
-        Built from open biomedical data. Connections are computed leads for experts to check, not medical advice.{" "}
-        <Link to="/about" className="underline hover:text-ink">
-          How it works
-        </Link>
+      {(agents > 0 || checked > 0 || latest) && (
+        <div className="mt-4 rounded-xl bg-slate-950 p-3 text-xs text-slate-200">
+          <div className="flex items-center gap-2 font-semibold text-white"><span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />Growing right now</div>
+          <p className="mt-1 text-slate-300">
+            {agents > 0 ? `${agents} AI agent${agents === 1 ? "" : "s"} contributed today` : "Agents contribute through our MCP server"}{checked > 0 ? ` · ${checked} findings quote-checked` : ""}.
+            {latest && <> Newest connection: <Link className="text-emerald-300 underline" to={routes.condition(latest.condition_id)}>{latest.name}</Link> ↔ {latest.new_connections[0].name}.</>}
+          </p>
+        </div>
+      )}
+      <p className="mt-5 text-xs leading-relaxed text-ink-faint">
+        Built from open biomedical data and reviewed agent contributions. Connections are leads for experts to check, not medical advice.{" "}
+        <Link to="/about" className="underline hover:text-ink">How it works</Link> · <Link to="/agents" className="underline hover:text-ink">For agents</Link>
       </p>
     </div>
   );
