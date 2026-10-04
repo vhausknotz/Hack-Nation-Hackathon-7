@@ -44,6 +44,9 @@ def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tm
         def close(self):
             pass
 
+        def events_for(self, _):
+            return []
+
     monkeypatch.setattr(store, "Store", FakeStore)
     monkeypatch.setattr(sources, "read_text", lambda _: "Title: Test study")
     result = load_actions({"C1": {"gene": {"symbol": "SCN2A"}}})
@@ -77,6 +80,7 @@ def test_newer_qualified_organization_quote_replaces_old_supported_quote(monkeyp
             return [{"reviewer_kind": "model", "model_family": "openai", "reviewer": "sol", "reason": "Checked attribution",
                      "verdict": "supports" if cid == "old" else "supports_with_qualification", "seq": 1 if cid == "old" else 2}]
         def close(self): pass
+        def events_for(self, _): return []
     monkeypatch.setattr(store, "Store", FakeStore)
     result = load_actions({"C1": {"gene": {"symbol": "TEST"}}})
     assert result["C1"]["communities"][0]["claim_id"] == "new"

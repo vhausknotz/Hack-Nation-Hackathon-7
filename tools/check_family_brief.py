@@ -68,6 +68,11 @@ def check_text(text: str, c: dict) -> int:
         if a["type"] in ("trial", "therapy_program"):
             assert "not evidence that the treatment works" in text
     assert text.count("Listed, not recommended") >= len(orgs) + len(assets)
+    for listing in orgs + assets:
+        if reviews := listing.get("history", {}).get("reviews", []):
+            assert f"Latest recorded review: {reviews[-1]['at']}" in text
+            if reviews[-1].get("model"):
+                assert reviews[-1]["model"] in text
     for route in c.get("shared_research", []):
         partner = route["partner_asset"]
         assert route["partner"]["name"] in text
@@ -91,6 +96,39 @@ def check_text(text: str, c: dict) -> int:
         assert "one AI reviewer" in text
     forbidden(text, "brief text")
     return len(orgs) + len(assets)
+
+
+def check_history(page: Page, c: dict):
+    region = page.get_by_role("region", name="Recent evidence checks")
+    assert region.is_visible()
+    listings = {a["claim_id"]: a for a in [*c.get("assets", []), *c.get("communities", [])]
+                if a.get("history", {}).get("reviews")}
+    if not listings:
+        assert "No reviewed group or study listing has been recorded here yet" in region.inner_text()
+        assert region.locator("article").count() == 0
+        return
+    if len(listings) > 3:
+        region.get_by_role("button", name=f"See all {len(listings)} checked listings").click()
+    assert region.locator("article").count() == len(listings)
+    for cid, listing in listings.items():
+        card = region.locator(f'[data-claim-id="{cid}"]')
+        card.locator("summary").click()
+        text = card.text_content()
+        assert cid in text
+        for r in listing["history"]["reviews"]:
+            assert r["reason"] in text
+            if r.get("model"):
+                assert r["model"] in text
+        if listing["history"].get("kernel_checked_at"):
+            assert "Source checks passed" in text
+        if listing.get("page_read") == "archived_snapshot":
+            assert f"Historical page from {listing['page_date']}" in text
+        assert card.get_by_role("link").get_attribute("href") == (listing.get("url") or listing.get("page") or listing.get("homepage"))
+        no_overflow(page, "expanded listing history")
+        card.locator("summary").click()
+    if len(listings) > 3:
+        region.get_by_role("button", name="Show fewer checks").click()
+    region.locator("article").first.locator("summary").click()
 
 
 def main(base: str, output: str):
@@ -123,6 +161,8 @@ def main(base: str, output: str):
                             assert c["shared_research"][0]["partner"]["name"] in text
                             stop.locator("[data-research-bridge]").first.locator("summary").click()
                             assert stop.locator("[data-research-bridge]").first.get_by_text("Evidence ID:", exact=False).count() == 2
+                    if step == 5:
+                        check_history(page, c)
                     stop.scroll_into_view_if_needed()
                     no_overflow(page, f"{name} stop {step + 1}")
                     page.screenshot(path=str(out / f"{name}-stop{step + 1}-{width}.png"))

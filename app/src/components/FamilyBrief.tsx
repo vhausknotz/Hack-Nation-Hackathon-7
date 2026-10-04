@@ -7,6 +7,7 @@ import { getMeta } from "../lib/data";
 import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
 import { collaborationQuestions } from "./SharedResearch";
+import { recordedReview } from "./EvidenceHistory";
 import type { ConditionBundle, Neighbor } from "../lib/types";
 import { ASSET_TYPE, gaps, groupStudies, orgKindLabel, orgNotes, orgScope, questions, researchQuestions, reviewLabel, statusLabel, studyFit, studyNotes } from "./familyJourney";
 
@@ -43,6 +44,7 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
       `${o.page_read === "archived_snapshot" ? "Archived source read" : "Source read"} ${o.page_date}: ${o.page || o.homepage}`,
       `Why listed: ${o.review.reason}`,
       `${reviewLabel(o.review)}. Listed, not recommended.`,
+      ...recordedReview(o.history),
     ],
     cautions: orgNotes(o, c),
   });
@@ -59,6 +61,7 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
           ...(a.restriction ? [`Restriction, as recorded: ${a.restriction}`] : []),
           `Why listed: ${a.review.reason}`,
           `${reviewLabel(a.review)}. Listed, not recommended.`,
+          ...recordedReview(a.history),
         ],
         cautions: studyNotes(a),
       })),

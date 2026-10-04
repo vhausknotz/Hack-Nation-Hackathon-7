@@ -72,3 +72,5 @@ MONDO, HPO, Orphanet, Gene2Phenotype, GenCC, ClinGen, HGNC, Complex Portal, Reac
 Start with [AGENTS.md](AGENTS.md) (rules, layout, Azure setup), then [PLAN.md](PLAN.md) (architecture and build order). Parallel tasks live in [docs/agent_tasks/](docs/agent_tasks/), and running Azure resources are listed in [docs/operations.md](docs/operations.md).
 
 *A research-coordination tool, not medical advice.*
+
+Patient-leader walkthrough and the genuine MCP correction story: [docs/demo_walkthrough.md](docs/demo_walkthrough.md). Step 6 exposes the recorded checks behind published listings, including actual review dates and models. These are history, not live availability checks.

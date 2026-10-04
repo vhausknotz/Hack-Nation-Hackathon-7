@@ -2,7 +2,7 @@
 import re
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-from check_family_brief import bundle, check_text, no_overflow
+from check_family_brief import bundle, check_text, check_history, no_overflow
 
 BASE = "https://salmon-island-04aa8f603.1.azurestaticapps.net"
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,6 +30,8 @@ def main():
             dialog.wait_for(state="detached")
             page.locator("button[aria-controls='stop-4']").click()
             assert page.get_by_role("region", name="Shared research for patient-group organizers").is_visible()
+            page.locator("button[aria-controls='stop-5']").click()
+            check_history(page, bundle(cid))
             assert not errors, errors
             print(f"PASS {cid} at {width}px, deployed {expected}", flush=True)
             context.close()

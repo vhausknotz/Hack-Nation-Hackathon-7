@@ -159,6 +159,18 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
             rank = asset_rank(status, review_seq, claim)
             if key not in best or best[key][0] < rank:
                 best[key] = (rank, entry)
+    # Reuse this read snapshot: displayed evidence and its trail must agree.
+    try:
+        from .project_history import listing_history
+    except ImportError:  # export_app.py is also run directly
+        from project_history import listing_history
+    bodies = {claim_id: claim for claim, *_, claim_id in rows}
+    histories = {}
+    for _, entry in best.values():
+        cid = entry["claim_id"]
+        if cid not in histories:
+            histories[cid] = listing_history(store, cid, bodies[cid])
+        entry["history"] = histories[cid]
     store.close()
 
     out: dict[str, dict] = defaultdict(lambda: {"communities": [], "assets": []})

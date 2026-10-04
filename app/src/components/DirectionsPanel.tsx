@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { useEvidence } from "./EvidenceDrawer";
 import { FamilyBrief } from "./FamilyBrief";
 import { SharedResearchPanel } from "./SharedResearch";
+import { EvidenceHistory } from "./EvidenceHistory";
 import { ASSET_TYPE, gaps, groupStudies, isSolid, orgKindLabel, orgNotes, orgScope, questions, reviewLabel, statusLabel, studyFit, studyNotes, type Question } from "./familyJourney";
 import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
@@ -82,9 +83,9 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
               <span>{asks.length > SHOWN_QUESTIONS ? `See all ${asks.length} questions in your brief` : "Open your question brief"}<span className="mt-0.5 block font-normal text-ink-soft">Print or copy it, with sources, dates and restrictions</span></span><span aria-hidden>→</span>
             </button>
           </>}
-          {i === 5 && <ul className="list-disc space-y-2 pl-4">
+          {i === 5 && <><ul className="list-disc space-y-2 pl-4">
             {gaps(c, neighbors).map((g, k) => <li key={k}>{g.text}{g.help && <span className="block text-xs text-ink-faint">{g.help}</span>}</li>)}
-          </ul>}
+          </ul><EvidenceHistory key={c.id} c={c} /></>}
           {i < 5 && <button onClick={() => onStep(i + 1)} className="mt-4 flex w-full items-center justify-between rounded-xl bg-machinery px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">{STOPS[i + 1]} <span aria-hidden>→</span></button>}
         </div>}
       </section>)}

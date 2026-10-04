@@ -117,7 +117,15 @@ export interface ActionReview {
   reason: string;
 }
 
+export interface ListingHistory {
+  submitted_at: string | null;
+  kernel_checked_at: string | null;
+  sources: { id: string; archived_at: string | null; url: string }[];
+  reviews: { at: string; kind: string; model: string | null; family: string | null; verdict: string; reason: string }[];
+}
+
 export interface Community {
+  history?: ListingHistory;
   kind_source?: { quote: string; url: string; page_date: string } | null;
   id: string;
   name: string;
@@ -143,6 +151,7 @@ export interface SharedResearch {
 }
 
 export interface ResearchAsset {
+  history?: ListingHistory;
   id: string;
   title: string;
   type: string;
