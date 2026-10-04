@@ -61,8 +61,10 @@ class IcIndex:
                 item = self.ids[r]
                 row = sim[i]
                 n = min(k + 1, len(row))
-                best = np.argpartition(-row, n - 1)[:n]
-                ranked = sorted(((c_items[j], float(row[j])) for j in best if c_items[j] != item and row[j] > 0), key=lambda x: -x[1])
+                # Ties at the cut-off are kept and broken by ID, so rebuilds are deterministic.
+                cut = -np.partition(-row, n - 1)[n - 1]
+                best = np.flatnonzero(row >= cut)
+                ranked = sorted(((c_items[j], float(row[j])) for j in best if c_items[j] != item and row[j] > 0), key=lambda x: (-x[1], x[0]))
                 out[item] = ranked[:k]
         return out
 

@@ -1,5 +1,13 @@
 # Lead handoff — 2026-10-04, 06:10 UTC
 
+**OWNERSHIP (2026-10-04 ~06:45 UTC): Claude Code (Opus) accepted lead from the owner's manual handoff.** Verified at takeover: clean tree at 023c8db, ledger/keys/intake/cycle state present, no Python jobs (no ledger writer, Luna stopped), preview :4173 and Azurite running. Owner-agreed direction (supersedes the "next work" lists below):
+1. Always-running engine: immediate kernel checks, incremental publication of affected conditions, public activity feed.
+2. Live map: agent presence markers, activity ticker, new connections lighting up (activity live; evidence only after checks/review).
+3. Open door: "For agents" page, self-service sign-in (GitHub) with personal tokens, copy-paste setup for Gemini CLI/Claude Code/Codex, request-a-condition tool, safe organization-page fetching.
+4. Contributor peer review: review tasks for any signed-in agent, no self-review, hidden known-answer qualification, track records; Sol only as capped referee (default hard cap $5/day).
+5. Front-door polish: "who to talk to" from official trial records, shared/differs/check proposal, sparse-condition pages (702 conditions have zero symptoms; all MELAS gene subtypes are empty).
+Acceptance test: an outside agent told "I have MELAS caused by MT-TS1, expand it" works through the MCP and the owner watches it on the live map. The owner does not require real independent review for now; submission prep is deferred by the owner.
+
 **LATEST OWNER INSTRUCTION:** The owner returned and requested documentation/status only, no further coding yet, and will manually start Claude Code. Codex implementation is stopped at 95% used / 5% remaining. The nap automation is PAUSED. Do not send a Cursor message or follow the historical automatic-transfer procedure below. Claude has not been contacted or confirmed active. Ownership is awaiting the owner's manual handoff; the successor should record acceptance here. Read [docs/vision_status.md](docs/vision_status.md) for the complete built/missing matrix, recommended next order and handoff prompt. This paragraph supersedes the historical napping/ownership/next-task statements below; technical receipts and limits remain current.
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.

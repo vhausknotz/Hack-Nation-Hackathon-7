@@ -232,7 +232,8 @@ def main() -> None:
         h = onto.resolve(a["object"])
         if not h:
             continue
-        for cid in by_disease.get(a["subject"], []):
+        # A claim may name a gene-specific (split) condition directly, or the MONDO disease.
+        for cid in ([a["subject"]] if a["subject"] in conditions else by_disease.get(a["subject"], [])):
             entry = cond_pheno[cid].setdefault(h, {"frequency": "", "sources": [], "refs": []})
             entry["sources"] = entry["sources"] + [f"{ev.get('pmid', 'paper')} (agent claim, {status.replace('_', ' ')})"]
             entry["refs"] = sorted(set(entry["refs"]) | ({ev["pmid"]} if ev.get("pmid") else set()))[:5]
@@ -317,7 +318,7 @@ def main() -> None:
             for p in partners.get(g, {}):
                 if p in col:
                     row[col[p]] = 1 - (1 - row[col[p]]) * (1 - interaction_bonus(g, p))
-            best = np.argsort(-row)[:80]
+            best = np.argsort(-row, kind="stable")[:80]  # stable: deterministic ties
             gene_neighbors[g] = [(condition_genes[j], float(row[j])) for j in best if condition_genes[j] != g and row[j] > 0]
     log(f"gene mechanism neighbors for {len(gene_neighbors)} genes")
 
@@ -401,7 +402,7 @@ def main() -> None:
         if a not in symptom_index or b not in symptom_index:
             return []
         shared = onto.most_specific(set(symptom_index.sets[a] & symptom_index.sets[b]))
-        return sorted(shared, key=lambda t: -symptom_index.term_ic(t))[:n]
+        return sorted(shared, key=lambda t: (-symptom_index.term_ic(t), t))[:n]
 
     def shared_mechanisms(g1: str, g2: str, n: int = 5) -> list[dict]:
         out = []
@@ -417,7 +418,7 @@ def main() -> None:
                 terms.append((s.ic, "partner", p))
         go_terms = {t for _, k, t in terms if k == "go"}
         specific_go = go_terms - {a for t in go_terms for a in go.ancestors(t) if a != t}
-        for ic, kind, term in sorted((x for x in terms if x[1] != "go" or x[2] in specific_go), key=lambda x: -x[0]):
+        for ic, kind, term in sorted((x for x in terms if x[1] != "go" or x[2] in specific_go), key=lambda x: (-x[0], x[1], x[2])):
             if len(out) >= n:
                 break
             out.append({"k": kind, "id": term, "symbol": gene_table[term].symbol} if kind == "partner" else {"k": kind, "id": term})
@@ -464,7 +465,7 @@ def main() -> None:
                     if s_sym < 0.08:
                         out.append({"id": o, "family": fam, "sym": round(s_sym, 4), "mech": round(mech_similarity(c.gene, g), 4),
                                     "same_category": category_of(c) == category_of(conditions[o])})
-        out.sort(key=lambda x: (x["same_category"], -x["mech"]))
+        out.sort(key=lambda x: (x["same_category"], -x["mech"], x["id"]))
         return out[:n]
 
     referenced_hpo: set[str] = set()
@@ -478,12 +479,12 @@ def main() -> None:
             lookalike_ids = {x["id"] for x in looks}
             rows = [(combine(s_sym, 0.0 if s_mech >= 1 else s_mech, sym_measured(cid, o), s_mech >= 1 or mech_measured(g0, conditions[o].gene)), o, s_sym, s_mech)
                     for o, s_sym, s_mech in scored[cid] if o not in lookalike_ids]
-            keep = {o for _, o, _, _ in sorted(rows, key=lambda x: -x[0])[:K_COMBINED]}
-            keep |= {o for _, o, _, _ in sorted(rows, key=lambda x: -x[2])[:K_SYMPTOM]}
-            keep |= {o for _, o, _, _ in sorted((r for r in rows if r[3] < 1), key=lambda x: -x[3])[:K_MECHANISM]}
+            keep = {o for _, o, _, _ in sorted(rows, key=lambda x: (-x[0], x[1]))[:K_COMBINED]}
+            keep |= {o for _, o, _, _ in sorted(rows, key=lambda x: (-x[2], x[1]))[:K_SYMPTOM]}
+            keep |= {o for _, o, _, _ in sorted((r for r in rows if r[3] < 1), key=lambda x: (-x[3], x[1]))[:K_MECHANISM]}
             keep |= {o for _, o, _, m in rows if m == 1}  # same gene, other condition
             out = []
-            for combined, o, s_sym, s_mech in sorted((r for r in rows if r[1] in keep), key=lambda x: -x[0]):
+            for combined, o, s_sym, s_mech in sorted((r for r in rows if r[1] in keep), key=lambda x: (-x[0], x[1])):
                 g1, g2 = conditions[cid].gene, conditions[o].gene
                 syms = shared_symptoms(cid, o)
                 mechs = [] if g1 == g2 else shared_mechanisms(g1, g2)
@@ -553,7 +554,7 @@ def main() -> None:
             other_genes = sorted(gene_table[g].symbol for g in candidates.get(c.disease, set()) if g != c.gene)
             phen = [{"id": h, "frequency": e["frequency"], "sources": sorted(set(e["sources"]))[:6], "refs": e["refs"]}
                     for h, e in cond_pheno[cid].items()]
-            phen.sort(key=lambda p: -(symptom_index.term_ic(p["id"]) if p["id"] in symptom_index.col else 0))
+            phen.sort(key=lambda p: (-(symptom_index.term_ic(p["id"]) if p["id"] in symptom_index.col else 0), p["id"]))
             referenced_hpo.update(p["id"] for p in phen)
             row = {
                 "id": cid, "name": title, "also_known_as": aka[:15], "disease": c.disease, "disease_name": d.name,
@@ -577,8 +578,8 @@ def main() -> None:
     with open(OUT / "genes.jsonl", "w", encoding="utf-8") as f:
         for g in condition_genes:
             gt = gene_table[g]
-            pw = sorted(pathways.get(g, []), key=lambda a: -mech_index["pathway"].term_ic(a.id))[:12]
-            gd = sorted((a for a in go_direct.get(g, []) if a.id in mech_index["go"].col), key=lambda a: -mech_index["go"].term_ic(a.id))[:20]
+            pw = sorted(pathways.get(g, []), key=lambda a: (-mech_index["pathway"].term_ic(a.id), a.id))[:12]
+            gd = sorted((a for a in go_direct.get(g, []) if a.id in mech_index["go"].col), key=lambda a: (-mech_index["go"].term_ic(a.id), a.id))[:20]
             cx = complexes.get(g, [])
             referenced_mech.update(a.id for a in pw + gd + cx)
             f.write(json.dumps({
@@ -586,7 +587,7 @@ def main() -> None:
                 "gene_groups": gt.groups, "uniprot": gt.uniprot_ids, "entrez": gt.entrez_id, "conditions": sorted(gene_conditions[g]),
                 "complexes": [a.id for a in cx], "pathways": [a.id for a in pw], "go": [a.id for a in gd],
                 "partners": [{"hgnc_id": p, "symbol": gene_table[p].symbol, "score": s / 1000, "has_condition": p in gene_conditions}
-                             for p, s in sorted(partners.get(g, {}).items(), key=lambda x: -x[1])[:25]],
+                             for p, s in sorted(partners.get(g, {}).items(), key=lambda x: (-x[1], x[0]))[:25]],
                 "dosage": dosage.get(gt.symbol),
                 "mechanism_neighbors": [{"hgnc_id": o, "symbol": gene_table[o].symbol, "score": round(s, 4)} for o, s in gene_neighbors.get(g, [])[:25]],
                 "url": f"https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/{g}",

@@ -213,8 +213,8 @@ def find_quote(text: str, patterns: list[re.Pattern]) -> tuple[int, int] | None:
     return best
 
 
-def verify_community(condition: dict, org: dict, page_title: str, quote: str, page_text: str, profile: dict | None = None) -> dict:
-    reply = llm.chat_json(VERIFY_MODEL, [
+def verify_community(condition: dict, org: dict, page_title: str, quote: str, page_text: str, profile: dict | None = None, chat_json=None) -> dict:
+    reply = (chat_json or llm.chat_json)(VERIFY_MODEL, [
         {"role": "system", "content": (
             "You check claims for a rare-disease evidence ledger. A claim says an organization of a given kind serves people "
             "with one genetic condition, at a given scope. Judge ONLY from the organization's page, without outside knowledge. "

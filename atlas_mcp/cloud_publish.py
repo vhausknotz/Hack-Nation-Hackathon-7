@@ -53,6 +53,9 @@ def publish(cloud, ledger_path, data_root):
         objects["catalog.json"] = {cid: {k: c[k] for k in ("id", "name", "gene", "also_known_as") if k in c} | {
             "phenotype_count": len(c.get("phenotypes", []))} for cid, c in conditions.items()}
         objects["review-frontier.json"] = frontier
+        terms = Path(data_root)/"hpo_terms.json"
+        if terms.exists():
+            objects["terms/hpo.json"] = json.loads(terms.read_text(encoding="utf-8"))
         manifest = {"prefix": prefix, "published_at": datetime.now(timezone.utc).isoformat(), "ledger_tree_head": dict(head) if head else None,
                     "conditions": len(conditions), "records": len(objects), "claim_coverage": "Contributed claims; bulk reference evidence remains in the local ledger.",
                     "website_updated": False}

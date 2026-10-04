@@ -89,6 +89,31 @@ class CloudAtlas(Atlas):
         return {"source": src, "text": text[offset:offset+limit], "offset": offset, "total_characters": len(text),
                 "next_offset": offset+limit if offset+limit < len(text) else None, "untrusted_source_text": True}
 
+    def term_index(self):
+        if getattr(self.projection, "terms", None) is None:
+            try:
+                self.projection.terms = self.projection.read("terms/hpo.json")
+            except ValueError:
+                self.projection.terms = {}
+        return self.projection.terms
+
+    def source_text(self, sid):
+        if not re.fullmatch(r"src:sha256:[0-9a-f]{64}", sid):
+            raise ValueError("Invalid source ID")
+        src = self.intake.store.get("source", sid)
+        if src:
+            name = "sources/text/"+src["text_hash"].split(":")[1]
+        else:
+            src = self.projection.read("sources/"+sid.split(":")[-1]+".json")
+            name = self.projection.prefix+"/text/"+sid.split(":")[-1]
+        try:
+            raw = self.intake.store.container.download_blob(name).readall()
+        except ResourceNotFoundError:
+            raise ValueError(f"Archived text for {sid} is not available; fetch the source first") from None
+        if sha256(raw) != src["text_hash"]:
+            raise ValueError("Archived source hash differs")
+        return raw.decode("utf-8")
+
     def fetch_source(self, tid, provider, record_id):
         self.writable()
         self.intake.owned_task(tid, self.actor)

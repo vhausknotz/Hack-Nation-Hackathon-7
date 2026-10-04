@@ -69,7 +69,7 @@ def test_real_http_mcp_requires_auth_and_isolates_concurrent_callers(credentials
                         async with ClientSession(read, write) as session:
                             await session.initialize()
                             listing = await session.list_tools()
-                            assert len(listing.tools) == 13
+                            assert len(listing.tools) == 14
                             result = await session.call_tool("claim_task", {"task_id": "evidence:"+CID})
                             return result
             first, second = await asyncio.gather(call(OID), call(OTHER))

@@ -5,8 +5,10 @@ their ID (FNV-1a, mirrored in app/src/lib/data.ts), and every bundle carries the
 Usage: python pipeline/export_app.py
 """
 
+import hashlib
 import json
 import math
+import os
 import shutil
 from collections import defaultdict
 from datetime import date
@@ -17,7 +19,8 @@ from project_collaboration import shared_research
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "data" / "build"
-OUT = ROOT / "app" / "public" / "data"
+# The live engine exports into a staging folder and publishes only the changed shards.
+OUT = Path(os.environ.get("ATLAS_EXPORT_OUT") or ROOT / "app" / "public" / "data")
 SHARDS = {"c": 256, "g": 128, "s": 128, "grp": 64, "m": 128}
 MAX_NEIGHBORS = 20
 MAX_SYMPTOMS = 80
@@ -202,8 +205,12 @@ def main() -> None:
 
     shutil.copyfile(BUILD / "map.json", OUT / "map.json")
 
+    # data_id identifies this exact export; the live overlay only applies on top of the same base.
+    digest = hashlib.sha256()
+    for path in sorted(p for p in OUT.rglob("*.json") if p.name != "meta.json"):
+        digest.update(path.relative_to(OUT).as_posix().encode() + b" " + hashlib.sha256(path.read_bytes()).digest())
     meta = {
-        "built": date.today().isoformat(), "shards": SHARDS, "counts": report,
+        "built": date.today().isoformat(), "data_id": digest.hexdigest()[:16], "shards": SHARDS, "counts": report,
         "sources": json.loads((ROOT / "data" / "sources_manifest.json").read_text()),
     }
     (OUT / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")

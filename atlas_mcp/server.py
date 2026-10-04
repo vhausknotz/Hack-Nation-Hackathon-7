@@ -37,6 +37,11 @@ def build_server(atlas, **settings):
         """Read predicates, qualifiers, evidence format, trust rules and contribution workflow."""
         return atlas.schema()
 
+    @mcp.tool(annotations=read)
+    def search_terms(query: str, limit: int = 10) -> dict:
+        """Find HPO symptom IDs (HP:…) for has_symptom claims from clinical or everyday wording."""
+        return atlas.search_terms(query, limit)
+
     @mcp.tool(annotations=write)
     def list_frontier(condition_id: str | None = None, limit: int = 20) -> dict:
         """Discover/seed persistent evidence and review tasks; no model calls or ledger writes."""

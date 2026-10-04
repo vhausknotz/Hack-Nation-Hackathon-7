@@ -21,6 +21,17 @@ from ledger.canonical import canonical_json, content_id
 from ledger.identity import Signer
 
 
+def summary(kind, payload):
+    """Public, payload-free description of a submission for the live feed."""
+    if kind == "claim":
+        a = payload.get("assertion", {})
+        return {"kind": "claim", "predicate": a.get("predicate"), "object": str(a.get("object"))[:120],
+                "label": str(a.get("qualifiers", {}).get("name") or "")[:120] or None}
+    if kind == "review":
+        return {"kind": "review", "verdict": payload.get("verdict")}
+    return {"kind": kind}
+
+
 class CloudStore:
     PARTITION = "intake-v1"
 
@@ -47,8 +58,11 @@ class CloudStore:
         return kind + "-" + hashlib.sha256(identifier.encode()).hexdigest()
 
     def entity(self, kind, identifier, body):
-        return {"PartitionKey": self.PARTITION, "RowKey": self.key(kind, identifier),
-                "kind": kind, "id": identifier, "body": json.dumps(body, ensure_ascii=True)}
+        row = {"PartitionKey": self.PARTITION, "RowKey": self.key(kind, identifier),
+               "kind": kind, "id": identifier, "body": json.dumps(body, ensure_ascii=True)}
+        if kind == "activity":
+            row["seq"] = body["seq"]  # numeric, so the public feed can read only new events
+        return row
 
     def get(self, kind, identifier):
         try:
@@ -151,9 +165,18 @@ class CloudIntake:
         return signer
 
     @staticmethod
-    def event(seq, actor, task, stage, submission=None):
-        return ("activity", str(seq), {"seq": seq, "at": time.time(), "actor": actor,
-                "task_id": task["id"], "condition_id": task["condition_id"], "stage": stage, "submission_id": submission})
+    def event(seq, actor, task, stage, submission=None, detail=None):
+        row = {"seq": seq, "at": time.time(), "actor": actor, "task_id": task["id"] if task else None,
+               "condition_id": task["condition_id"] if task else None, "stage": stage, "submission_id": submission}
+        if detail:
+            row["detail"] = detail
+        return ("activity", str(seq), row)
+
+    def post(self, actor, condition_id, stage, detail=None):
+        """Operator worker only: a public workflow event (review, publication, new connection)."""
+        def decide(seq):
+            return seq, [self.event(seq, actor, {"id": None, "condition_id": condition_id}, stage, None, detail)]
+        return self.store.atomic(decide)
 
     def seed(self, tasks):
         for task in tasks:
@@ -232,7 +255,7 @@ class CloudIntake:
             record = {"id": sid, "actor": actor, "task_id": tid, "kind": kind, "blob": blob,
                       "sha256": hashlib.sha256(encoded).hexdigest(), "created": now, "state": "queued", "result": None}
             return {"submission_id": sid, "state": "queued", "notice": "Queued for the ledger worker; not reviewed or published. No model calls were made."}, [
-                ("submission", sid, record), ("quota", actor, quota), self.event(seq, actor, task, "queued", sid)]
+                ("submission", sid, record), ("quota", actor, quota), self.event(seq, actor, task, "queued", sid, summary(kind, payload))]
         return self.store.atomic(decide)
 
     def submission(self, sid, actor):
@@ -245,7 +268,7 @@ class CloudIntake:
     def pending(self, limit=100):
         return sorted((r for r in self.store.rows("submission") if r["state"] == "queued"), key=lambda r: (r["created"], r["id"]))[:limit]
 
-    def acknowledge(self, sid, result):
+    def acknowledge(self, sid, result, detail=None):
         """Operator worker only, after a durable signed ledger receipt."""
         def decide(seq):
             row = self.store.get("submission", sid)
@@ -257,7 +280,7 @@ class CloudIntake:
                 return None, []
             row.update(state=result["state"], result=deepcopy(result))
             task = self.store.get("task", row["task_id"])
-            changes = [("submission", sid, row), self.event(seq, row["actor"], task, row["state"], sid)]
+            changes = [("submission", sid, row), self.event(seq, row["actor"], task, row["state"], sid, detail)]
             if row["kind"] == "review" and result["state"] == "review_recorded":
                 task.update(state="complete", expires=0)
                 quota = self.store.get("quota", row["actor"])

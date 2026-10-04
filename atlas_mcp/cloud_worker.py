@@ -40,12 +40,14 @@ def _drain_locked(cloud, local, ledger_path, registry_, limit):
     # Same-checkout bridge invocations are excluded separately from the ledger
     # lease, which the existing drain acquires for all actual signed log writes.
     selected = cloud.pending(limit)
+    payloads = {}
     for row in selected:
         raw = cloud.store.container.download_blob(row["blob"]).readall()
         if hashlib.sha256(raw).hexdigest() != row["sha256"]:
             raise ValueError("Cloud payload hash differs")
         signed = json.loads(raw)
         envelope, signature = signed["envelope"], signed["signature"]
+        payloads[row["id"]] = (row["kind"], envelope["payload"])
         actor, sid = row["actor"], row["id"]
         profile = cloud.profile(actor)
         if envelope["actor"] != actor or envelope["id"] != sid or envelope["task_id"] != row["task_id"] or envelope["kind"] != row["kind"]:
@@ -88,5 +90,33 @@ def _drain_locked(cloud, local, ledger_path, registry_, limit):
     for row in selected:
         result = local.submission(row["id"], row["actor"])
         if result["state"] != "queued":
-            cloud.acknowledge(row["id"], result["result"])
+            cloud.acknowledge(row["id"], result["result"], ack_detail(*payloads[row["id"]], result["result"]))
     return receipt
+
+
+_LABELS = {}
+
+
+def label(entity):
+    """Readable name for a symptom ID in public feed details (HPO index built by atlas_mcp.terms)."""
+    if not _LABELS:
+        from .terms import INDEX
+        _LABELS.update({k: v[0] for k, v in json.loads(INDEX.read_text(encoding="utf-8")).items()} if INDEX.exists() else {"": ""})
+    return _LABELS.get(entity)
+
+
+def ack_detail(kind, payload, result):
+    """Public summary of a kernel decision: what was claimed and, if rejected, which checks failed."""
+    detail = {"kind": kind}
+    if kind == "claim":
+        a = payload.get("assertion", {})
+        q = a.get("qualifiers", {})
+        detail.update(predicate=a.get("predicate"), object=str(a.get("object"))[:120],
+                      label=label(a.get("object")) or q.get("name") or None, claim_id=result.get("claim_id"))
+    failed = [{"check": c.get("name"), "detail": str(c.get("detail", ""))[:160]}
+              for c in result.get("checks", []) if isinstance(c, dict) and not c.get("passed", True)]
+    if failed:
+        detail["failed_checks"] = failed[:6]
+    if result.get("error"):
+        detail["error"] = result["error"][:200]
+    return detail

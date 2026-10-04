@@ -30,6 +30,7 @@ def configured_store():
 def serve(store):
     from .cloud_service import CloudAtlas, Projection
     from .http_transport import EntraVerifier, build_http_server
+    from .live import Feed, Presence, add_routes
     intake = CloudIntake(store)
     verifier = EntraVerifier(os.environ["ATLAS_TENANT_ID"], os.environ["ATLAS_API_AUDIENCE"], intake.principal_actor)
     lock = threading.Lock()
@@ -42,8 +43,9 @@ def serve(store):
                 current = Projection(store.container)
                 refreshed = time.monotonic()
             projection = current
-        return CloudAtlas(intake, projection, actor)
+        return Presence(CloudAtlas(intake, projection, actor), store, actor)
     server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"], loopback_proxy=True)
+    add_routes(server, Feed(store))
     server.run(transport="streamable-http")
 
 
