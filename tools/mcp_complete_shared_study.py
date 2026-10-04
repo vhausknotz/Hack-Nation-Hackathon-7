@@ -20,6 +20,7 @@ from tools.azure_mcp_operator import Operator
 STATE = ROOT / "data/contributions/shared-study-proposal.json"
 CONDITIONS = ["MONDO:0012812", "MONDO:0012960"]
 RECORD = "NCT06555965"
+PROMPT = "complete-shared-study-eligibility@2"
 
 
 def evidence_for(source):
@@ -29,8 +30,10 @@ def evidence_for(source):
     eligibility = section("Eligibility:", "\nInterventions:")
     if not all(label in eligibility for label in ("Minimum age:", "Maximum age:", "Sex:", "Healthy volunteers:")):
         raise ValueError("Deploy the complete eligibility renderer before proposing")
-    quotes = [section("Title:", "\nKeywords:"), section("Summary:", "\nStudy type:"),
+    quotes = [section("Title:", "\nKeywords:"), section("Summary:", "\nDetailed description:"),
               eligibility, section("Primary outcomes:", "\nStatus:"), section("Status:", "\nWhy stopped:")]
+    if any(len(q) > 2000 for q in quotes):
+        raise ValueError("A quote exceeds the kernel's 2000-character limit; inspect and split it without losing restrictions")
     return [{"type": "trial_record", "source_id": source["source_id"], "quote": q,
              "start": text.index(q), "end": text.index(q) + len(q),
              **({"restriction": eligibility} if q == eligibility else {})} for q in quotes]
@@ -69,17 +72,23 @@ async def main(command):
                 status = next(line.removeprefix("Status: ") for line in source["text"].splitlines() if line.startswith("Status: "))
                 for cid in CONDITIONS:
                     if cid in receipt["submissions"]:
-                        continue
+                        previous = receipt["submissions"][cid]
+                        status_record = await call("get_submission", {"submission_id": previous["submission_id"]})
+                        if status_record["state"] != "kernel_rejected":
+                            continue
+                        if previous.get("prompt") == PROMPT:
+                            raise ValueError("This version was rejected; inspect kernel feedback before another revision")
+                        receipt.setdefault("rejected_history", []).append({"condition_id": cid, **previous, "kernel_result": status_record.get("result")})
                     task = "evidence:" + cid
                     await call("list_frontier", {"condition_id": cid})
                     await call("claim_task", {"task_id": task})
                     result = await call("submit_claim", {"task_id": task,
                         "assertion": {"subject": cid, "predicate": "has_asset", "object": RECORD,
                                       "qualifiers": {"asset_type": "natural_history_study", "status": status}},
-                        "evidence": ev, "prompt": "complete-shared-study-eligibility@1"})
+                        "evidence": ev, "prompt": PROMPT})
                     if not result.get("submission_id"):
                         raise ValueError("MCP did not accept a queued submission")
-                    receipt["submissions"][cid] = result
+                    receipt["submissions"][cid] = {**result, "prompt": PROMPT}
                     atomic_json(STATE, receipt)
                 print(json.dumps({"record": RECORD, "submissions": receipt["submissions"], "model_calls": 0}, indent=2))
 
