@@ -13,6 +13,7 @@ import { StudyTeamCard } from "./StudyTeam";
 import { Contrast } from "./Contrast";
 import { DisputeNote } from "./Dispute";
 import { PeopleSection } from "./People";
+import { VariantSection } from "./Variants";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -59,6 +60,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
           {i === 0 && <>
             <p>{c.plain?.summary || `This genetic condition is linked to changes in the ${c.gene.symbol} gene. Its name is a starting point for finding relevant people and research.`}</p>
             {c.phenotype_count === 0 && c.broader_phenotypes && <BroaderSigns c={c} />}
+            <VariantSection c={c} />
             <Link to={routes.conditionDetails(c.id)} className="mt-3 block text-xs underline underline-offset-2">{c.plain ? "AI summary from MONDO and HPO data · see sources" : "See the diagnosis sources"}</Link>
             <p className="mt-3 rounded-lg bg-ink-wash p-3 text-xs">The lights nearby are other conditions with shared features. Their position is a research lead, not a medical conclusion.</p>
           </>}

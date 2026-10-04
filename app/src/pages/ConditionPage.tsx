@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ConnectionCard } from "../components/ConnectionCard";
 import { useEvidence } from "../components/EvidenceDrawer";
 import { PathDiagram } from "../components/PathDiagram";
+import { VariantSection } from "../components/Variants";
 import { Chip, ExternalLink, GeneChip, Loading, NotFoundBox, Section, TierLegend } from "../components/ui";
 import { getCondition } from "../lib/data";
 import { capitalize, categoryLabel, effectExplainer, effectLabel, frequency, rarity, symptomRarity } from "../lib/format";
@@ -69,6 +70,7 @@ function Condition({ c }: { c: ConditionBundle }) {
           <Fact label="Gene–disease evidence" value={capitalize(strongest?.confidence ?? c.gene.strength)} detail={`${c.gene.evidence.length} curation source${c.gene.evidence.length === 1 ? "" : "s"}`} onClick={() => open(geneEvidencePanel(c))} />
           <Fact label="Symptoms recorded" value={String(c.phenotype_count)} detail={c.onset.length ? `Onset: ${c.onset.map((o) => o.replace(" onset", "")).join(", ").toLowerCase()}` : "Onset not recorded"} />
         </div>
+        {c.variants && <div className="max-w-3xl"><VariantSection c={c} /></div>}
       </header>
 
       {/* ---------- 1. who shares your biology ---------- */}

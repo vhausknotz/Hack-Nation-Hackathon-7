@@ -105,6 +105,8 @@ export interface ConditionBundle {
   phenotype_count: number;
   people?: { researchers: { name: string; affiliation: string; papers: number; pmids: string[]; latest: string }[];
     projects: { title: string; pis: string[]; organization: string; years: number[]; url: string }[]; retrieved: string } | null;
+  /** ClinVar germline records naming this condition (pipeline/variants.py); top = [variation id, HGVS, protein change, stars, submitters] */
+  variants?: VariantSummary | null;
   broader_phenotypes?: { from: string; name: string; conditions_below: number; count: number; phenotypes: { id: string; frequency: string }[] } | null;
   xrefs: Record<string, string[]>;
   url: string;
@@ -252,3 +254,17 @@ export interface Meta {
   counts: Record<string, unknown> & { conditions: number; genes: number; groups: number };
   sources: Record<string, { file: string; url: string; description: string; license: string; retrieved: string }>;
 }
+
+export interface VariantSummary {
+  plp: number; vus: number; conflicting: number; benign: number;
+  types: Record<string, number>;
+  top: [number, string, string, number, number][];
+  gene_unassigned_plp: number;
+  release: string;
+}
+
+/** One ClinVar variant in the per-gene look-up file (served by the MCP host at /variants/<gene>). */
+export type VariantRow = [id: number, hgvs: string, protein: string, cls: "P" | "LP" | "C" | "VUS" | "LB" | "B" | "O", stars: number,
+  submitters: number, type: string, conditions: number[], rs: string, evaluated: string, named: string];
+
+export interface GeneVariants { gene: string; release: string; conditions: string[]; total: number; variants: VariantRow[] }

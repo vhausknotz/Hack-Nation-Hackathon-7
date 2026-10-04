@@ -65,6 +65,8 @@ def main() -> None:
     plain = {p["id"]: p for p in load("plain.jsonl")} if (BUILD / "plain.jsonl").exists() else {}
     # Who works on each gene (pipeline/people.py): PubMed investigators and NIH-funded projects.
     people = json.loads((BUILD / "people.json").read_text(encoding="utf-8")) if (BUILD / "people.json").exists() else {}
+    # ClinVar counts per condition (pipeline/variants.py); the per-variant look-up is served by the MCP host.
+    variants = json.loads((BUILD / "variants_summary.json").read_text(encoding="utf-8")) if (BUILD / "variants_summary.json").exists() else {}
     person_key = lambda r: r["name"].casefold()  # noqa: E731
     for entry in people.values():  # display-time cleanup of affiliation strings (no e-mail remnants)
         for r in entry.get("researchers", []):
@@ -156,6 +158,7 @@ def main() -> None:
             "plain": plain.get(cid),
             "people": ({"researchers": people[c["gene"]["symbol"]]["researchers"][:5], "projects": people[c["gene"]["symbol"]]["projects"][:3],
                         "retrieved": people[c["gene"]["symbol"]]["retrieved"]} if c["gene"]["symbol"] in people else None),
+            "variants": variants.get(cid),
             "dict": {"symptoms": sym_dict, "mechanisms": mech_dict},
         }
         shards["c"][shard_of("c", cid)][cid] = bundle

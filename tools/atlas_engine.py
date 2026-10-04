@@ -571,12 +571,14 @@ class Engine:
         if time.time() - self.state.get("freshness_at", 0) > 6 * 3600:  # recheck listed studies' registry status
             self.state["freshness_at"] = time.time()
             save_json(STATE / "state.json", self.state)
-            people = ROOT / "data/build/people.json"
-            seen = self.state.get("people_size", 0)
-            if people.exists() and people.stat().st_size != seen:  # the people collector added genes
-                self.state["people_size"] = people.stat().st_size
-                save_json(STATE / "state.json", self.state)
-                force = True
+            # Background collectors (people: PubMed/NIH; variants: weekly ClinVar) changed their output.
+            for name, key in (("people.json", "people_size"), ("variants_summary.json", "variants_size")):
+                path = ROOT / "data/build" / name
+                if path.exists() and path.stat().st_size != self.state.get(key, 0):
+                    self.state[key] = path.stat().st_size
+                    save_json(STATE / "state.json", self.state)
+                    log(f"{name} changed; republishing")
+                    force = True
             path = ROOT / "data/build/study_contacts.json"
             before = path.read_bytes() if path.exists() else b""
             try:

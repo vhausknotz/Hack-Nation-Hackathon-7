@@ -14,6 +14,7 @@ from azure.core.exceptions import ResourceNotFoundError
 PRESENCE_TTL = 900  # seconds an agent stays on the map (fading) after its last tool call
 FEED_EVENTS = 80
 OVERLAY_PATH = re.compile(r"[a-f0-9]{16}/(c|g|s|grp|m)/\d{1,3}\.json")
+GENE_SYMBOL = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,29}")
 
 # Tool -> what the agent is doing, in plain words (shown on the map).
 DOING = {
@@ -142,6 +143,15 @@ class Feed:
         snap = self.snapshot()
         return {**snap, "events": [e for e in snap["events"] if e["seq"] > after]}
 
+    def variants_file(self, symbol):
+        """Per-gene ClinVar summary written by pipeline/variants.py (public data)."""
+        if not GENE_SYMBOL.fullmatch(symbol):
+            return None
+        try:
+            return self.store.container.download_blob(f"variants/{symbol}.json").readall()
+        except ResourceNotFoundError:
+            return None
+
     def overlay_file(self, path):
         if not OVERLAY_PATH.fullmatch(path):
             return None
@@ -175,3 +185,11 @@ def add_routes(mcp, feed):
             return Response("Not found", status_code=404, headers=headers)
         return Response(raw, media_type="application/json",
                         headers={**headers, "Cache-Control": "public, max-age=31536000, immutable"})
+
+    @mcp.custom_route("/variants/{symbol}", methods=["GET"])
+    async def variants(request):
+        import anyio
+        raw = await anyio.to_thread.run_sync(feed.variants_file, request.path_params["symbol"])
+        if raw is None:
+            return Response("Not found", status_code=404, headers=headers)
+        return Response(raw, media_type="application/json", headers={**headers, "Cache-Control": "public, max-age=3600"})

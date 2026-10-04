@@ -4,6 +4,7 @@
     python tools/azure_engine_vm.py setup      # packages, Python env, systemd service, nightly backup
     python tools/azure_engine_vm.py migrate    # stop the PC engine, ship code + state, start the VM engine
     python tools/azure_engine_vm.py update     # ship current code only (keeps VM state), restart the service
+    python tools/azure_engine_vm.py variants   # install the weekly ClinVar refresh timer and run it once now
     python tools/azure_engine_vm.py status | stop | start | logs
 
 `stop` deallocates the VM: compute billing stops (disk and IP, about $6/month, remain). The engine's queue
@@ -245,6 +246,37 @@ journalctl -u atlas-scouts -n 6 --no-pager
 """
         return self.run(script)
 
+    def variants(self):
+        """Weekly ClinVar refresh (pipeline/variants.py --upload) as a systemd timer; starts a first run now."""
+        script = r"""set -e
+cat > /etc/systemd/system/atlas-variants.service <<'UNIT'
+[Unit]
+Description=Weekly ClinVar variant refresh for the atlas (per-gene look-up files + condition counts)
+After=network-online.target
+[Service]
+Type=oneshot
+User=atlas
+WorkingDirectory=/opt/atlas/repo
+EnvironmentFile=/etc/atlas/engine.env
+ExecStart=/opt/atlas/venv/bin/python pipeline/variants.py --upload
+UNIT
+cat > /etc/systemd/system/atlas-variants.timer <<'UNIT'
+[Unit]
+Description=Weekly ClinVar refresh (ClinVar publishes weekly)
+[Timer]
+OnCalendar=Mon *-*-* 04:30:00
+Persistent=true
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now atlas-variants.timer
+systemctl start --no-block atlas-variants.service
+sleep 5
+systemctl is-active atlas-variants.service || true
+"""
+        return self.run(script)
+
     def site(self):
         """Full website release from the cloud's current data: VM exports, PC builds the frontend and deploys."""
         import shutil
@@ -289,7 +321,7 @@ echo uploaded""")
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "site", "status", "stop", "start", "logs"))
+    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "variants", "site", "status", "stop", "start", "logs"))
     args = parser.parse_args()
     vm = EngineVM()
     if args.command == "create":
@@ -302,6 +334,8 @@ def main():
         print(vm.update())
     elif args.command == "scouts":
         print(vm.scouts())
+    elif args.command == "variants":
+        print(vm.variants())
     elif args.command == "site":
         print(vm.site())
     elif args.command == "status":
