@@ -1,0 +1,35 @@
+{
+ "campaign": "simons-stxbp1-quote-correction",
+ "old_claim": "claim:sha256:cf79bfc3dac323f6cc17e49a12a00076dc9c4f5ba06ae9181b08d851de8623c9",
+ "started": "2026-10-04T00:55:06+00:00",
+ "reviews": [
+  {
+   "which": "old",
+   "claim_id": "claim:sha256:cf79bfc3dac323f6cc17e49a12a00076dc9c4f5ba06ae9181b08d851de8623c9",
+   "verdict": "does_not_support",
+   "reason": "The supplied quote describes the STXBP1 Foundation, not Simons Searchlight, so it cannot establish that Simons Searchlight serves people with STXBP1-related syndrome.",
+   "serves": false,
+   "org_type": "research_program",
+   "scope": "broader_group",
+   "status": "rejected"
+  },
+  {
+   "which": "new",
+   "claim_id": "claim:sha256:1a5297c4490c483ff84e873174323f1c42f943d82b529292b90750db33a78139",
+   "verdict": "supports",
+   "reason": "The quote invites families to join Simons Searchlight’s research program, describes its work across more than 175 disorders, and links to its STXBP1 page.",
+   "serves": true,
+   "org_type": "research_program",
+   "scope": "broader_group",
+   "status": "reviewed"
+  }
+ ],
+ "ledger_tree_head": {
+  "size": 1614,
+  "root": "f9eb5f6389bd0a276efb017a20ff1d445e38091acf5a0555709d56eaafe99927",
+  "ts": "2026-10-04T00:55:13+00:00",
+  "signature": "ed25519:R0P6wD5vBUZUZzGyrPnJqNGmR_x-UpSx-CRa5oVkzhVI6TLvGuElrr08hauLuSPGecYuRQMTKrfv17oP_pIgCA",
+  "log_key": "ed25519:SqJsN6AYUmYupalFI8NqXI1TJF_AfxKCLEjHmSAB1fk"
+ },
+ "log_verified": true
+}

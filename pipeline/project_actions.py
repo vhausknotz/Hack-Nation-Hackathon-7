@@ -85,7 +85,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
                 continue
             entry = {
                 "id": a["object"], "name": q.get("name", ""), "homepage": q.get("homepage", ""), "kind": org_kind[a["object"]],
-                "scope": q.get("scope", "broader_group"), "quote": ev[0]["quote"][:400], "page": ev[0].get("url", ""),
+                "scope": q.get("scope", "broader_group"), "quote": ev[0]["quote"], "page": ev[0].get("url", ""),
                 "page_read": ev[0].get("page_read", "live"), "page_date": ev[0].get("page_date", claim["provenance"]["created"][:10]),
                 "claim_id": claim_id,
                 "kind_source": latest[a["object"]][2],
@@ -95,7 +95,9 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
             for t in targets:
                 e = entry if t == a["subject"] else {**entry, "via": a["subject"]}
                 key = ("org", t, a["object"])
-                rank = (STATUS_RANK.get(status, 0), verdict == "supports", t == a["subject"])
+                # Corrections must replace an older quote at equal trust, including
+                # newer qualified evidence. A cached first claim must not win forever.
+                rank = (STATUS_RANK.get(status, 0), review_seq, claim["provenance"]["created"], t == a["subject"])
                 if key not in best or best[key][0] < rank:
                     best[key] = (rank, e)
         else:

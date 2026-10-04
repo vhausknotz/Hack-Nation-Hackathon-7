@@ -36,6 +36,7 @@ def serve(store):
     current, refreshed = None, 0
     def factory(actor):
         nonlocal current, refreshed
+        intake.admit_call(actor)
         with lock:
             if current is None or time.monotonic()-refreshed > 30:
                 current = Projection(store.container)

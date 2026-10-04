@@ -269,6 +269,23 @@ class CloudIntake:
     def activity(self, after=0, limit=50):
         return sorted((r for r in self.store.rows("activity") if r["seq"] > after), key=lambda r: r["seq"])[:limit]
 
+    def admit_call(self, actor, daily_limit=1000, actor_limit=250):
+        """Hard application tool-call limits, not a cap on Azure metered charges."""
+        def decide(seq):
+            self.profile(actor)
+            day = str(int(time.time()//86400))
+            global_row = self.store.get("callbudget", "global") or {"day": day, "count": 0}
+            actor_row = self.store.get("callbudget", actor) or {"day": day, "count": 0}
+            for row in (global_row, actor_row):
+                if row["day"] != day:
+                    row.update(day=day, count=0)
+            if global_row["count"] >= daily_limit or actor_row["count"] >= actor_limit:
+                raise ValueError("Daily MCP tool-call allowance reached; ask the operator or retry next UTC day")
+            global_row["count"] += 1
+            actor_row["count"] += 1
+            return None, [("callbudget", "global", global_row), ("callbudget", actor, actor_row)]
+        self.store.atomic(decide)
+
     def reserve_fetch(self, actor, tid):
         """Provider slots and daily quotas survive failure/restart; no free retry loop."""
         def decide(seq):

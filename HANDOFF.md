@@ -2,6 +2,19 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Deployment approval and current permissions boundary
+
+Newest update: the owner cannot involve an administrator and **explicitly approved the dedicated storage key** after being told that a leak could expose/alter MCP data and signing keys, but would not grant access to other Azure resources. Deployment `mcp-initial` is now running with `useManagedIdentity=false`. The earlier approval rejection below is superseded by this explicit authorization. Keep keys out of commands, logs, local files, repository and client output; only protected server settings and transient operator process memory may contain them. Verify the live state before claiming completion.
+
+The family UI agent delivered `2b2f5b3` on `agent/family-journey`; lead integration is next. Its new assignment is `docs/agent_tasks/community_coverage_parallel.md`: source-backed candidate research in an isolated worktree, no production-ledger writes or paid campaigns.
+
+- Owner approved Functions Flex + one storage account with a $5/month planning allowance, asking for a cap if possible and clear status/off controls. Explained that Azure budget alerts are not a hard dollar cap. Added hard application limits: 1,000 tool calls/global UTC day, 250/contributor; submission/source quotas remain separate. These do not cap platform billing for rejected HTTP traffic/storage.
+- Created only the tagged resource group `rare-disease-atlas-mcp` and a single-tenant Entra API registration/service principal. Actual names/IDs are in ignored `data/build/mcp-deployment.json` and `mcp-entra.json`. **No Function App or storage account exists yet.** ARM validation rejected data-role assignments because this account lacks `Microsoft.Authorization/roleAssignments/write`.
+- A dedicated storage account key fallback is prepared behind `useManagedIdentity=false`, but **automatic approval review rejected executing that deployment** because the owner had not explicitly approved the broader persistent credential. The template default remains managed identity. Owner answered the clarification with “I don't understand”; explained both methods plainly and asked again. **Wait for an explicit reply before using the key fallback.** Do not retry the rejected action indirectly. The preferred alternative needs an Azure administrator to grant roles.
+- `tools/azure_mcp.ps1 status|stop|start|remove` is implemented; removal requires `-ConfirmRemove` and validates the dedicated group tags. Status was tested and correctly reports NOT DEPLOYED. Stop retains storage; remove deletes the dedicated group only. Website and shared models are separate. A real $5 Azure budget alert still needs creation/verification after permissions are resolved.
+- Entra delegated scope is `Atlas.Contribute`; application role is `Atlas.Contribute.AsAgent` (Entra requires distinct names). Actual client login remains untested.
+- Simons/STXBP1 quote correction is kernel-accepted and Sol-reviewed; the old and intermediate incorrect claims remain rejected in history. The canonical Foundation redirect was verified; alias resolution is still outstanding. See the updated data audit. These changes are not yet exported/deployed. **122 tests passed** before the final full-quote export tweak.
+
 ### Cloud MCP implementation (newest, not yet deployed)
 
 - Added authenticated stateless HTTP using the official MCP SDK. Entra v2 tokens are checked against a fixed tenant/audience/scope and operator-enrolled issuer/object-ID identity. Request identity is isolated across simultaneous tool calls. Client registration/sign-in still needs actual tenant setup and testing.

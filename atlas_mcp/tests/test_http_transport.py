@@ -43,6 +43,7 @@ def test_token_rejects_wrong_audience_issuer_expiry_scope_and_unenrolled(credent
     atlas, _, verifier, token = credentials
     async def run():
         assert (await verifier.verify_token(token())).client_id == atlas.actor
+        assert (await verifier.verify_token(token(scp="", roles=["Atlas.Contribute.AsAgent"]))).client_id == atlas.actor
         for changes in ({"aud": "another-api"}, {"iss": "https://attacker.test"}, {"exp": 1},
                         {"scp": "read"}, {"oid": "bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee"}, {"tid": OTHER}):
             assert await verifier.verify_token(token(**changes)) is None

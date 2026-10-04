@@ -55,3 +55,28 @@ def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tm
     assert assets["NCT1"]["restriction"] == "One participant only"
     assert assets["NCT1"]["claim_id"] == "new"
     assert assets["NCT1"]["review"]["verdict"] == "supports_with_qualification"
+
+
+def test_newer_qualified_organization_quote_replaces_old_supported_quote(monkeypatch, tmp_path):
+    from ledger import store
+    from pipeline import project_actions
+    (tmp_path / "data/ledger").mkdir(parents=True)
+    (tmp_path / "data/ledger/ledger.db").touch()
+    monkeypatch.setattr(project_actions, "ROOT", tmp_path)
+    def row(cid, quote, created):
+        return {"claim_id": cid, "predicate": "represented_by", "body": json.dumps({
+            "assertion": {"subject": "C1", "predicate": "represented_by", "object": "org:research",
+                          "qualifiers": {"org_type": "research_program", "scope": "broader_group", "name": "Research program"}},
+            "provenance": {"created": created}, "evidence": [{"quote": quote}]})}
+    class FakeStore:
+        def __init__(self, **_): pass
+        def claims_where(self, _):
+            return [row("old", "A different organization's description", "2026-10-01"),
+                    row("new", "This program's condition page", "2026-10-04")]
+        def reviews_for(self, cid):
+            return [{"reviewer_kind": "model", "model_family": "openai", "reviewer": "sol", "reason": "Checked attribution",
+                     "verdict": "supports" if cid == "old" else "supports_with_qualification", "seq": 1 if cid == "old" else 2}]
+        def close(self): pass
+    monkeypatch.setattr(store, "Store", FakeStore)
+    result = load_actions({"C1": {"gene": {"symbol": "TEST"}}})
+    assert result["C1"]["communities"][0]["claim_id"] == "new"

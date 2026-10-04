@@ -48,6 +48,18 @@ def test_concurrent_leases_cannot_have_two_owners(cloud):
     assert cloud.task("evidence:1")["actor"] == winners[0]
 
 
+def test_global_tool_allowance_is_atomic_across_callers(cloud):
+    actors = [cloud.enroll(name, "test", "family", "issuer|"+name)["id"] for name in ("alice", "bravo")]
+    def call(actor):
+        try:
+            cloud.admit_call(actor, daily_limit=3, actor_limit=3)
+            return True
+        except ValueError:
+            return False
+    with ThreadPoolExecutor(4) as pool:
+        assert sum(pool.map(call, actors*2)) == 3
+
+
 def test_atomic_quota_duplicate_delivery_and_durable_restart(cloud):
     from atlas_mcp.cloud_store import CloudIntake
     actor = cloud.enroll("alice", "test", "family-a", "issuer|alice", quota=1)["id"]

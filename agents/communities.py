@@ -38,7 +38,8 @@ from ledger.canonical import find_quote as locate_quote  # noqa: E402
 from .verify import MODEL_FAMILY, VERIFY_MODEL  # noqa: E402
 
 SCOUT_MODEL, FALLBACK_MODEL = "gpt-6-luna", "gpt-6-sol"
-SCOUT_PROMPT, RECALL_PROMPT, VERIFY_PROMPT = "find-communities@3", "recall-communities@2", "verify-community@2"
+SCOUT_PROMPT, RECALL_PROMPT, VERIFY_PROMPT = "find-communities@3", "recall-communities@2", "verify-community@3"
+PROFILE_VERIFY_PROMPT = "verify-community-profile@2"
 USER_AGENT = "Mozilla/5.0 (compatible; rare-disease-atlas/0.1; +https://github.com/vhausknotz/Hack-Nation-Hackathon-7)"
 CAMPAIGNS = ROOT / "data" / "campaigns"
 # directories, platforms and reference sites: useful, but not a community of their own
@@ -216,6 +217,10 @@ def verify_community(condition: dict, org: dict, page_title: str, quote: str, pa
             "You check claims for a rare-disease evidence ledger. A claim says an organization of a given kind serves people "
             "with one genetic condition, at a given scope. Judge ONLY from the organization's page, without outside knowledge. "
             "Do not judge whether the organization is active today.\n"
+            "The supplied quote must carry the decision about THIS organization and condition/gene. A quote describing a different "
+            "foundation, even on this organization's own page, does not support the claim. Return does_not_support for that "
+            "attribution error. Page context can resolve references, but cannot substitute for missing quoted support. "
+            "An organization-wide profile establishes kind, not diagnosis-specific membership or eligibility.\n"
             "Kinds: " + "; ".join(f"{k} = {v}" for k, v in ORG_TYPES.items()) + ".\n"
             "Scopes: this_condition; this_gene (everything caused by the gene); broader_group (many conditions, explicitly including this one).\n"
             "Answer: serves_these_patients (does the page show the organization works for or with people who have this "
@@ -231,7 +236,7 @@ def verify_community(condition: dict, org: dict, page_title: str, quote: str, pa
             "page_title": page_title, "quote": quote, "page_text": page_text[:6000],
             **({"organization_profile": profile} if profile else {}),
         }, ensure_ascii=False)},
-    ], task="verify-community-profile@1" if profile else VERIFY_PROMPT)
+    ], task=PROFILE_VERIFY_PROMPT if profile else VERIFY_PROMPT)
     verdict = reply.get("verdict")
     if verdict not in ("supports", "supports_with_qualification", "does_not_support", "out_of_scope"):
         verdict = "out_of_scope"
@@ -361,7 +366,7 @@ def scout_condition(c, name, ledger, scout, verifier, pages):
             r["claims_kernel_accepted"] += 1
             v = verify_community(c, org, src.title, text[start:end], text, profile)
             if not ledger.store.reviews_for(result.claim_id):
-                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt="verify-community-profile@1" if profile else VERIFY_PROMPT)
+                ledger.review(result.claim_id, v["verdict"], v["reason"], verifier, model_family=MODEL_FAMILY, model=VERIFY_MODEL, prompt=PROFILE_VERIFY_PROMPT if profile else VERIFY_PROMPT)
             r[f"review_{v['verdict']}"] += 1
             correction = (v["serves"] and v["verdict"] == "does_not_support" and v["org_type"] and v["scope"]
                           and (v["org_type"], v["scope"]) != (org["org_type"], org["scope"]))

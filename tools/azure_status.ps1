@@ -26,3 +26,4 @@ foreach ($a in (($ai.Content | ConvertFrom-Json).value | Where-Object { $_.name 
     Write-Host ("    {0} ({1}) - billed per token used" -f $a.name, $a.location)
 }
 Write-Host "`nTo switch the project off: powershell -File tools/azure_off.ps1"
+Write-Host "For accurate MCP app state and its separate controls: powershell -File tools/azure_mcp.ps1 status"

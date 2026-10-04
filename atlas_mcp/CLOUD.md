@@ -10,7 +10,9 @@ The gateway supplies OAuth protected-resource metadata. It does **not** register
 
 Table Storage holds task leases, daily quotas, profiles, signed submission references and factual activity. Conditional guard updates and same-partition transactions prevent conflicting claims or quota races. Immutable Blob payloads are written first, then made discoverable in an atomic Table transaction. The Table submission rows **are the durable outbox**; there is no separate Queue write that could be lost. Content written before a failed transaction can be orphaned but never accepted as a submission. Polling is explicit and bounded. This small single-partition design favors correctness and low initial cost; archive/index activity before scaling to a large public service.
 
-Contributor signing keys are held privately by the service and operator worker, as in local enrollment. Signatures establish the gateway-bound enrolled identity; this is not client-held-key attestation. Private blobs never appear in tool results. Managed identity accesses storage; there is no model API credential or model invocation in gateway tools.
+Contributor signing keys are held privately by the service and operator worker, as in local enrollment. Signatures establish the gateway-bound enrolled identity; this is not client-held-key attestation. Private blobs never appear in tool results. There is no model API credential or model invocation in gateway tools.
+
+The preferred deployment uses managed identity, but the operator lacks permission to assign its storage roles. On 2026-10-04 the owner explicitly approved the fallback: a key for the separate MCP storage account, resolved by ARM into protected Function App settings. It grants broad access to that account, including contributor signing keys; a leak requires key rotation and an integrity audit. Never print the key, commit it, save it locally, or expose it through MCP responses. Operator commands may obtain it transiently in process memory through authenticated Azure management calls. HTTPS and private containers remain required. MCP callers use Entra tokens, never this storage key. This approval does not cover credentials for other accounts.
 
 The local bridge is bound to one persistent worker state directory and uses OS locks. It verifies signatures/source bytes, calls the existing kernel, records signed ledger receipts, then acknowledges cloud rows. A crash after ledger commit but before acknowledgement replays safely. Switching computers requires explicit recovery; this is **not** distributed ledger failover. When this computer is off, submissions remain queued in Azure.
 
@@ -26,7 +28,7 @@ $env:ATLAS_TEST_AZURITE='1'
 ./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests
 ```
 
-120 tests passed, including real SDK HTTP authentication/caller isolation, real Azure Storage SDK transactions against Azurite, quota/task races, immutable source/payload storage and kernel commit followed by lost-acknowledgement recovery. No public source fetch, paid model call or Azure cloud resource was needed for those integration tests.
+122 tests passed, including real SDK HTTP authentication/caller isolation, real Azure Storage SDK transactions against Azurite, quota/task races, immutable source/payload storage and kernel commit followed by lost-acknowledgement recovery. No public source fetch, paid model call or Azure cloud resource was needed for those integration tests. Tool calls are limited to 1,000 globally and 250 per contributor per UTC day. These are application limits, not a dollar cap on Azure charges.
 
 ## Provisioning and onboarding checklist
 
@@ -37,7 +39,7 @@ $env:ATLAS_TEST_AZURITE='1'
 5. Grant the operator/function managed identity only the template's scoped Blob/Table data roles. Allow role propagation, then initialize/publish/enroll using the commands below. Never send the service's managed-identity storage token to an MCP client.
 6. Test actual client sign-in, unauthenticated 401, two distinct contributor identities and an isolated fixture contribution through cloud intake to a local test ledger before exposing real task writes. Record the endpoint, costs and shutdown procedure in `docs/operations.md`.
 
-Environment variables: `ATLAS_STORAGE_ACCOUNT`, `ATLAS_TENANT_ID`, `ATLAS_API_AUDIENCE`, `ATLAS_PUBLIC_URL`. Optional `ATLAS_TABLE` (default `atlasintake`), `ATLAS_CONTAINER` (default `atlas-mcp`). `ATLAS_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true` is for local emulator tests; production shared-key access is disabled.
+Environment variables: `ATLAS_STORAGE_ACCOUNT`, `ATLAS_TENANT_ID`, `ATLAS_API_AUDIENCE`, `ATLAS_PUBLIC_URL`. Optional `ATLAS_TABLE` (default `atlasintake`), `ATLAS_CONTAINER` (default `atlas-mcp`). `ATLAS_STORAGE_CONNECTION_STRING=UseDevelopmentStorage=true` is for local emulator tests. The approved production fallback sets this variable privately through ARM; default managed-identity deployments disable shared-key access. Delegated scope is `Atlas.Contribute`; the distinct application role is `Atlas.Contribute.AsAgent`.
 
 ```powershell
 ./.venv/Scripts/python -m atlas_mcp.cloud initialize

@@ -35,8 +35,8 @@ class EntraVerifier:
         if claims["tid"] != self.tenant or not re.fullmatch(r"[0-9a-fA-F-]{36}", claims["oid"]):
             return None
         # Delegated OAuth scope, or an explicitly assigned application permission.
-        permissions = claims.get("scp", "").split() + claims.get("roles", [])
-        if self.scope not in permissions:
+        permissions = claims.get("scp", "").split()
+        if self.scope not in permissions and self.scope+".AsAgent" not in claims.get("roles", []):
             return None
         principal = self.issuer + "|" + claims["oid"]
         actor = self.resolve_principal(principal)
