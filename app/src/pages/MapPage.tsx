@@ -1,11 +1,12 @@
 // The atlas as a map: search, fly to a condition, see who shares its biology. Like Google Maps for rare diseases.
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { DirectionsPanel, STOPS } from "../components/DirectionsPanel";
 import { Logo } from "../components/Layout";
 import { SearchBox } from "../components/SearchBox";
 import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
+import { ReplayBar, useReplay } from "../components/Replay";
 import { LiveConditionBanner, LivePanel, LiveToasts, SparseInvite, useLiveLayers } from "../components/LiveActivity";
 import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
 import { ageSeconds, useLive, type LiveState } from "../lib/live";
@@ -33,7 +34,10 @@ export default function MapPage() {
   const conditionId = !kind && id ? decodeURIComponent(id) : null;
   const live = useLive();
   const layers = useLiveLayers(live);
-  const echo = useEcho(live, !conditionId && !kind);
+  const [params, setParams] = useSearchParams();
+  const replaying = params.get("replay") === "1";
+  const replay = useReplay(replaying);
+  const echo = useEcho(live, !conditionId && !kind && !replaying);
   const [revision, setRevision] = useState("base");
 
   useEffect(() => {
@@ -100,9 +104,9 @@ export default function MapPage() {
           onStop={selectStep}
           onSelect={(nodeId) => navigate(routes.condition(nodeId))}
           onBackground={() => (conditionId || kind) && navigate("/")}
-          agents={layers.agents}
-          pulses={echo ? [...layers.pulses, echo.pulse] : layers.pulses}
-          ripples={layers.ripples}
+          agents={replaying ? [] : layers.agents}
+          pulses={replaying ? replay.layers.pulses : echo ? [...layers.pulses, echo.pulse] : layers.pulses}
+          ripples={replaying ? replay.layers.ripples : layers.ripples}
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center text-sm text-slate-400">Drawing the map…</div>
@@ -115,7 +119,8 @@ export default function MapPage() {
 
       <LivePanel nameOf={(nodeId) => map?.byId.get(nodeId)?.name} />
       {echo && <div className="pointer-events-none absolute bottom-[calc(58dvh+8px)] left-1/2 z-10 -translate-x-1/2 rounded-full bg-slate-950/70 px-3 py-1 text-[10.5px] text-emerald-200/90 motion-safe:animate-[toast-in_.5s_ease-out] sm:bottom-12 sm:left-[calc(50%+216px)]">Recently connected by reviewed evidence: {echo.from} ↔ {echo.to}</div>}
-      <LiveToasts onOpen={(nodeId) => navigate(routes.condition(nodeId))} />
+      {!replaying && <LiveToasts onOpen={(nodeId) => navigate(routes.condition(nodeId))} />}
+      {replaying && <ReplayBar replay={replay} onClose={() => { const next = new URLSearchParams(params); next.delete("replay"); setParams(next); }} />}
 
       {/* search, top left like a maps app */}
       <div className="absolute left-3 right-3 top-3 z-20 sm:left-4 sm:right-auto sm:top-4 sm:w-[400px]">
@@ -225,6 +230,7 @@ function Welcome({ map }: { map: StarMapData | null }) {
             {agents > 0 ? `${agents} AI agent${agents === 1 ? "" : "s"} contributed today` : "Agents contribute through our MCP server"}{checked > 0 ? ` · ${checked} findings quote-checked` : ""}.
             {latest && <> Newest connection: <Link className="text-emerald-300 underline" to={routes.condition(latest.condition_id)}>{latest.name}</Link> ↔ {latest.new_connections[0].name}.</>}
           </p>
+          <Link to="/?replay=1" className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 font-semibold text-white hover:bg-white/20">▶ Watch the atlas grow</Link>
         </div>
       )}
       <p className="mt-5 text-xs leading-relaxed text-ink-faint">

@@ -159,6 +159,12 @@ class Feed:
         except ResourceNotFoundError:
             return {"at": None, "contributors": []}
 
+    def history(self):
+        try:
+            return self.store.container.download_blob("live/history.json").readall()
+        except ResourceNotFoundError:
+            return b'{"at": null, "findings": [], "connections": []}'
+
     def salt(self):
         """Server-side secret for hashing visitors; created once, never leaves storage."""
         if not getattr(self, "_salt", None):
@@ -234,6 +240,12 @@ def add_routes(mcp, feed):
         import anyio
         body = await anyio.to_thread.run_sync(feed.contributors)
         return JSONResponse(body, headers={**headers, "Cache-Control": "public, max-age=120"})
+
+    @mcp.custom_route("/live/history", methods=["GET"])
+    async def live_history(request):
+        import anyio
+        raw = await anyio.to_thread.run_sync(feed.history)
+        return Response(raw, media_type="application/json", headers={**headers, "Cache-Control": "public, max-age=300"})
 
     @mcp.custom_route("/live/request/{condition_id}", methods=["GET"])
     async def request_count(request):

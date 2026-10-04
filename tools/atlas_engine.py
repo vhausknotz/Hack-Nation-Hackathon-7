@@ -565,6 +565,16 @@ def upload_track_records(engine):
         challenges = [dict(r) for r in store.all_challenges()]
         seqs = {c["created_seq"] for c in claims if c["created_seq"]}
         times = {r[0]: r[1] for r in store.db.execute("SELECT seq, ts FROM events WHERE type LIKE 'claim%'") if r[0] in seqs}
+        # Growth history for the replay: each accepted finding at the time of its first supporting review.
+        review_ts = dict(store.db.execute("SELECT seq, ts FROM events WHERE type = 'review.attested'").fetchall())
+        first_support = {}
+        for r in sorted(reviews, key=lambda r: r["seq"]):
+            if r["verdict"] in ("supports", "supports_with_qualification") and r["claim_id"] not in first_support:
+                first_support[r["claim_id"]] = review_ts.get(r["seq"])
+        code = {"has_symptom": "s", "represented_by": "g", "has_asset": "t"}
+        findings = sorted([first_support[c["claim_id"]], c["subject"], code.get(c["predicate"], "o")] for c in claims
+                          if c["kernel_ok"] and first_support.get(c["claim_id"]) and claim_review_status(
+                              [r for r in reviews if r["claim_id"] == c["claim_id"]]) in track_record.ACCEPTED)
         # Expert queue: recent quote-checked findings that no person has reviewed yet (atlas_mcp/expert.py).
         human = {r["claim_id"] for r in reviews if r["reviewer_kind"] == "human"}
         recent = sorted((c for c in claims if c["kernel_ok"] and c["claim_id"] not in human), key=lambda c: -(c["created_seq"] or 0))[:60]
@@ -622,6 +632,13 @@ def upload_track_records(engine):
                    contributor=prof.get("display") or row["contributor"].removeprefix("agent:mcp-").removeprefix("agent:"),
                    status={"unreviewed": "awaiting review", "reviewed": "accepted by one AI reviewer", "independently_reviewed": "accepted by independent reviewers",
                            "rejected": "rejected by an AI reviewer", "review_disagreement": "AI reviewers disagree"}.get(row["status"], row["status"]))
+    connections = []
+    for e in engine.cloud.rows("activity"):
+        if e.get("stage") == "published" and e.get("condition_id"):
+            when = datetime.fromtimestamp(e["at"], timezone.utc).isoformat(timespec="seconds")
+            connections += [[when, e["condition_id"], n["id"]] for n in (e.get("detail") or {}).get("new_connections", [])]
+    engine.cloud.container.upload_blob("live/history.json", json.dumps({"at": time.time(), "findings": findings,
+                                                                        "connections": sorted(connections)}).encode(), overwrite=True)
     engine.cloud.container.upload_blob("live/expert-queue.json", json.dumps({"at": time.time(), "claims": expert_rows}).encode(), overwrite=True)
     public.sort(key=lambda r: (-r["accepted"], -r["reviews_given"], r["id"]))
     engine.cloud.container.upload_blob("live/contributors.json", json.dumps({"at": time.time(), "contributors": public}).encode(), overwrite=True)
