@@ -132,3 +132,16 @@ def test_expert_desk_needs_an_owner_grant_and_records_a_human_review(cloud):  # 
         desk.review(actor, "claim:sha256:" + "a" * 64, "MONDO:0800032", "supports", "ok")
     queued = desk.review(actor, "claim:sha256:" + "a" * 64, "MONDO:0800032", "does_not_support", "The quote is about a different variant class.")
     assert queued["state"] == "queued"
+
+
+@azurite
+def test_released_leases_free_a_task_slot(cloud):  # noqa: F811
+    actor = cloud.enroll("busy-agent", "m", "google-gemini", "issuer|b")["id"]
+    tasks = [{"id": f"evidence:MONDO:000000{n}", "condition_id": f"MONDO:000000{n}", "kind": "evidence"} for n in range(4)]
+    cloud.seed(tasks)
+    for t in tasks[:3]:
+        cloud.claim(t["id"], actor)
+    with pytest.raises(ValueError, match="three active"):
+        cloud.claim(tasks[3]["id"], actor)
+    assert cloud.release(tasks[0]["id"], actor) is True
+    assert cloud.claim(tasks[3]["id"], actor)["actor"] == actor

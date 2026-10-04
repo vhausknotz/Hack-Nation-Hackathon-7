@@ -254,6 +254,21 @@ class CloudIntake:
             return {**task, "lease_expires": task["expires"]}, [("task", tid, task), ("quota", actor, quota), self.event(seq, actor, task, "task_claimed")]
         return self.store.atomic(decide)
 
+    def release(self, tid, actor):
+        """Give back a task lease early (the contributor is done with it); frees one of its three active slots."""
+        def decide(seq):
+            task = self.store.get("task", tid)
+            quota = self.store.get("quota", actor) or {"leases": {}, "submissions": []}
+            changes = []
+            if tid in quota.get("leases", {}):
+                quota["leases"].pop(tid)
+                changes.append(("quota", actor, quota))
+            if task and task["actor"] == actor and task["expires"] > time.time():
+                task.update(expires=0)
+                changes.append(("task", tid, task))
+            return bool(changes), changes
+        return self.store.atomic(decide)
+
     def owned_task(self, tid, actor):
         task = self.task(tid)
         if not task or task["actor"] != actor or task["expires"] <= time.time() or task["state"] == "complete":

@@ -216,6 +216,10 @@ class Scout:
             return self.work(c, pmids)
         finally:
             self.settle()
+            try:
+                self.intake.release(f"evidence:{c['id']}", self.actor)  # done or failed: free the lease
+            except ValueError:
+                pass
 
     def can_spend(self):
         return self.paying["round_usd"] < self.paying["left"] if self.paying else self.budget.can_spend()
