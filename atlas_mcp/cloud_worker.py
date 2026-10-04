@@ -80,8 +80,13 @@ def _drain_locked(cloud, local, ledger_path, registry_, limit):
         task = cloud.task(row["task_id"])
         with local.connect() as db:
             old = db.execute("SELECT body FROM profiles WHERE id=?", (actor,)).fetchone()
-            if old and json.loads(old[0]) != profile:
-                raise ValueError("Cloud/local enrollment differs; operator reconciliation required")
+            earned = {"allow_review", "qualified_at", "calibration_score", "display"}  # changed by qualification, not identity
+            if old:
+                previous = json.loads(old[0])
+                if {k: v for k, v in previous.items() if k not in earned} != {k: v for k, v in profile.items() if k not in earned}:
+                    raise ValueError("Cloud/local enrollment differs; operator reconciliation required")
+                if previous != profile:
+                    db.execute("UPDATE profiles SET body=? WHERE id=?", (json.dumps(profile), actor))
             db.execute("INSERT OR IGNORE INTO profiles VALUES (?,?)", (actor, json.dumps(profile)))
             db.execute("INSERT OR IGNORE INTO tasks(id,condition_id,kind,body) VALUES (?,?,?,?)", (task["id"], task["condition_id"], task["kind"], task["body"]))
             db.execute("INSERT OR IGNORE INTO submissions(id,actor,task_id,kind,payload,signature,created) VALUES (?,?,?,?,?,?,?)",
@@ -113,6 +118,8 @@ def ack_detail(kind, payload, result):
         q = a.get("qualifiers", {})
         detail.update(predicate=a.get("predicate"), object=str(a.get("object"))[:120],
                       label=label(a.get("object")) or q.get("name") or None, claim_id=result.get("claim_id"))
+    if kind == "review":
+        detail.update(verdict=payload.get("verdict"), claim_id=payload.get("claim_id"), reviewer="peer")
     failed = [{"check": c.get("name"), "detail": str(c.get("detail", ""))[:160]}
               for c in result.get("checks", []) if isinstance(c, dict) and not c.get("passed", True)]
     if failed:

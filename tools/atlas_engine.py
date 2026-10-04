@@ -48,7 +48,7 @@ DEFAULT_CONFIG = {
     "daily_usd_cap": 5.0,
     # Assumed list prices (USD per million tokens) until real Sol pricing is configured. Conservative on purpose.
     "prices": {"gpt-6-sol": [5.0, 30.0]},
-    "peer_review_grace_seconds": 0,
+    "peer_review_grace_seconds": 180,
     "poll_seconds": 15,
     "reviewable_predicates": ["has_symptom", "has_asset", "represented_by", "has_name", "studied_by", "has_variant_effect", "has_prevalence"],
 }
@@ -187,7 +187,12 @@ def review_pass(engine):
                 continue  # only MCP contributions; earlier campaigns have their own reviews
             if row["predicate"] not in config["reviewable_predicates"] or row["subject"] not in engine.conditions:
                 continue
-            if row["contributor"] == REFEREE or store.reviews_for(row["claim_id"]):
+            reviews = [dict(v) for v in store.reviews_for(row["claim_id"])]
+            if row["contributor"] == REFEREE or any(v["reviewer"] == REFEREE for v in reviews):
+                continue
+            # A peer review settles it, unless a peer rejected the finding: then the referee looks too,
+            # so a single strict or careless reviewer cannot bury sourced work alone.
+            if reviews and all(v["verdict"] in ("supports", "supports_with_qualification") for v in reviews):
                 continue
             if store.challenges_for(row["claim_id"]) or store.challenges_for(row["assertion_id"]):
                 continue
@@ -231,7 +236,7 @@ def review_pass(engine):
             save_json(STATE / "attempts.json", attempts)
         ledger = Ledger(LEDGER)
         try:
-            if not ledger.store.reviews_for(claim_id):
+            if not any(v["reviewer"] == REFEREE for v in ledger.store.reviews_for(claim_id)):
                 signer = ledger.register(identity.load_or_create(REFEREE), kind="agent", manifest={
                     "role": "referee", "model": MODEL, "model_family": FAMILY, "prompt": "engine-referee@1"})
                 ledger.review(claim_id, judgment["verdict"], judgment["reason"], signer, model_family=FAMILY, model=MODEL, prompt="engine-referee@1")
@@ -283,6 +288,27 @@ def run(args, env=None):
     return result.stdout
 
 
+def refresh_plain(subjects, before_c, after_c):
+    """Rewrite the everyday description of conditions whose recorded symptoms changed (GPT-6 Luna, cached)."""
+    changed = [cid for cid in subjects if cid in after_c and
+               [p["id"] for p in after_c[cid].get("phenotypes", [])] != [p["id"] for p in before_c.get(cid, {}).get("phenotypes", [])]]
+    if not changed:
+        return
+    import plain_summaries
+    path = ROOT / "data/build/plain.jsonl"
+    rows = read_jsonl(path)
+    genes = {g["hgnc_id"]: g for g in map(json.loads, (ROOT / "data/build/genes.jsonl").read_text(encoding="utf-8").splitlines()) if g}
+    pheno = read_jsonl(ROOT / "data/build/phenotypes.jsonl")
+    for cid in changed:
+        summary = plain_summaries.summarize(after_c[cid], genes, pheno)
+        if summary:
+            rows[cid] = summary
+            log(f"refreshed plain summary for {cid}")
+    temp = path.with_suffix(".tmp")
+    temp.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows.values()), encoding="utf-8")
+    temp.replace(path)
+
+
 def publish(engine, subjects):
     py = sys.executable
     before_n = read_jsonl(ROOT / "data/build/neighbors.jsonl")
@@ -290,9 +316,10 @@ def publish(engine, subjects):
     log("rebuilding graph from accepted claims…")
     engine.post(None, "rebuilding", {"subjects": sorted(subjects)[:20]})
     run([py, "pipeline/build_graph.py"])
+    after_c = read_jsonl(ROOT / "data/build/conditions.jsonl")
+    refresh_plain(subjects, before_c, after_c)
     run([py, "pipeline/export_app.py"], env={"ATLAS_EXPORT_OUT": str(EXPORT)})
     after_n = read_jsonl(ROOT / "data/build/neighbors.jsonl")
-    after_c = read_jsonl(ROOT / "data/build/conditions.jsonl")
 
     base_meta = load_json(BASE / "meta.json", {})
     base_id = base_meta.get("data_id")
@@ -343,6 +370,108 @@ def publish(engine, subjects):
     return manifest
 
 
+# ---- peer review: what peers can review, and calibration cases for new reviewers -------------------------
+PEER_PREDICATES = {"has_symptom", "has_asset", "represented_by", "has_name", "studied_by", "has_prevalence"}
+
+
+def peer_frontier(engine):
+    """Kernel-accepted MCP claims still open for review, plus their full claim records for get_claim."""
+    from ledger.policy import claim_review_status
+    from atlas_mcp.challenge_view import challenge_view
+    store = Store(LEDGER, readonly=True)
+    items, records = [], {}
+    try:
+        for row in store.claims_where("kernel_ok=1 AND origin='contributed'"):
+            if row["predicate"] not in PEER_PREDICATES or row["subject"] not in engine.conditions:
+                continue
+            claim = json.loads(row["body"])
+            if not claim.get("provenance", {}).get("intake_submission"):
+                continue
+            reviews = [dict(v) for v in store.reviews_for(row["claim_id"])]
+            status = claim_review_status(reviews)
+            if status in {"independently_reviewed", "human_reviewed", "rejected"}:
+                continue
+            items.append({"claim_id": row["claim_id"], "condition_id": row["subject"], "contributor": row["contributor"],
+                          "predicate": row["predicate"], "object": row["object"],
+                          "reviewed_families": sorted({v["model_family"] for v in reviews if v["model_family"]}),
+                          "reviewers": sorted({v["reviewer"] for v in reviews if v.get("reviewer")})})
+            history = [{"seq": r["seq"], "type": r["type"], "actor": r["actor"], "at": r["ts"], "redacted": bool(r["redacted"])} for r in store.events_for(row["claim_id"])]
+            records[row["claim_id"]] = {"claim_id": row["claim_id"], "claim": claim, "origin": row["origin"], "kernel_accepted": True,
+                                        "review_status": status, "reviews": reviews, "history": history, **challenge_view(store, row)}
+    finally:
+        store.close()
+    return items, records
+
+
+def upload_peer_frontier(engine):
+    items, records = peer_frontier(engine)
+    digest = hashlib.sha256(json.dumps(items, sort_keys=True).encode()).hexdigest()
+    if digest == engine.state.get("peer_frontier"):
+        return
+    container = engine.cloud.container
+    for cid, record in records.items():
+        container.upload_blob("live/claims/" + cid.split(":")[-1] + ".json", json.dumps(record, ensure_ascii=False).encode(), overwrite=True)
+    container.upload_blob("live/review-frontier.json", json.dumps(items).encode(), overwrite=True)
+    engine.state["peer_frontier"] = digest
+    save_json(STATE / "state.json", engine.state)
+
+
+def calibration_cases(engine, limit=60):
+    """Known-answer cases from reviewed claims. Answers stay private in storage; agents only see the case.
+
+    Positives and negatives are the referee's recorded decisions; symptom swaps (a real quote paired with a
+    symptom it does not mention) are certain negatives. Cases measure careful reading, not outside knowledge.
+    """
+    import random
+    from atlas_mcp.cloud_worker import label
+    store = Store(LEDGER, readonly=True)
+    cases, symptoms = [], []
+    try:
+        for row in store.claims_where("kernel_ok=1 AND origin='contributed'"):
+            if row["predicate"] not in ("has_symptom", "has_asset", "represented_by") or row["subject"] not in engine.conditions:
+                continue
+            reviews = [dict(v) for v in store.reviews_for(row["claim_id"])]
+            if len(reviews) != 1:
+                continue
+            claim = json.loads(row["body"])
+            ev = claim["evidence"][0]
+            src = store.source(ev["source_id"])
+            text = sources.read_text(src, root=LEDGER.parent / "sources") if src and src.get("redistributable") else None
+            i = text.find(ev["quote"]) if text else -1
+            context = text[max(0, i - 1200): i + len(ev["quote"]) + 1200] if i >= 0 else None
+            c = engine.conditions[row["subject"]]
+            q = claim["assertion"].get("qualifiers", {})
+            statement = {"has_symptom": f"Patients with this condition have: {label(row['object']) or row['object']}",
+                         "has_asset": f"This study is a {q.get('asset_type', 'study')} relevant to people with this condition",
+                         "represented_by": f"{q.get('name') or row['object']} is a {str(q.get('org_type', 'organization')).replace('_', ' ')} serving people with this condition ({q.get('scope', '')})"}[row["predicate"]]
+            answer = "support" if reviews[0]["verdict"] in ("supports", "supports_with_qualification") else "reject"
+            case = {"condition": f"{c['name']} (gene {c['gene']['symbol']})", "claim": statement, "qualifiers": q,
+                    "quote": ev["quote"][:1500], "source_context": context, "answer": answer, "kind": row["predicate"]}
+            cases.append(case)
+            if row["predicate"] == "has_symptom" and answer == "support":
+                symptoms.append((case, row["object"]))
+    finally:
+        store.close()
+    rng = random.Random(7)
+    names = [label(h) for _, h in symptoms if label(h)]
+    for case, hpo in symptoms:
+        other = next((n for n in rng.sample(names, len(names)) if n != label(hpo) and n.lower() not in case["quote"].lower()), None)
+        if other:
+            cases.append({**case, "claim": f"Patients with this condition have: {other}", "answer": "reject", "kind": "has_symptom (swapped)"})
+    rng.shuffle(cases)
+    balanced = [c for c in cases if c["answer"] == "reject"][:limit // 2] + [c for c in cases if c["answer"] == "support"][:limit // 2]
+    rng.shuffle(balanced)
+    for c in balanced:
+        c["id"] = "cal-" + hashlib.sha256(json.dumps(c, sort_keys=True).encode()).hexdigest()[:16]
+    return balanced
+
+
+def upload_calibration(engine):
+    cases = calibration_cases(engine)
+    engine.cloud.container.upload_blob("live/calibration.json", json.dumps(cases, ensure_ascii=False).encode(), overwrite=True)
+    log(f"calibration set: {len(cases)} cases ({sum(c['answer'] == 'reject' for c in cases)} negatives)")
+
+
 # ---- the loop --------------------------------------------------------------------------------------------
 class Engine:
     def __init__(self):
@@ -379,6 +508,10 @@ class Engine:
             log(f"kernel processed {len(processed)} submission(s): " + ", ".join(p["state"] for p in processed))
         if not receipt.get("log_verified", True):
             raise RuntimeError("Ledger verification failed; stopping before review or publication")
+        try:
+            upload_peer_frontier(self)
+        except Exception as error:
+            log(f"peer frontier upload failed: {error}")
         reviewed = review_pass(self)
         subjects = set(self.state.get("pending_subjects", []))
         if reviewed:
@@ -412,6 +545,7 @@ def main():
     try:
         engine = Engine()
         log(f"engine started (cap ${engine.config['daily_usd_cap']}/day)")
+        upload_calibration(engine)
         while True:
             try:
                 engine.once(force=args.force_publish)

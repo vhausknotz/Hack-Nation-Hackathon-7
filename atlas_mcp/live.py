@@ -23,6 +23,7 @@ DOING = {
     "submit_review": "reviewing a finding", "submit_challenge": "challenging a claim", "submission": "checking its submissions",
     "search_terms": "looking up symptom terms", "request_condition": "requesting work on a condition",
     "fetch_page": "archiving an organization page",
+    "calibration_case": "qualifying as a reviewer", "submit_calibration": "qualifying as a reviewer",
 }
 
 

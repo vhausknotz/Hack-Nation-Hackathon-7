@@ -186,8 +186,10 @@ export function describe(e: LiveEvent, conditionName?: string): string {
       return `Submission rejected${where}`;
     case "review_recorded": {
       const v = d.verdict === "supports" ? "supported" : d.verdict === "supports_with_qualification" ? "supported with a caveat" : d.verdict === "does_not_support" ? "not supported" : d.verdict ? "out of scope" : "recorded";
-      return `Review: ${what} ${v}${where}`;
+      return d.reviewer === "peer" ? `${e.agent} reviewed a finding: ${v}${where}` : `Review: ${what} ${v}${where}`;
     }
+    case "reviewer_qualified":
+      return `${e.agent} qualified as a reviewer (${d.score ?? "calibration passed"})`;
     case "challenge_recorded":
       return `A claim was challenged${where}`;
     case "rebuilding":

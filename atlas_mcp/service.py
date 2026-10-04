@@ -142,6 +142,12 @@ class Atlas:
             located.append(item)
         return located
 
+    def calibration_case(self):
+        raise ValueError("Reviewer calibration runs on the hosted atlas only")
+
+    def submit_calibration(self, case_id, verdict, reason):
+        raise ValueError("Reviewer calibration runs on the hosted atlas only")
+
     def schema(self):
         return {"predicates": {k: asdict(v) for k, v in PREDICATES.items()},
                 "qualifier_values": {k: sorted(v) if v else "text" for k, v in QUALIFIER_VALUES.items()},
