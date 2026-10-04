@@ -243,8 +243,9 @@ def screen(budget, workers, max_pairs=0):
     rows = conditions()
     llm.CACHE = OUT / "cache/llm"
     llm.USAGE = OUT / "cache/llm_usage.jsonl"
-    # No implicit SDK retries: a transport error leaves the entire wave reserved.
-    # This deliberately fails closed on ambiguous billing instead of silently retrying.
+    # No implicit SDK retries: uncertain calls retain their entire wave reservation.
+    # Bounded transient recovery below reserves the next attempt separately.
+    from openai import APIConnectionError, APITimeoutError, InternalServerError, RateLimitError
     from azure.identity import DefaultAzureCredential, get_bearer_token_provider
     provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
     provider()  # warm the shared token before workers can launch parallel PowerShell logins
@@ -256,6 +257,8 @@ def screen(budget, workers, max_pairs=0):
     gate = RateGate()
     processed = 0
     stopped_with_error = False
+    transient_streak = 0
+    transient_total = 0
     previous_uncertain = meta(db, "uncertain_reserved_usd", 0)
     set_meta(db, "budget_usd", budget)
     set_meta(db, "screening_complete", False)
@@ -294,6 +297,7 @@ def screen(budget, workers, max_pairs=0):
             set_meta(db, "uncertain_reserved_usd", previous_uncertain + reserve); db.commit()
             futures = [pool.submit(screen_one, job, gate) for job in jobs]
             failures = []
+            transient_only = True
             for job, future in zip(jobs, futures):
                 try:
                     decision = future.result()
@@ -303,12 +307,27 @@ def screen(budget, workers, max_pairs=0):
                     counts[decision["condition_id"]] = counts.get(decision["condition_id"], 0) + 1
                 except Exception as exc:
                     failures.append(type(exc).__name__ + ": " + str(exc)[:300])
+                    transient_only = transient_only and isinstance(exc, (APIConnectionError, APITimeoutError, InternalServerError, RateLimitError))
             if failures:
+                transient_streak += 1
+                transient_total += 1
+                previous_uncertain += reserve
+                if transient_only and transient_streak <= 3 and transient_total <= 10:
+                    set_meta(db, "stop_reason", "transient_backoff")
+                    recovery = meta(db, "recoveries", [])
+                    recovery.append({"at": pilot.now(), "errors": failures, "retained_reservation_usd": reserve})
+                    set_meta(db, "recoveries", recovery); db.commit()
+                    print(json.dumps({"retrying_after_transient_error": failures, "retained_reservation_usd": previous_uncertain}), flush=True)
+                    export()
+                    time.sleep(min(45, 15 * transient_streak))
+                    continue
                 stopped_with_error = True
                 set_meta(db, "stop_reason", "request_error_reserved_for_review")
                 set_meta(db, "errors", failures); db.commit()
-                print(json.dumps({"stopped": failures, "reserved_usd": previous_uncertain + reserve}), flush=True)
+                print(json.dumps({"stopped": failures, "reserved_usd": previous_uncertain}), flush=True)
                 break
+            transient_streak = 0
+            set_meta(db, "stop_reason", "running")
             measured = usage()
             set_meta(db, "uncertain_reserved_usd", previous_uncertain)
             set_meta(db, "screening_usage", measured)
@@ -364,8 +383,8 @@ def main():
     parser.add_argument("--max-pages", type=int, default=0)
     parser.add_argument("--max-pairs", type=int, default=0)
     args = parser.parse_args()
-    if not 0 < args.budget <= 30 or not 1 <= args.workers <= 32:
-        parser.error("Budget must be <=30 USD; concurrency must be 1..32")
+    if not 0 < args.budget <= 30 or not 1 <= args.workers <= 96:
+        parser.error("Budget must be <=30 USD; concurrency must be 1..96 (shared token/request gates still apply)")
     with single_run("collect" if args.phase == "collect" else "screen"):
         if args.phase == "collect":
             collect(args.max_pages)
