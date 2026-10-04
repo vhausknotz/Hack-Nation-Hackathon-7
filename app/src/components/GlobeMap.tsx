@@ -9,6 +9,9 @@ type V = { x: number; y: number; z: number };
 type Pin = RouteStop & { x: number; y: number };
 
 const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n));
+const MAX_ZOOM = 160;
+const SPIN_KEY = "atlas.globeSpin";
+const readSpin = () => { try { return localStorage.getItem(SPIN_KEY) !== "off"; } catch { return true; } };
 
 export function GlobeMap(props: MapProps) {
   const reduceMotion = useReducedMotion();
@@ -19,11 +22,15 @@ export function GlobeMap(props: MapProps) {
   current.current = props;
   const redraw = useRef<() => void>(() => {});
   const fly = useRef<() => void>(() => {});
-  const zoom = useRef<(factor: number) => void>(() => {});
+  const zoom = useRef<(factor: number, at?: { x: number; y: number }) => void>(() => {});
   const [pins, setPins] = useState<Pin[]>([]);
   const project = useRef<Project>(() => null);
   const [view] = useState(viewNotifier);
   const [hover, setHover] = useState("");
+  const [spinOn, setSpinOn] = useState(readSpin);
+  const spin = useRef(spinOn);
+  spin.current = spinOn;
+  const toggleSpin = () => setSpinOn(on => { try { localStorage.setItem(SPIN_KEY, on ? "off" : "on"); } catch { /* per-viewer convenience only */ } return !on; });
 
   useEffect(() => {
     const el = canvas.current!;
@@ -40,7 +47,7 @@ export function GlobeMap(props: MapProps) {
     // Ambient life on the home view: a slow drift after a few idle seconds, and stars that softly flare.
     let lastInteraction = Date.now(), prevT = 0, idleTimer = 0;
     const twinkles: { i: number; born: number }[] = [];
-    const idle = () => !motion.current && !current.current.focus && !current.current.highlight && !target && Date.now() - lastInteraction > 5000;
+    const idle = () => spin.current && !motion.current && !current.current.focus && !current.current.highlight && !target && Date.now() - lastInteraction > 5000;
     let target: typeof camera | null = null;
     let disposed = false;
     let hitNodes: { id: string; x: number; y: number; name: string }[] = [];
@@ -106,9 +113,9 @@ export function GlobeMap(props: MapProps) {
       for (const n of nodes) {
         const p=screen(n.v); if (p.z<=0 || p.x < -20 || p.x>width+20 || p.y< -20 || p.y>height+20) continue;
         const selected=n.id===focus, relative=rel.has(n.id), lit=highlight?.has(n.id);
-        const size=selected ? 4 : relative || lit ? 2.1 : clamp(.65+Math.sqrt(camera.zoom)*.26+n.connections/100,.7,2);
+        const size=selected ? 4 : relative || lit ? 2.1 : clamp(.65+Math.sqrt(camera.zoom)*.26+n.connections/100,.7,camera.zoom>10?2.6:2);
         ctx.globalAlpha=(focus || highlight) && !selected && !relative && !lit ? .25 : .3+.7*Math.sqrt(p.z);
-        const halo=(selected ? 40 : relative || lit ? 22 : 8+Math.sqrt(camera.zoom)*4);
+        const halo=(selected ? 40 : relative || lit ? 22 : Math.min(26,8+Math.sqrt(camera.zoom)*4));
         ctx.drawImage(glow,p.x-halo/2,p.y-halo/2,halo,halo);
         ctx.fillStyle=selected ? "#fffef4" : relative || lit ? "#ffe1a1" : "#e5c797";
         ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fill();
@@ -153,6 +160,11 @@ export function GlobeMap(props: MapProps) {
       for(const r of [...related].sort((a,b)=>a.id===emphasized?-1:b.id===emphasized?1:0)){ const n=byId.get(r.id);if(n)label(n.name,n.v,true); }
       const areas=camera.zoom<1.7?data.regions:data.constellations;
       for(const a of [...areas].sort((a,b)=>b.size-a.size))label(a.name,vector(a.x,a.y));
+      // Deep inside a cluster, name the individual conditions nearest the centre of the view.
+      if(camera.zoom>5&&!focus){
+        const near=hitNodes.map(h=>({h,d:Math.hypot(h.x-cx,h.y-cy)})).sort((a,b)=>a.d-b.d).slice(0,60);
+        for(const {h} of near){const n=byId.get(h.id);if(n)label(n.name,n.v);}
+      }
       const chosen=route.filter(p=>p.step===activeStep||!route.some(q=>q.id===p.id&&q.step===activeStep)&&route.find(q=>q.id===p.id)?.step===p.step);
       const nextPins: Pin[]=[];
       for(const pin of [...chosen].sort((a,b)=>a.step===activeStep?-1:b.step===activeStep?1:0)) {
@@ -177,7 +189,11 @@ export function GlobeMap(props: MapProps) {
       target=n ? {yaw:n.lon,pitch:n.lat,zoom:focus?2.5:1.2} : {yaw:0,pitch:.08,zoom:1};
       schedule();
     };
-    zoom.current=factor=>{target=null;camera.zoom=clamp(camera.zoom*factor,.7,18);schedule();};
+    zoom.current=(factor,at)=>{
+      target=null;const before=radius,next=clamp(camera.zoom*factor,.7,MAX_ZOOM);
+      // Keep the point under the cursor in place, so zooming heads into the cluster you point at.
+      if(at&&next!==camera.zoom){const dx=at.x-cx,dy=at.y-cy;if(Math.hypot(dx,dy)<before){const after=before*next/camera.zoom,k=1/before-1/after;camera.yaw+=dx*k;camera.pitch=clamp(camera.pitch-dy*k,-Math.PI/2,Math.PI/2);}}
+      camera.zoom=next;schedule();};
     const resize=()=>{const rect=el.getBoundingClientRect();width=rect.width;height=rect.height;const dpr=Math.min(window.devicePixelRatio||1,2);el.width=Math.round(width*dpr);el.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);schedule();};
     const observer=new ResizeObserver(resize);observer.observe(el);
     const pointers=new Map<number,{x:number;y:number}>();
@@ -188,13 +204,13 @@ export function GlobeMap(props: MapProps) {
     const pointerMove=(e:PointerEvent)=>{
       const prev=pointers.get(e.pointerId);
       if(prev){pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Math.hypot(e.clientX-down.x,e.clientY-down.y)>4)moved=true;
-        if(pointers.size===2){const next=distance();if(pinch)camera.zoom=clamp(camera.zoom*next/pinch,.7,18);pinch=next;moved=true;}
+        if(pointers.size===2){const next=distance();if(pinch)camera.zoom=clamp(camera.zoom*next/pinch,.7,MAX_ZOOM);pinch=next;moved=true;}
         else{camera.yaw-=(e.clientX-prev.x)/radius;camera.pitch=clamp(camera.pitch+(e.clientY-prev.y)/radius,-Math.PI/2,Math.PI/2);}schedule();
       }else{const r=el.getBoundingClientRect();const n=nearest(e.clientX-r.left,e.clientY-r.top);setHover(n?.name||"");el.style.cursor=n?"pointer":"grab";}
     };
     const pointerUp=(e:PointerEvent)=>{if(!moved&&pointers.size===1){const r=el.getBoundingClientRect(),n=nearest(e.clientX-r.left,e.clientY-r.top);if(n)current.current.onSelect(n.id);}pointers.delete(e.pointerId);pinch=0;};
     const cancel=(e:PointerEvent)=>{pointers.delete(e.pointerId);pinch=0;moved=true;};
-    const wheel=(e:WheelEvent)=>{lastInteraction=Date.now();e.preventDefault();zoom.current(Math.exp(-e.deltaY*.001));};
+    const wheel=(e:WheelEvent)=>{lastInteraction=Date.now();e.preventDefault();const r=el.getBoundingClientRect();zoom.current(Math.exp(-e.deltaY*.0015),{x:e.clientX-r.left,y:e.clientY-r.top});};
     const key=(e:KeyboardEvent)=>{lastInteraction=Date.now();if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","+","=","-"].includes(e.key)){e.preventDefault();target=null;if(e.key==="ArrowLeft")camera.yaw-=.12;if(e.key==="ArrowRight")camera.yaw+=.12;if(e.key==="ArrowUp")camera.pitch=clamp(camera.pitch+.12,-1.5,1.5);if(e.key==="ArrowDown")camera.pitch=clamp(camera.pitch-.12,-1.5,1.5);if(e.key==="+"||e.key==="=")zoom.current(1.3);if(e.key==="-")zoom.current(1/1.3);schedule();}};
     el.addEventListener("pointerdown",pointerDown);el.addEventListener("pointermove",pointerMove);el.addEventListener("pointerup",pointerUp);el.addEventListener("pointercancel",cancel);el.addEventListener("wheel",wheel,{passive:false});el.addEventListener("keydown",key);
     fly.current();
@@ -210,6 +226,6 @@ export function GlobeMap(props: MapProps) {
     <LiveLayer project={project} subscribe={view.subscribe} agents={props.agents ?? []} pulses={props.pulses ?? []} ripples={props.ripples ?? []} reduceMotion={reduceMotion} onSelect={props.onSelect} />
     {pins.map(p=><button key={p.step} onClick={()=>props.onStop(p.step)} aria-label={`Directions stop ${p.step+1}: ${p.label}`} style={{left:p.x,top:p.y}} className={`absolute z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-xs font-bold shadow-lg ${p.step===props.activeStep?"border-white bg-amber-100 text-slate-900":"border-amber-200/70 bg-slate-900 text-amber-100"}`}>{p.step+1}</button>)}
     <div className="pointer-events-none absolute bottom-3 left-4 right-16 text-[10px] leading-relaxed text-slate-400">{hover || (props.focus ? "Numbered stops follow your Directions. Shared biology, not geography." : `${props.data.nodes.length.toLocaleString()} conditions · drag to turn · scroll to explore`)}</div>
-    <div className="absolute bottom-4 right-4 flex flex-col overflow-hidden rounded-xl bg-slate-900/90 text-white ring-1 ring-white/15"><button className="px-3 py-2 hover:bg-white/10" aria-label="Zoom in" onClick={()=>zoom.current(1.5)}>+</button><button className="border-t border-white/10 px-3 py-2 hover:bg-white/10" aria-label="Zoom out" onClick={()=>zoom.current(1/1.5)}>−</button><button className="border-t border-white/10 px-3 py-2 text-xs hover:bg-white/10" aria-label="Reset globe view" onClick={()=>fly.current()}>↺</button></div>
+    <div className="absolute bottom-4 right-4 flex flex-col overflow-hidden rounded-xl bg-slate-900/90 text-white ring-1 ring-white/15"><button className="px-3 py-2 hover:bg-white/10" aria-label="Zoom in" onClick={()=>zoom.current(1.5)}>+</button><button className="border-t border-white/10 px-3 py-2 hover:bg-white/10" aria-label="Zoom out" onClick={()=>zoom.current(1/1.5)}>−</button><button className="border-t border-white/10 px-3 py-2 text-xs hover:bg-white/10" aria-label="Reset globe view" title="Reset view" onClick={()=>fly.current()}>↺</button>{!reduceMotion&&<button className="border-t border-white/10 px-3 py-2 text-xs hover:bg-white/10" aria-pressed={spinOn} aria-label={spinOn?"Stop the globe turning by itself":"Let the globe turn by itself when idle"} title={spinOn?"Stop auto-rotate":"Auto-rotate when idle"} onClick={toggleSpin}>{spinOn?"❚❚":"▶"}</button>}</div>
   </div>;
 }

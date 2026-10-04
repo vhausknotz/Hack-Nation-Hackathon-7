@@ -79,7 +79,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
       labelWeight: "600",
       renderLabels: false, // labels are drawn in the overlay, with overlap avoidance
       defaultEdgeColor: "#a5b4fc",
-      minCameraRatio: 0.02,
+      minCameraRatio: 0.002,
       maxCameraRatio: 2.5,
       stagePadding: 30,
       zIndex: true,
@@ -147,6 +147,19 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
             const rp = renderer.graphToViewport({ x: ra.x, y: ra.y });
             const rt = shorten(ra.label as string, 30);
             tryPlace({ key: `rel:${r.id}`, text: rt, x: rp.x, y: rp.y + 22, level: "relative", color: regionColor(ra.region as number, 0.8) }, rt.length * 6.6 + 12, 18);
+          }
+        }
+        // Deep inside a cluster, name the individual conditions nearest the centre of the view.
+        if (!f && ratio < 0.07) {
+          const { width, height } = renderer.getDimensions();
+          const near: { id: string; x: number; y: number; d: number }[] = [];
+          graph.forEachNode((id, a) => {
+            const p = renderer.graphToViewport({ x: a.x, y: a.y });
+            if (p.x > 0 && p.y > 0 && p.x < width && p.y < height) near.push({ id, x: p.x, y: p.y, d: Math.hypot(p.x - width / 2, p.y - height / 2) });
+          });
+          for (const n of near.sort((p, q) => p.d - q.d).slice(0, 60)) {
+            const t = shorten(graph.getNodeAttribute(n.id, "label") as string, 30);
+            tryPlace({ key: `node:${n.id}`, text: t, x: n.x, y: n.y + 14, level: "relative", color: "rgba(226,232,240,0.78)" }, t.length * 6.6 + 12, 18);
           }
         }
         for (const a of [...areas].sort((p, q) => (p.level === q.level ? q.size - p.size : p.level === "region" ? -1 : 1))) {

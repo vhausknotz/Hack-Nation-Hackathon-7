@@ -15,6 +15,9 @@ import { routes } from "../lib/links";
 import { loadMap, type StarMapData } from "../lib/map";
 import type { Brief, ConditionBundle } from "../lib/types";
 
+// One stable empty list: a fresh [] on every live-feed render would make the map re-fly and undo the user's zoom.
+const NO_RELATED: Related[] = [];
+
 type Explore = { kind: "g" | "s" | "grp" | "m"; title: string; subtitle: string; conditions: (Brief & { group?: boolean; studies?: number })[]; total: number; science: string;
   people?: { name: string; affiliation: string; genes: string[] }[] };
 
@@ -89,7 +92,7 @@ export default function MapPage() {
         <MapView
           data={map}
           focus={condition ? condition.id : null}
-          related={condition ? related : []}
+          related={condition ? related : NO_RELATED}
           highlight={highlight}
           emphasized={emphasized}
           route={route}
