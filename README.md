@@ -11,6 +11,7 @@ Built for Hack-Nation's 7th Global AI Hackathon, Challenge 05 ("AI Atlas for the
 - **The map:** 7,328 gene-defined rare conditions, each a warm point of light on an interactive globe, with a flat-map alternative. The sphere wraps the existing biological layout; it is not geography. GPT-6 Sol names regions and constellations from what their members share.
 - **Directions:** search a condition and follow six stops: your diagnosis, patient groups, related conditions, existing research, a question to take forward, and what remains unknown. Numbered pins connect the panel to the map.
 - **Groups and studies:** the family view displays kernel-checked, reviewed listings, with source dates, historical-page labels, eligibility restrictions and reviewer reasons. Listings remain separate from recommendations: a specific next-step proposal requires independent or human review.
+- **For patient-group organizers:** Directions connects diagnoses through the same reviewed registry or natural-history record, retaining both sets of restrictions. A printable/copyable brief asks concrete questions about existing questionnaires, data definitions and reuse permissions. Shared listings do not establish that cohorts can be combined.
 - **Evidence everywhere:** every connection shows what it rests on:
   - proteins that bind each other (STRING)
   - shared protein complexes (Complex Portal) and pathways (Reactome, Gene Ontology)
@@ -32,7 +33,7 @@ The atlas is becoming a self-improving evidence network (see [PLAN.md](PLAN.md))
 - **Log:** everything is recorded in a signed, append-only Merkle log, and the map is a projection of accepted claims.
 - **Campaigns:** patient communities can direct and fund agent work on their disease.
 
-The kernel, log, reference imports, literature campaign, trial importer and patient-group scout are built ([ledger/](ledger/), [agents/](agents/)). The [MCP contribution server](atlas_mcp/CLOUD.md) is hosted on Azure with authenticated task discovery, sourced claims, reviews, challenges and durable submission tracking. A real hosted contribution has passed the local kernel and a separate Sol review. The worker stays on the operator's computer; review and publication are explicit. Continuous worker hosting, automatic publication and open-contributor onboarding remain planned.
+The kernel, log, reference imports, literature campaign, trial importer and patient-group scout are built ([ledger/](ledger/), [agents/](agents/)). The [MCP contribution server](atlas_mcp/CLOUD.md) is hosted on Azure with authenticated task discovery, sourced claims, reviews, challenges and durable submission tracking. A [bounded local operator cycle](atlas_mcp/CYCLE.md) has processed two real contributions through kernel checks, Sol reviews, browser tests and live publication. It reserves attempts before spending and resumes without repeating completed work. The worker stays on the operator's computer. Broad continuous discovery, independent model-family review and open-contributor onboarding remain unfinished.
 
 ## Architecture
 

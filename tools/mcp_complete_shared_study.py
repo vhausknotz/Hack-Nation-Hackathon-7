@@ -67,6 +67,17 @@ async def main(command):
                     atomic_json(STATE, receipt)
                     print(source["text"])
                     return
+                if command == "status":
+                    statuses = {}
+                    for cid, submission in receipt["submissions"].items():
+                        current = await call("get_submission", {"submission_id": submission["submission_id"]})
+                        statuses[cid] = {"submission_id": submission["submission_id"], "state": current["state"],
+                                         "claim_id": (current.get("result") or {}).get("claim_id"),
+                                         "published_review_status": (current.get("current_claim") or {}).get("review_status")}
+                    receipt["verified_cloud_status"] = statuses
+                    atomic_json(STATE, receipt)
+                    print(json.dumps(statuses, indent=2))
+                    return
                 source = receipt["source"]
                 ev = evidence_for(source)
                 status = next(line.removeprefix("Status: ") for line in source["text"].splitlines() if line.startswith("Status: "))
@@ -95,5 +106,5 @@ async def main(command):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("inspect", "submit"))
+    parser.add_argument("command", choices=("inspect", "submit", "status"))
     asyncio.run(main(parser.parse_args().command))

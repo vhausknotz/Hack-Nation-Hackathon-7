@@ -1,6 +1,6 @@
 # Lead continuation while the owner naps
 
-Updated 2026-10-04 02:18 UTC. **Implementation owner: Codex. No transfer to Claude has occurred.**
+Updated 2026-10-04 03:15 UTC. **Implementation owner: Codex. No transfer to Claude has occurred.**
 
 The owner authorized continuing the agreed work while away, testing, commits/pushes and existing deployments. They requested Codex usage monitoring and a possible handoff to the existing Claude Code chat in Cursor if only 5% remains. This does not increase any model budget, authorize new paid resources, or bypass permissions.
 
@@ -9,7 +9,7 @@ The owner authorized continuing the agreed work while away, testing, commits/pus
 The newest conversation supersedes the older breadth-first next-priority paragraph in HANDOFF.md. Broad coverage is secondary. The challenge's lead persona is Maria, the patient-group organizer, alongside Devon the caregiver.
 
 1. Build one evidence-backed collaboration journey in a well-supported neighborhood such as SNAP25/STXBP1: diagnosis -> explained connection -> existing research asset -> responsible organization or investigator -> concrete verification question and shareable brief. A plausible connection does not establish that an asset can be reused. Keep hypotheses, restrictions, review status and missing evidence visible. Specific action proposals still need the support required by PLAN; do not relabel a single-model review as independent.
-2. Finish a bounded, resumable contribution cycle: useful missing-evidence task, sourced proposal, deterministic validation, explicitly budgeted semantic review, approved projection and publication. Test rejection, duplicate/retry and interruption paths, single-ledger-writer behavior, and spending limits. Hosted MCP intake already works; operator-triggered worker/review/publication are not yet an autonomous loop.
+2. Finish a bounded, resumable contribution cycle: useful missing-evidence task, sourced proposal, deterministic validation, explicitly budgeted semantic review, approved projection and publication. Test rejection, duplicate/retry and interruption paths, single-ledger-writer behavior, and spending limits. Hosted MCP intake and the bounded operator-triggered review/publication cycle now work end to end; continuous autonomous discovery remains unfinished. The two-attempt pilot allowance is exhausted.
 3. Verify the combined journey on desktop and phone, deploy tested milestones, and document one genuine before/after contribution for the demo. Preserve the currently working family brief. Cute agent presence, chatbot and broad new discovery campaigns remain later priorities.
 
 Read AGENTS.md, CHALLENGE_BRIEF.md, PLAN.md and the newest HANDOFF.md checkpoint before implementation. Main repo was clean at e4c8307; live release was 3d000e7. Recheck actual state instead of assuming these remain current.

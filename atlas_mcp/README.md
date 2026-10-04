@@ -1,8 +1,8 @@
-# Atlas MCP: local contribution loop
+# Atlas MCP: contribution loop
 
-**Implemented:** 13 tools over local stdio, task leases, fixed contributor identities, official-source fetching, a durable signed inbox, kernel processing, reviews, challenges and activity receipts. **Not yet implemented:** remote hosting/authentication, automatic semantic reviewers, automatic website publication, campaign funding or the avatar UI.
+**Implemented:** 13 tools over local stdio and an authenticated [Azure endpoint](CLOUD.md), task leases, fixed contributor identities, official-source fetching, a durable signed inbox, kernel processing, reviews, challenges and activity receipts. The [bounded operator cycle](CYCLE.md) now runs scoped semantic review, tests and publication with persistent attempt limits. Its live two-condition pilot completed and a repeated run made no extra model calls or publication. **Still incomplete:** independent reviewer operation, continuous general discovery, campaign funding and the avatar UI. The ledger worker and cycle run on the operator's computer.
 
-The SDK is the [official Python SDK v1 maintenance line](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x), pinned in `requirements.txt`. The tested server and business layer are separate so remote transport can be added without changing evidence rules.
+The SDK is the [official Python SDK v1 maintenance line](https://github.com/modelcontextprotocol/python-sdk/tree/v1.x), pinned in `requirements.txt`. Local and hosted transport share the evidence rules. The commands below describe the local server; use [CLOUD.md](CLOUD.md) for the hosted bridge.
 
 ## Connect an agent
 
@@ -58,7 +58,7 @@ An evidence task remains available for additional findings. A review task is sco
 ./.venv/Scripts/python -m atlas_mcp.manage drain --limit 100
 ```
 
-Only one ledger writer may run. New `Ledger` instances acquire an OS writer lease; read-only snapshots and MCP intake remain available while it is held. **Migration caveat:** processes launched before this lease was added do not honor it. Let the current demo community scout finish before the first production drain. Tests use isolated ledgers.
+Only one ledger writer may run. `Ledger` instances acquire an OS writer lease; read-only snapshots and MCP intake remain available while it is held. The old demo community scout has finished. Tests use isolated ledgers.
 
 The worker verifies the signed queue envelope, copies and checks archived sources, invokes the kernel and records results. Submission IDs make replay safe after a crash between ledger commit and inbox acknowledgment. Unexpected storage failures leave the item queued. Kernel acceptance is not truth, semantic review or family visibility.
 

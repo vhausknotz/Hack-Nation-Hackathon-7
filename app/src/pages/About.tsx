@@ -30,7 +30,7 @@ export default function About() {
             <b className="text-ink">Look-alikes.</b> Genes from the same protein family whose conditions share almost no symptoms are shown separately: a family resemblance is not a shared mechanism.
           </p>
           <p>
-            <b className="text-ink">Variant effect.</b> Whether a gene change removes the protein's function or makes it overactive or toxic decides which therapy approaches could transfer. It comes from Gene2Phenotype, Orphanet and ClinGen, and many conditions don't have it curated yet.
+            <b className="text-ink">Variant effect.</b> Whether a gene change removes the protein's function or makes it overactive or toxic helps researchers assess a connection. It does not establish that a treatment can transfer. This information comes from Gene2Phenotype, Orphanet and ClinGen, and many conditions don't have it curated yet.
           </p>
         </div>
       </Section>
@@ -38,13 +38,22 @@ export default function About() {
       <Section title="Data, hypotheses and proof">
         <TierLegend />
         <p className="mt-4 text-[15px] leading-relaxed text-ink-soft">
-          Everything recorded in a curated source is shown as data, with a link to it. Connections the atlas computes are always hypotheses: leads for experts to check, never findings. Clinical proof is reserved for trial results and approvals.
+          Curated source records are linked to their databases. Connections the atlas computes are hypotheses: leads for experts to check, never findings. Agent-contributed group and study listings must pass source checks and a semantic review. Each listing shows its review level; a study being listed is not evidence that a treatment works.
         </p>
       </Section>
 
-      <Section title="Where this is going">
+      <Section title="For patient-group organizers">
         <p className="text-[15px] leading-relaxed text-ink-soft">
-          The atlas is becoming a living evidence network. AI agents, ours and anyone's, will read papers, trials and patient-group pages and propose new claims. A small trusted kernel checks what can be checked mechanically (the source exists, the quote is really in it, the identifiers are valid, computations reproduce), and independent reviewers judge the meaning. Nothing becomes knowledge without passing both, and every claim keeps its full history.
+          In Directions, “Prepare your questions” looks for the same research record in two diagnoses' reviewed listings. It connects that overlap to questions about existing questionnaires, data definitions and research infrastructure. The shareable brief keeps both diagnoses' restrictions and sources. The study team still needs to confirm the current protocol, scientific suitability, consent and permissions before anything can be shared.
+        </p>
+      </Section>
+
+      <Section title="How agents improve the atlas">
+        <p className="text-[15px] leading-relaxed text-ink-soft">
+          Enrolled agents can use our hosted MCP service to find research tasks, archive official sources and submit quoted claims. A deterministic checker verifies identifiers, archived quotes and signatures. A separate reviewer checks what the source actually supports. The operator's bounded workflow can then rebuild, test and publish the result. Rejected submissions remain in the contribution history and do not become family listings.
+        </p>
+        <p className="mt-3 text-[15px] leading-relaxed text-ink-soft">
+          Current study and community reviews use one model family. They are labeled as single-AI reviews, not independent verification. Independent review, broader contributor access and continuous research campaigns remain unfinished. Specific partnership recommendations need stronger evidence than the shared-listing questions shown today.
         </p>
       </Section>
 

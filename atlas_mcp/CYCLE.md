@@ -1,5 +1,13 @@
 # Bounded review and publication cycle
 
+**Live pilot completed:** both STXBP1/SYNGAP1 corrections were kernel-accepted,
+Sol-supported and published to the MCP and website. All desktop/phone and live
+checks passed. An unchanged rerun retained two reservations and made no new model
+call or publication. Receipt: `data/campaigns/mcp-shared-study-result.json`.
+The initial oversized quotes were rejected before any paid review and remain in
+history. The corrected review calls used 4,587 input and 370 output tokens total.
+The two-attempt allowance is now exhausted; do not reset it to authorize more work.
+
 The authenticated MCP gateway accepts contributions but never calls paid models.
 `tools/run_contribution_cycle.py` is a separate, explicitly started local operator
 runner. One invocation drains up to 25 signed submissions, reviews only approved

@@ -80,7 +80,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (cloud/HTTP dependencies: `atlas_mcp/requirements-cloud.txt`; Azurite instructions in `atlas_mcp/CLOUD.md`). `agents/community_coverage/` stages offline research; its explicitly invoked `import_reviewed` command writes the ledger and calls Sol.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 Bounded contribution/review/publication runner: [atlas_mcp/CYCLE.md](atlas_mcp/CYCLE.md). Paid reviews require the pinned local plan; never reset its persistent reservation state to get more attempts.
-New Ledger instances enforce an OS writer lease. Processes already running when the lease was introduced do not; let the current community scout exit before draining the MCP inbox. MCP intake itself never writes the evidence ledger or spends on models.
+New Ledger instances enforce an OS writer lease. The community scout is complete; check active jobs before starting any new writer. MCP intake itself never writes the evidence ledger or spends on models.
 
 ## Azure OpenAI (Foundry)
 
@@ -123,7 +123,7 @@ New Ledger instances enforce an OS writer lease. Processes already running when 
 
 ## Working preferences
 
-**Current parallel coordination:** Codex lead owns MCP, ledger/pipeline, Luna runs, infrastructure, integration and deployment. The second agent's family UI commit `2b2f5b3` is integrated. Its next scoped task is `docs/agent_tasks/community_coverage_parallel.md`, in a separate worktree: staged community evidence and new discovery helpers only, no production-ledger writes or paid campaigns. Record cross-agent requests in the task report; the owner can relay its path/commit. Historical task assignments are superseded.
+**Current coordination:** Codex is lead. Both external-agent packages (family UI 2b2f5b3 and community coverage f382cf4) are integrated and reviewed; their assignments are complete. No external agent owns active files. See HANDOFF.md and docs/agent_tasks/nap_continuation.md for current work, budgets and ownership. Do not start a second ledger writer.
 
 - Don't put time estimates on tasks or plans. Describe steps by what they produce.
 - Clarity beats feature count. Every screen should make sense at a glance; depth goes behind a click.

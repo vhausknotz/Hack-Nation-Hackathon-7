@@ -1,0 +1,94 @@
+{
+  "purpose": "Shared natural-history eligibility completed through hosted MCP and bounded operator cycle",
+  "record": "NCT06555965",
+  "verified_cloud_status": {
+    "MONDO:0012812": {
+      "submission_id": "submission:sha256:c4e9f937eefcfabd45f1c3aaa20beabc968fa411270a5edae81e4343de60f4e7",
+      "state": "kernel_accepted",
+      "claim_id": "claim:sha256:fb05c5b0a9b80358cbb7014274ab8b279f88106a0061de2e013eb40d71e3d223",
+      "published_review_status": "reviewed"
+    },
+    "MONDO:0012960": {
+      "submission_id": "submission:sha256:b69c3dbcc262fb6d6d572994fdb7dca9d85ad200dc3737f1dee273ba8e6d2775",
+      "state": "kernel_accepted",
+      "claim_id": "claim:sha256:9f79470391228e7440ab3e31873600bcfa4eb4ef12c0cac3ad7428dd19f2f616",
+      "published_review_status": "reviewed"
+    }
+  },
+  "initial_kernel_rejections": 2,
+  "initial_rejection_reason": "Purpose quote exceeded 2000 characters; no model call occurred",
+  "corrected_prompt": "complete-shared-study-eligibility@2",
+  "attempts": {
+    "claim:sha256:9f79470391228e7440ab3e31873600bcfa4eb4ef12c0cac3ad7428dd19f2f616": {
+      "state": "complete",
+      "judgment": {
+        "verdict": "supports",
+        "reason": "This natural history study follows people with causative SYNGAP1 variants over time, and the screener preserves the record’s additional exclusions."
+      }
+    },
+    "claim:sha256:fb05c5b0a9b80358cbb7014274ab8b279f88106a0061de2e013eb40d71e3d223": {
+      "state": "complete",
+      "judgment": {
+        "verdict": "supports_with_qualification",
+        "reason": "This study follows people with STXBP1-related epilepsy over time, but eligibility requires a causative STXBP1 variant and excludes people with certain other conditions or medical histories."
+      }
+    }
+  },
+  "review_usage": {
+    "model": "gpt-6-sol",
+    "calls": 2,
+    "input_tokens": 4587,
+    "output_tokens": 370,
+    "usd": null,
+    "note": "Sol price is not configured in the logger; missing cost is not zero"
+  },
+  "publication": {
+    "revision": "1704:7f65eb1e6b7dad7835944c670f90c1ff975d392890abe6911be1b0101c865884:afe2a3517fe4fcb2c28978deede296e2b3e20c20",
+    "completed": [
+      "export",
+      "build",
+      "browser_checks",
+      "cloud_snapshot",
+      "website",
+      "live_check"
+    ],
+    "results": {
+      "export": {
+        "ok": true
+      },
+      "build": {
+        "ok": true
+      },
+      "browser_checks": {
+        "ok": true
+      },
+      "cloud_snapshot": {
+        "prefix": "published/661ccc94192247418bf3d4a2dc82eebd",
+        "published_at": "2026-10-04T03:00:05.246383+00:00",
+        "ledger_tree_head": {
+          "size": 1704,
+          "root": "7f65eb1e6b7dad7835944c670f90c1ff975d392890abe6911be1b0101c865884",
+          "ts": "2026-10-04T02:58:47+00:00",
+          "signature": "ed25519:e-jsr0uaGZCVqYpe3Px7C7BIp0LsMMBh0RXCysdXk6SGfawJpIdJ8LJJ7IJKl7ZqsiOYX3H1sHTTogJ51ITNAQ"
+        },
+        "conditions": 7328,
+        "records": 8054,
+        "claim_coverage": "Contributed claims; bulk reference evidence remains in the local ledger.",
+        "website_updated": false
+      },
+      "website": {
+        "deployed": true,
+        "url": "https://salmon-island-04aa8f603.1.azurestaticapps.net"
+      },
+      "live_check": {
+        "ok": true
+      }
+    }
+  },
+  "restart_check": "Repeated completed cycle: two reservations retained, no new review or publication",
+  "limitations": [
+    "Single model-family review, not independent verification",
+    "Explicit local operator runner, not a continuously hosted worker",
+    "Only the pinned two-condition/study pilot is authorized"
+  ]
+}
