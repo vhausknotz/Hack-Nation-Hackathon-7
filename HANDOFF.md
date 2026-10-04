@@ -6,6 +6,8 @@ This file supersedes the contradictory historical checkpoints preserved in [the 
 
 ## Low-usage checkpoint — ready to resume
 
+Submission materials/access check: [docs/submission_readiness.md](docs/submission_readiness.md). GitHub metadata confirmed the repository is **PRIVATE** at 05:59 UTC; source access for judges needs an owner decision. Do not change visibility or permissions automatically. Silent footage exists, but narration/team introduction and actual form submission remain undone. No model calls, uploads or access changes were made for this check.
+
 Codex reached **90% used / 10% remaining** at 05:42 UTC. This is the requested early checkpoint, **not a transfer**. Implementation milestone `117bccb` is pushed, and no implementation edits remain in progress. The ledger-writer and Luna-screening leases were both available when checked; neither job is running. Preserve the ignored ledger, keys, receipts, source archives and demo video when continuing on this computer. Do not start fresh state directories to get another spending allowance.
 
 The immediate useful next task is a **synthetic-data-tested family dispute view**: show the original and reviewed counter-evidence together, distinguish pending objections from reviewed disputes, and keep disputed listings out of ordinary shared-research questions. Preserve the existing export guard until the complete display/projection path is verified. Do not create a fake dispute in production to demonstrate it. Production currently has zero challenges.
