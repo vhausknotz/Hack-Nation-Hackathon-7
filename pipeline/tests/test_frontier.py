@@ -36,3 +36,10 @@ def test_known_variants_with_little_clinical_description():
     s, why, _ = score(condition("a", n=1), variants={"plp": 40})
     assert s == score(condition("a", n=1))[0] + 1
     assert any("40 disease-causing variants" in w for w in why)
+
+
+def test_campaigns_buy_attention_with_a_stated_reason():
+    plain, boosted = score(condition("a", n=9)), score(condition("a", n=9), campaign="SNARE neighborhood")
+    assert boosted[0] == plain[0] + 4 and boosted[1][0] == "part of the campaign “SNARE neighborhood”"
+    rows = frontier({"a": condition("a", n=9), "b": condition("b", n=9)}, {}, {}, {}, campaigns={"b": "SNARE neighborhood"})
+    assert rows[0]["condition_id"] == "b" and rows[0]["campaign"] == "SNARE neighborhood"

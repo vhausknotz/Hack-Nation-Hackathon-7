@@ -206,6 +206,12 @@ export function describe(e: LiveEvent, conditionName?: string): string {
       return `Someone asked agents to work on ${conditionName ?? "a condition"}${d.count > 1 ? ` (${d.count} requests)` : ""}`;
     case "moderated":
       return d.action === "suspend" ? `The atlas operator suspended ${d.contributor}: ${d.reason}` : `The atlas operator reinstated ${d.contributor}`;
+    case "campaign_started":
+      return `A campaign started: ${d.title}`;
+    case "campaign_funded":
+      return `Campaign “${d.title}” was funded (budget $${Number(d.budget_usd).toFixed(2)})`;
+    case "campaign_closed":
+      return `Campaign “${d.title}” closed`;
     case "budget_reached":
       return "Today's review budget is used up; findings wait for peer reviewers";
     default:

@@ -541,7 +541,9 @@ def upload_impact_frontier(engine):
     requests = engine.intake.requests()
     changes = load_json(STATE / "overlay.json", {}).get("changes", [])
     recent = {c["condition_id"] for c in changes if time.time() - c.get("at", 0) < 3 * 86400}
-    rows = frontier.frontier(conditions, load_actions(conditions), variants, {k: v for k, v in requests.items() if k in conditions}, recent)
+    campaigns = {cid: c["title"] for c in engine.cloud.rows("campaign") if c["status"] == "open" for cid in c["conditions"]}
+    rows = frontier.frontier(conditions, load_actions(conditions), variants, {k: v for k, v in requests.items() if k in conditions}, recent,
+                             campaigns=campaigns)
     body = {"at": time.time(), "goals": frontier.GOALS, "conditions": rows}
     engine.cloud.container.upload_blob("live/evidence-frontier.json", json.dumps(body).encode(), overwrite=True)
     log(f"impact frontier: top {rows[0]['condition_id'] if rows else '-'} ({sum(1 for r in rows if r['requests'])} requested)")
@@ -639,6 +641,19 @@ def upload_track_records(engine):
             connections += [[when, e["condition_id"], n["id"]] for n in (e.get("detail") or {}).get("new_connections", [])]
     engine.cloud.container.upload_blob("live/history.json", json.dumps({"at": time.time(), "findings": findings,
                                                                         "connections": sorted(connections)}).encode(), overwrite=True)
+    # Campaign progress (tools/campaigns.py): findings accepted since the start, symptoms now, requests, spend.
+    current = read_jsonl(ROOT / "data/build/conditions.jsonl")
+    requests_now = engine.intake.requests()
+    public_campaigns = []
+    for camp in engine.cloud.rows("campaign"):
+        since = datetime.fromtimestamp(camp["created"], timezone.utc).isoformat(timespec="seconds")
+        public_campaigns.append({**{k: camp.get(k) for k in ("id", "title", "goal", "sponsor", "budget_usd", "spent_usd", "status", "created", "rounds")},
+                                 "conditions": [{"condition_id": cid, "name": current.get(cid, {}).get("name", cid),
+                                                 "gene": current.get(cid, {}).get("gene", {}).get("symbol"),
+                                                 "symptoms": len(current.get(cid, {}).get("phenotypes", [])),
+                                                 "findings_since_start": sum(1 for f in findings if f[1] == cid and f[0] >= since),
+                                                 "requests": requests_now.get(cid, 0)} for cid in camp["conditions"]]})
+    engine.cloud.container.upload_blob("live/campaigns.json", json.dumps({"at": time.time(), "campaigns": public_campaigns}).encode(), overwrite=True)
     engine.cloud.container.upload_blob("live/expert-queue.json", json.dumps({"at": time.time(), "claims": expert_rows}).encode(), overwrite=True)
     public.sort(key=lambda r: (-r["accepted"], -r["reviews_given"], r["id"]))
     engine.cloud.container.upload_blob("live/contributors.json", json.dumps({"at": time.time(), "contributors": public}).encode(), overwrite=True)

@@ -8,6 +8,7 @@ the website's "what needs work" list both read it. The score is a transparent su
     genetic certainty                  well-established gene-disease links first (work there is less likely wasted)
     known variants, little clinical    many disease-causing ClinVar variants but few recorded symptoms
     recently expanded                  lower, so attention spreads
+    campaign                           conditions in an open campaign (tools/campaigns.py): attention, never acceptance
 """
 import math
 
@@ -26,13 +27,16 @@ GOALS = {
 }
 
 
-def score(c, actions=None, variants=None, requests=0, recent=False):
+def score(c, actions=None, variants=None, requests=0, recent=False, campaign=None):
     """(score, reasons in plain words, focus) for one condition record from conditions.jsonl."""
     actions = actions or {}
     n = len(c.get("phenotypes") or [])
     groups = [o for o in actions.get("communities", []) if o.get("kind") == "patient_organization"]
     studies = actions.get("assets", [])
     total, why = 0.0, []
+    if campaign:
+        total += 4
+        why.append(f"part of the campaign “{campaign}”")
     if requests:
         total += 6 * math.log2(1 + requests)
         why.append(f"{requests} {'person' if requests == 1 else 'people'} asked for this")
@@ -69,12 +73,12 @@ def score(c, actions=None, variants=None, requests=0, recent=False):
     return round(total, 2), why, focus
 
 
-def frontier(conditions, actions, variants, requests, recent=(), limit=200):
+def frontier(conditions, actions, variants, requests, recent=(), limit=200, campaigns=None):
     rows = []
-    recent = set(recent)
+    recent, campaigns = set(recent), campaigns or {}
     for cid, c in conditions.items():
-        s, why, focus = score(c, actions.get(cid), variants.get(cid), requests.get(cid, 0), cid in recent)
+        s, why, focus = score(c, actions.get(cid), variants.get(cid), requests.get(cid, 0), cid in recent, campaigns.get(cid))
         rows.append({"condition_id": cid, "name": c["name"], "gene": c["gene"]["symbol"], "score": s, "why": why,
-                     "focus": focus, "requests": requests.get(cid, 0)})
+                     "focus": focus, "requests": requests.get(cid, 0), **({"campaign": campaigns[cid]} if cid in campaigns else {})})
     rows.sort(key=lambda r: (-r["score"], r["condition_id"]))
     return rows[:limit]

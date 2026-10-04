@@ -97,6 +97,7 @@ class Scout:
             self.intake.enroll(f"luna-scout-{n}", MODEL, "openai-gpt6", f"atlas-scout|luna-scout-{n}",
                                allow_review=False, quota=40, display=f"Luna scout {n}")
         self.cloud = cloud
+        self.paying = None
         self.new_atlas = lambda: Presence(CloudAtlas(self.intake, Projection(cloud.container), self.actor), cloud, self.actor)
 
     def chat(self, messages):
@@ -111,20 +112,45 @@ class Scout:
                     f.seek(before)
                     rows = [json.loads(l) for l in f.read().decode("utf-8").splitlines() if l.strip()]
                 usd = sum((r.get("input_tokens") or 0) / 1e6 * PRICE[0] + (r.get("output_tokens") or 0) / 1e6 * PRICE[1] for r in rows if r.get("model") == MODEL)
-                self.budget.charge(usd=usd)
+                if self.paying:  # a funded campaign pays for this round (tools/campaigns.py)
+                    self.paying["round_usd"] += usd
+                else:
+                    self.budget.charge(usd=usd)
 
-    def pick(self, worked):
+    def funded(self):
+        """Open campaigns with budget left: condition id -> campaign row."""
+        out = {}
+        for c in self.cloud.rows("campaign"):
+            if c["status"] == "open" and c.get("budget_usd", 0) - c.get("spent_usd", 0) > 0.01:
+                for cid in c["conditions"]:
+                    out.setdefault(cid, c)
+        return out
+
+    def settle(self):
+        """Charge the round's model spend to its campaign (public receipt on /campaigns)."""
+        paying, self.paying = self.paying, None
+        if not paying or paying["round_usd"] <= 0:
+            return
+        def decide(seq):
+            row = self.cloud.get("campaign", paying["id"])
+            row["spent_usd"] = round(row.get("spent_usd", 0) + paying["round_usd"], 6)
+            row["rounds"] = row.get("rounds", 0) + 1
+            return None, [("campaign", row["id"], row)]
+        self.cloud.atomic(decide)
+
+    def pick(self, worked, only=None):
         # Prefer genes linked to a single condition: papers about the gene are then about this condition.
         per_gene = {}
         for c in self.conditions.values():
             per_gene[c["gene"]["symbol"]] = per_gene.get(c["gene"]["symbol"], 0) + 1
-        thin = [c for c in self.conditions.values() if len(c.get("phenotypes", [])) < 5 and c["id"] not in worked]
+        thin = [c for c in self.conditions.values() if len(c.get("phenotypes", [])) < 5 and c["id"] not in worked
+                and (only is None or c["id"] in only)]
         random.shuffle(thin)
         thin.sort(key=lambda c: per_gene[c["gene"]["symbol"]] > 1)
         # Conditions that families or agents asked for come first (impact frontier from the engine).
         try:
             ranked = json.loads(self.cloud.container.download_blob("live/evidence-frontier.json").readall())["conditions"]
-            wanted = {r["condition_id"] for r in ranked if r["requests"] and r["focus"] == "symptoms"}
+            wanted = {r["condition_id"] for r in ranked if (r["requests"] or r.get("campaign")) and r["focus"] == "symptoms"}
         except Exception:
             wanted = set()
         thin.sort(key=lambda c: c["id"] not in wanted)  # stable: keeps the single-gene preference within each group
@@ -173,19 +199,35 @@ class Scout:
         return {f: h for f, h in (reply.get("mapping") or {}).items() if f in allowed and h in allowed[f]}
 
     def round(self, worked):
-        if not (self.budget.can_spend() and self.budget.can_submit()):
+        funded = self.funded()
+        base = self.budget.can_spend()
+        if not self.budget.can_submit() or not (base or funded):
             log(f"scout {self.n}: budget for today reached; resting")
             return None
-        c, pmids = self.pick(worked)
+        # Funded campaigns first; once the base budget is used up, only funded campaign work continues.
+        c, pmids = self.pick(worked, only=set(funded)) if funded else (None, [])
+        if not c and base:
+            c, pmids = self.pick(worked)
         if not c:
             return None
+        campaign = funded.get(c["id"])
+        self.paying = {"id": campaign["id"], "left": campaign["budget_usd"] - campaign.get("spent_usd", 0), "round_usd": 0.0} if campaign else None
+        try:
+            return self.work(c, pmids)
+        finally:
+            self.settle()
+
+    def can_spend(self):
+        return self.paying["round_usd"] < self.paying["left"] if self.paying else self.budget.can_spend()
+
+    def work(self, c, pmids):
         atlas = self.new_atlas()
         task = f"evidence:{c['id']}"
         atlas.frontier(c["id"], 5)
         atlas.claim_task(task)
         submitted = 0
         for pmid in pmids:
-            if not (self.budget.can_spend() and self.budget.can_submit()):
+            if not (self.can_spend() and self.budget.can_submit()):
                 break
             try:
                 src = atlas.fetch_source(task, "pubmed", pmid)
@@ -211,7 +253,8 @@ class Scout:
                 except ValueError as error:
                     log(f"scout {self.n}: claim not queued ({error})")
             time.sleep(random.uniform(20, 60))  # read like a person, not a crawler: presence stays visible on the map
-        log(f"scout {self.n}: {c['name']} ({c['id']}): {len(pmids)} papers, {submitted} findings submitted")
+        log(f"scout {self.n}: {c['name']} ({c['id']}): {len(pmids)} papers, {submitted} findings submitted"
+            + (f" (paid by campaign {self.paying['id']}: ${self.paying['round_usd']:.4f})" if self.paying else ""))
         return c["id"]
 
 

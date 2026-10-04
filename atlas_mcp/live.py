@@ -159,6 +159,12 @@ class Feed:
         except ResourceNotFoundError:
             return {"at": None, "contributors": []}
 
+    def campaigns(self):
+        try:
+            return self.store.container.download_blob("live/campaigns.json").readall()
+        except ResourceNotFoundError:
+            return b'{"at": null, "campaigns": []}'
+
     def history(self):
         try:
             return self.store.container.download_blob("live/history.json").readall()
@@ -240,6 +246,12 @@ def add_routes(mcp, feed):
         import anyio
         body = await anyio.to_thread.run_sync(feed.contributors)
         return JSONResponse(body, headers={**headers, "Cache-Control": "public, max-age=120"})
+
+    @mcp.custom_route("/live/campaigns", methods=["GET"])
+    async def live_campaigns(request):
+        import anyio
+        raw = await anyio.to_thread.run_sync(feed.campaigns)
+        return Response(raw, media_type="application/json", headers={**headers, "Cache-Control": "public, max-age=120"})
 
     @mcp.custom_route("/live/history", methods=["GET"])
     async def live_history(request):
