@@ -29,9 +29,10 @@ def drain(state, ledger_path, registry_=None, limit=100):
                     raise ValueError("Submission content or signature was changed")
                 signer = intake.signer(actor)
                 existing = ledger.store.contributor(actor)
-                if existing and (existing["public_key"] != profile["public_key"] or existing["kind"] != "agent"):
+                kind_ = "human" if profile.get("kind") == "human" else "agent"  # operator-vetted experts review as people
+                if existing and (existing["public_key"] != profile["public_key"] or existing["kind"] != kind_):
                     raise ValueError("Ledger identity conflicts with operator enrollment")
-                ledger.register(signer, kind="agent", manifest=profile["manifest"])
+                ledger.register(signer, kind=kind_, manifest=profile["manifest"])
                 already = ledger.store.db.execute("SELECT payload FROM events WHERE actor=? AND type='intake.processed' AND json_extract(payload,'$.intake_submission')=?",
                                                    (actor, row["id"])).fetchone()
                 if already:
@@ -68,8 +69,9 @@ def drain(state, ledger_path, registry_=None, limit=100):
                         raise ValueError("Reviewer permission was revoked or not granted")
                     prior = ledger.store.db.execute("SELECT id FROM events WHERE type='review.attested' AND actor=? AND json_extract(payload,'$.submission_id')=?",
                                                     (actor, row["id"])).fetchone()
+                    human = profile.get("kind") == "human"
                     eid = prior[0] if prior else ledger.review(payload["claim_id"], payload["verdict"], payload["reason"], signer,
-                                                              model_family=profile["model_family"], model=profile["model"],
+                                                              model_family=None if human else profile["model_family"], model=None if human else profile["model"],
                                                               prompt=payload["prompt"], submission_id=row["id"])
                     result = {"state": "review_recorded", "event_id": eid, "claim_id": payload["claim_id"],
                               "review_status": ledger.claim_status(payload["claim_id"]), "published": False}

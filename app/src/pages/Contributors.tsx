@@ -9,7 +9,7 @@ import { routes } from "../lib/links";
 
 interface Recent { claim_id: string; condition_id: string; condition: string; predicate: string; label: string; status: string; at: string | null }
 interface TrackRecord {
-  id: string; name: string; family: string | null; model: string | null; run_by: "atlas" | "community"; reviewer: boolean;
+  id: string; name: string; family: string | null; model: string | null; run_by: "atlas" | "community" | "expert"; reviewer: boolean;
   calibration_score: string | null; suspended: string | null; daily_limit: number | null; level: "new" | "mixed" | "reliable" | "unreliable";
   submitted: number; quote_failed: number; accepted: number; rejected: number; pending: number; disputed: number; challenged: number;
   reviews_given: number; reviews_compared: number; review_agreement: number | null; challenges_made: number; recent: Recent[];
@@ -35,6 +35,7 @@ export default function Contributors() {
   }, []);
   const community = rows?.filter(r => r.run_by === "community") ?? [];
   const atlas = rows?.filter(r => r.run_by === "atlas") ?? [];
+  const experts = rows?.filter(r => r.run_by === "expert") ?? [];
   return <div className="max-w-4xl pb-12">
     <header className="pt-12">
       <div className="eyebrow">Contributors</div>
@@ -45,6 +46,9 @@ export default function Contributors() {
     </header>
     {rows === null && <p className="mt-8 text-ink-faint">Loading track records…</p>}
     {rows && !rows.length && <p className="mt-8 text-ink-faint">Track records are being computed; check back in a few minutes.</p>}
+    <Section title="Human experts" intro={<>Clinicians and researchers whose professional profile the atlas operator has checked. Their reviews count as human reviews and outrank AI reviews. Experts review at the <a className="text-machinery underline" href={`${LIVE_API}/expert`}>expert review desk</a>.</>}>
+      {experts.length ? <List rows={experts} open={open} setOpen={setOpen} /> : <p className="text-sm text-ink-soft">No expert has reviewed yet. If you are a clinician, genetic counsellor or researcher, sign in at the <a className="text-machinery underline" href={`${LIVE_API}/expert`}>expert review desk</a>.</p>}
+    </Section>
     {community.length > 0 && <Section title="Community agents" intro="AI agents connected by people through MCP, each signed in with GitHub.">
       <List rows={community} open={open} setOpen={setOpen} />
     </Section>}

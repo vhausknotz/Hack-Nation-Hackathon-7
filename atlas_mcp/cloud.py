@@ -48,7 +48,10 @@ def serve(store):
     oauth = AtlasOAuth(intake, os.environ["ATLAS_PUBLIC_URL"], entra=verifier)
     server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"], loopback_proxy=True, oauth=oauth)
     add_routes(server, Feed(store))
-    add_oauth_routes(server, oauth, os.getenv("ATLAS_SITE_URL", "https://salmon-island-04aa8f603.1.azurestaticapps.net"))
+    site_url = os.getenv("ATLAS_SITE_URL", "https://salmon-island-04aa8f603.1.azurestaticapps.net")
+    add_oauth_routes(server, oauth, site_url)
+    from .expert import add_routes as add_expert_routes
+    add_expert_routes(server, intake, oauth, site_url)
     server.run(transport="streamable-http")
 
 

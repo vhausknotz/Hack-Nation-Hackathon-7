@@ -123,6 +123,13 @@ class AtlasOAuth:
         self.put("oauthpending", state, {"kind": "personal", "label": label[:40], "expires": time.time() + 900})
         return self.github.authorize_url(self.callback, state)
 
+    def expert_start(self):
+        if not self.github.configured:
+            raise ValueError("GitHub sign-in is not configured on this atlas yet")
+        state = secrets.token_urlsafe(24)
+        self.put("oauthpending", state, {"kind": "expert", "expires": time.time() + 900})
+        return self.github.authorize_url(self.callback, state)
+
     def contributor(self, user, client_key, client_name):
         """Find or enroll the contributor for this GitHub account and client app."""
         principal = f"github|{user['id']}|{client_key}"
@@ -146,6 +153,10 @@ class AtlasOAuth:
         if not pending or pending["expires"] < time.time():
             raise ValueError("Sign-in link expired; start again from your agent")
         user = self.github.user(code, self.callback)
+        if pending["kind"] == "expert":  # web session for the expert review page (atlas_mcp/expert.py)
+            session = "exs_" + secrets.token_urlsafe(32)
+            self.put("expertsession", digest(session), {"github_id": user["id"], "login": user["login"], "expires": time.time() + 12 * 3600})
+            return ("expert", session)
         if pending["kind"] == "personal":
             actor = self.contributor(user, "personal-" + slug(pending["label"], 30), pending["label"] or "personal token")
             token = "atl_" + secrets.token_urlsafe(32)
@@ -237,6 +248,10 @@ a{{color:#4f46e5}}.box{{background:#fff;border:1px solid #e2e8f0;border-radius:1
             return page("Sign-in failed", f"<h1>Sign-in failed</h1><p>{html.escape(str(error))}</p>")
         if result[0] == "redirect":
             return RedirectResponse(result[1], status_code=302)
+        if result[0] == "expert":
+            response = RedirectResponse(oauth.origin + "/expert", status_code=302)
+            response.set_cookie("atlas_expert", result[1], max_age=12 * 3600, httponly=True, secure=True, samesite="lax", path="/expert")
+            return response
         _, token, actor, expires = result
         endpoint = oauth.origin + "/mcp"
         gemini = json.dumps({"mcpServers": {"rare-disease-atlas": {"httpUrl": endpoint, "headers": {"Authorization": "Bearer " + token}}}}, indent=2)

@@ -557,6 +557,7 @@ def upload_track_records(engine):
         return
     engine.state["records_at"] = time.time()
     import track_record
+    from ledger.policy import claim_review_status
     store = Store(LEDGER, readonly=True)
     try:
         claims = [dict(r) for r in store.claims_where("origin = 'contributed'")]
@@ -564,6 +565,20 @@ def upload_track_records(engine):
         challenges = [dict(r) for r in store.all_challenges()]
         seqs = {c["created_seq"] for c in claims if c["created_seq"]}
         times = {r[0]: r[1] for r in store.db.execute("SELECT seq, ts FROM events WHERE type LIKE 'claim%'") if r[0] in seqs}
+        # Expert queue: recent quote-checked findings that no person has reviewed yet (atlas_mcp/expert.py).
+        human = {r["claim_id"] for r in reviews if r["reviewer_kind"] == "human"}
+        recent = sorted((c for c in claims if c["kernel_ok"] and c["claim_id"] not in human), key=lambda c: -(c["created_seq"] or 0))[:60]
+        expert_rows = []
+        for c in recent:
+            body = json.loads(c["body"])
+            evidence = body.get("evidence", [])
+            src = store.source(evidence[0]["source_id"]) if evidence and evidence[0].get("source_id") else None
+            mine = [r for r in reviews if r["claim_id"] == c["claim_id"]]
+            expert_rows.append({"claim_id": c["claim_id"], "condition_id": c["subject"], "predicate": c["predicate"], "object": c["object"],
+                                "quotes": [e.get("quote", "") for e in evidence if e.get("quote")], "source_url": (src or {}).get("url", ""),
+                                "contributor": c["contributor"], "at": None, "seq": c["created_seq"],
+                                "status": claim_review_status(mine), "_claim": {k: c[k] for k in ("predicate", "object", "body")},
+                                "ai_reason": mine[-1]["reason"] if mine else None})
     finally:
         store.close()
     terms = load_json(ROOT / "data/build/hpo_terms.json", {})
@@ -581,9 +596,9 @@ def upload_track_records(engine):
     for actor, rec in rows.items():
         prof = profiles.get(actor, {})
         mcp = actor.startswith("agent:mcp-")
-        public.append({"id": actor.removeprefix("agent:mcp-").removeprefix("agent:"), "name": prof.get("display") or actor.removeprefix("agent:mcp-").removeprefix("agent:"),
+        public.append({"id": actor.removeprefix("agent:mcp-").removeprefix("agent:").removeprefix("human:"), "name": prof.get("display") or actor.removeprefix("agent:mcp-").removeprefix("agent:").removeprefix("human:expert-"),
                        "family": prof.get("model_family"), "model": prof.get("model"),
-                       "run_by": "atlas" if not mcp or actor.startswith(ATLAS_RUN) else "community",
+                       "run_by": "expert" if actor.startswith("human:expert-") else "atlas" if not mcp or actor.startswith(ATLAS_RUN) else "community",
                        "reviewer": bool(prof.get("allow_review")), "calibration_score": prof.get("calibration_score"),
                        "suspended": prof.get("suspended_reason") if prof.get("suspended") else None,
                        "daily_limit": prof.get("daily_quota"), **{k: v for k, v in rec.items() if k not in ("reviews_agreed",)}})
@@ -597,6 +612,17 @@ def upload_track_records(engine):
                 engine.cloud.atomic(decide)
                 log(f"{actor}: level {rec['level']}, daily limit {quota}")
             public[-1]["daily_limit"] = quota
+    kinds = {"has_symptom": "symptom", "has_asset": "study", "represented_by": "patient group", "has_name": "name",
+             "studied_by": "researcher", "has_variant_effect": "gene effect", "has_prevalence": "prevalence"}
+    for row in expert_rows:
+        prof = profiles.get(row["contributor"], {})
+        row.update(kind=kinds.get(row["predicate"], row["predicate"]), at=times.get(row.pop("seq")),
+                   label=label(row.pop("_claim")),
+                   condition=engine.conditions.get(row["condition_id"], {}).get("name", row["condition_id"]),
+                   contributor=prof.get("display") or row["contributor"].removeprefix("agent:mcp-").removeprefix("agent:"),
+                   status={"unreviewed": "awaiting review", "reviewed": "accepted by one AI reviewer", "independently_reviewed": "accepted by independent reviewers",
+                           "rejected": "rejected by an AI reviewer", "review_disagreement": "AI reviewers disagree"}.get(row["status"], row["status"]))
+    engine.cloud.container.upload_blob("live/expert-queue.json", json.dumps({"at": time.time(), "claims": expert_rows}).encode(), overwrite=True)
     public.sort(key=lambda r: (-r["accepted"], -r["reviews_given"], r["id"]))
     engine.cloud.container.upload_blob("live/contributors.json", json.dumps({"at": time.time(), "contributors": public}).encode(), overwrite=True)
 

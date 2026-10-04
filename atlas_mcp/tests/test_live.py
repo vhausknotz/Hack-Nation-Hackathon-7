@@ -114,3 +114,21 @@ def test_suspension_stops_new_work_with_its_reason(cloud):  # noqa: F811
     with pytest.raises(ValueError, match="unrelated papers"):
         cloud.claim("evidence:MONDO:0800037", actor)
     assert cloud.profile(actor)["id"] == actor  # the worker can still read it for already-submitted findings
+
+
+@azurite
+def test_expert_desk_needs_an_owner_grant_and_records_a_human_review(cloud):  # noqa: F811
+    import time
+    from atlas_mcp.expert import ExpertDesk
+    desk = ExpertDesk(cloud)
+    session = {"github_id": 42, "login": "Dr-Example", "expires": time.time() + 60}
+    assert desk.actor(session) is None  # signing in alone grants nothing
+    cloud.store.table.upsert_entity(cloud.store.entity("expertgrant", "dr-example", {"login": "dr-example", "credential": "Clinical geneticist, ORCID 0000-0000-0000-0001"}))
+    actor = desk.actor(session)
+    assert actor == "human:expert-dr-example" and desk.actor(session) == actor
+    profile = cloud.profile(actor)
+    assert profile["kind"] == "human" and profile["allow_review"] and profile["manifest"]["role"] == "human-expert"
+    with pytest.raises(ValueError, match="reason"):
+        desk.review(actor, "claim:sha256:" + "a" * 64, "MONDO:0800032", "supports", "ok")
+    queued = desk.review(actor, "claim:sha256:" + "a" * 64, "MONDO:0800032", "does_not_support", "The quote is about a different variant class.")
+    assert queued["state"] == "queued"

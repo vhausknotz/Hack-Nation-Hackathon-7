@@ -3,10 +3,13 @@
     python tools/moderate.py list
     python tools/moderate.py suspend <name> --reason "submits quotes from unrelated papers"
     python tools/moderate.py reinstate <name>
+    python tools/moderate.py expert-grant <github-login> --credential "Clinical geneticist, ORCID 0000-0002-..." [--display "Dr. A. Example"]
+    python tools/moderate.py expert-revoke <github-login>
 
 <name> is the contributor's slug as shown on /contributors (e.g. vhausknotz-codex) or its full agent: id.
 Suspension stops new tasks, fetches and submissions at once; findings already submitted are still processed and stay
-in the public record. Each action appears on the public live feed with its reason. Automatic consequences of a poor
+in the public record. Each action appears on the public live feed with its reason.
+Expert grants are for people whose professional profile the owner has checked; their reviews count as human reviews. Automatic consequences of a poor
 track record are limited to a lower daily limit (pipeline/track_record.py).
 """
 import argparse
@@ -27,9 +30,11 @@ def actor_id(name: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("list", "suspend", "reinstate"))
+    parser.add_argument("command", choices=("list", "suspend", "reinstate", "expert-grant", "expert-revoke"))
     parser.add_argument("name", nargs="?")
     parser.add_argument("--reason", default="")
+    parser.add_argument("--credential", default="")
+    parser.add_argument("--display", default="")
     args = parser.parse_args()
     store = Operator().store()
     if args.command == "list":
@@ -39,6 +44,19 @@ def main():
         return
     if not args.name:
         parser.error("name is required")
+    if args.command == "expert-grant":
+        if len(args.credential.strip()) < 10:
+            parser.error("--credential must say who this person is professionally (with a checkable link or ORCID)")
+        login = args.name.lower()
+        store.table.upsert_entity(store.entity("expertgrant", login, {"login": login, "credential": args.credential.strip(),
+                                                                       "display": args.display.strip() or None, "granted_at": time.time()}))
+        print(json.dumps({"expert": login, "granted": True, "next": "They sign in at <MCP host>/expert"}, indent=1))
+        return
+    if args.command == "expert-revoke":
+        login = args.name.lower()
+        store.table.delete_entity(store.PARTITION, store.key("expertgrant", login))
+        print(json.dumps({"expert": login, "granted": False, "note": "Past reviews stay in the evidence log."}, indent=1))
+        return
     if args.command == "suspend" and len(args.reason.strip()) < 10:
         parser.error("Give a public reason of at least a few words (--reason)")
     actor = actor_id(args.name)

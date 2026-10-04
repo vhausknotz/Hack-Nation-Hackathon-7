@@ -119,24 +119,26 @@ class CloudIntake:
     def __init__(self, store):
         self.store = store
 
-    def enroll(self, name, model, family, principal, allow_review=False, quota=100, display=None):
-        """Operator-only. Principal must be verified issuer + subject, not display name."""
+    def enroll(self, name, model, family, principal, allow_review=False, quota=100, display=None, human=None):
+        """Operator-only. Principal must be verified issuer + subject, not display name.
+        human = {"credential": ...} enrolls a person (an operator-vetted expert) instead of an agent."""
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,60}", name):
             raise ValueError("Use a lowercase contributor slug")
         if not model.strip() or not family.strip() or not 1 <= quota <= 1000 or not principal:
             raise ValueError("Model, family, verified principal and quota are required")
-        actor = "agent:mcp-" + name
+        actor = ("human:expert-" if human else "agent:mcp-") + name
         key = Ed25519PrivateKey.generate()
         signer = Signer(actor, key)
         key_bytes = key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
         # Content-addressing permits safe retry, with no key overwrite on collision.
         key_path = "private/keys/" + hashlib.sha256(key_bytes).hexdigest() + ".pem"
         self.store.immutable(key_path, key_bytes)
-        profile = {"id": actor, "public_key": signer.public_key, "kind": "agent", "model": model,
+        profile = {"id": actor, "public_key": signer.public_key, "kind": "human" if human else "agent", "model": model,
                    "model_family": family, "allow_review": bool(allow_review), "daily_quota": quota,
                    "key_path": key_path, "principal": principal, **({"display": display} if display else {}),
-                   "manifest": {"role": "mcp-contributor", "model": model, "model_family": family,
-                                "transport": "authenticated-http", "version": "atlas-mcp@1"}}
+                   "manifest": {"role": "human-expert", "credential": human["credential"], "transport": "authenticated-web", "version": "atlas-expert@1"}
+                   if human else {"role": "mcp-contributor", "model": model, "model_family": family,
+                                  "transport": "authenticated-http", "version": "atlas-mcp@1"}}
         def decide(seq):
             if self.store.get("profile", actor) or self.store.get("principal", principal):
                 raise ValueError("Contributor or principal is already enrolled")
