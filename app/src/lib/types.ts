@@ -220,6 +220,7 @@ export interface MechanismBundle {
 
 export interface Meta {
   built: string;
+  data_id?: string;
   shards: Record<string, number>;
   counts: Record<string, unknown> & { conditions: number; genes: number; groups: number };
   sources: Record<string, { file: string; url: string; description: string; license: string; retrieved: string }>;

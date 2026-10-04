@@ -25,7 +25,12 @@ export interface MapProps {
   route: RouteStop[];
   activeStep: number;
   onStop: (step: number) => void;
+  agents?: AgentMarker[]; // live presence: agents working near a condition (status, never evidence)
+  pulses?: Pulse[]; // newly published connections, drawn bright for a while
 }
+
+export interface AgentMarker { key: string; id: string; name: string; family: string | null; doing: string; color: string; role: string }
+export interface Pulse { from: string; to: string; at: number }
 
 const DIM = "#26324f"; // faint, unselected stars
 const SKY = "radial-gradient(ellipse at 50% 45%, #111a33 0%, #070b18 55%, #04060e 100%)";

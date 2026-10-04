@@ -1,11 +1,14 @@
 // The existing biological layout wrapped onto a sphere. This is not geographic space.
 // Canvas keeps the globe light enough for phones; the original flat map remains available.
 import { useEffect, useRef, useState } from "react";
-import type { MapProps, RouteStop } from "./StarMap";
+import type { AgentMarker, MapProps, RouteStop } from "./StarMap";
+import { AgentAvatar } from "./LiveActivity";
 import { useReducedMotion } from "../lib/useReducedMotion";
 
 type V = { x: number; y: number; z: number };
 type Pin = RouteStop & { x: number; y: number };
+type AgentPin = AgentMarker & { x: number; y: number };
+const PULSE_MS = 45000;
 const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n));
 
 export function GlobeMap(props: MapProps) {
@@ -19,6 +22,7 @@ export function GlobeMap(props: MapProps) {
   const fly = useRef<() => void>(() => {});
   const zoom = useRef<(factor: number) => void>(() => {});
   const [pins, setPins] = useState<Pin[]>([]);
+  const [agentPins, setAgentPins] = useState<AgentPin[]>([]);
   const [hover, setHover] = useState("");
 
   useEffect(() => {
@@ -110,6 +114,19 @@ export function GlobeMap(props: MapProps) {
         for (let i=1;i<route.length;i++) { const a=byId.get(route[i-1].id), b=byId.get(route[i].id); if(a&&b)arc(a.v,b.v,true); }
         ctx.setLineDash([]);
       }
+      // Newly published connections glow, then settle (static for reduced motion).
+      let animating = false;
+      for (const pulse of current.current.pulses ?? []) {
+        const a = byId.get(pulse.from), b = byId.get(pulse.to);
+        const age = Date.now() - pulse.at;
+        if (!a || !b || age > PULSE_MS) continue;
+        const fade = motion.current ? 0.8 : 1 - age / PULSE_MS;
+        const beat = motion.current ? 1 : 0.65 + 0.35 * Math.sin(age / 260);
+        ctx.strokeStyle = `rgba(134,239,172,${(0.25 + 0.7 * fade * beat).toFixed(3)})`;
+        ctx.lineWidth = 1.2 + 2.2 * fade;
+        arc(a.v, b.v, true);
+        if (!motion.current) animating = true;
+      }
       // Labels share one collision budget so names stay legible in dense cities.
       const boxes: {x:number;y:number;w:number;h:number}[]=[];
       const label=(text:string,v:V,selected=false) => {
@@ -137,7 +154,16 @@ export function GlobeMap(props: MapProps) {
         nextPins.push({...pin,x:pos.x,y});
       }
       setPins(nextPins);
-      if(target)frame=requestAnimationFrame(draw);
+      const nextAgents: AgentPin[] = [];
+      for (const agent of current.current.agents ?? []) {
+        const n = byId.get(agent.id); if (!n) continue; const pos = screen(n.v);
+        if (pos.z <= .05 || pos.x < 12 || pos.x > width - 12 || pos.y < 56 || pos.y > height - 30) continue;
+        let x = pos.x + 14, y = pos.y - 14;
+        while (nextAgents.some(p => Math.hypot(p.x - x, p.y - y) < 26)) x += 24;
+        nextAgents.push({ ...agent, x, y });
+      }
+      setAgentPins(nextAgents);
+      if(target||animating)frame=requestAnimationFrame(draw);
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(draw);};
     redraw.current=schedule;
@@ -173,8 +199,10 @@ export function GlobeMap(props: MapProps) {
   useEffect(()=>{fly.current();},[props.focus,props.highlight]);
   useEffect(()=>{redraw.current();},[props.related,props.emphasized,props.route,props.activeStep]);
   useEffect(()=>{redraw.current();},[reduceMotion]);
+  useEffect(()=>{redraw.current();},[props.agents,props.pulses]);
   return <div className="absolute inset-x-0 top-0 bottom-[58dvh] overflow-hidden bg-[#03070e] sm:bottom-0 sm:left-[432px]">
     <canvas ref={canvas} tabIndex={0} role="img" aria-label="Interactive globe of rare genetic conditions. Drag or use arrow keys to turn. Scroll or use plus and minus to zoom. Use search or Directions to choose a condition." className="absolute inset-0 h-full w-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-200" />
+    {agentPins.map(a=><button key={a.key} onClick={()=>props.onSelect(a.id)} style={{left:a.x,top:a.y}} title={`${a.name} · ${a.doing}`} aria-label={`Agent ${a.name} is ${a.doing}. Open this condition.`} className="group absolute z-10 -translate-x-1/2 -translate-y-1/2"><AgentAvatar color={a.color} role={a.role} size={22} pulse={!reduceMotion}/><span className="pointer-events-none absolute left-6 top-0 hidden whitespace-nowrap rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] text-slate-100 ring-1 ring-white/10 group-hover:block group-focus:block">{a.name} · {a.doing}</span></button>)}
     {pins.map(p=><button key={p.step} onClick={()=>props.onStop(p.step)} aria-label={`Directions stop ${p.step+1}: ${p.label}`} style={{left:p.x,top:p.y}} className={`absolute z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-xs font-bold shadow-lg ${p.step===props.activeStep?"border-white bg-amber-100 text-slate-900":"border-amber-200/70 bg-slate-900 text-amber-100"}`}>{p.step+1}</button>)}
     <div className="pointer-events-none absolute bottom-3 left-4 right-16 text-[10px] leading-relaxed text-slate-400">{hover || (props.focus ? "Numbered stops follow your Directions. Shared biology, not geography." : `${props.data.nodes.length.toLocaleString()} conditions · drag to turn · scroll to explore`)}</div>
     <div className="absolute bottom-4 right-4 flex flex-col overflow-hidden rounded-xl bg-slate-900/90 text-white ring-1 ring-white/15"><button className="px-3 py-2 hover:bg-white/10" aria-label="Zoom in" onClick={()=>zoom.current(1.5)}>+</button><button className="border-t border-white/10 px-3 py-2 hover:bg-white/10" aria-label="Zoom out" onClick={()=>zoom.current(1/1.5)}>−</button><button className="border-t border-white/10 px-3 py-2 text-xs hover:bg-white/10" aria-label="Reset globe view" onClick={()=>fly.current()}>↺</button></div>

@@ -6,7 +6,9 @@ import { Logo } from "../components/Layout";
 import { SearchBox } from "../components/SearchBox";
 import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
-import { getCondition, getGene, getGroup, getMechanism, getSymptom } from "../lib/data";
+import { LiveConditionBanner, LivePanel, useLiveLayers } from "../components/LiveActivity";
+import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
+import { useLive } from "../lib/live";
 import { routes } from "../lib/links";
 import { loadMap, type StarMapData } from "../lib/map";
 import type { Brief, ConditionBundle } from "../lib/types";
@@ -23,6 +25,9 @@ export default function MapPage() {
   const [globe, setGlobe] = useState(true);
   const [emphasized, setEmphasized] = useState<string | null>(null);
   const conditionId = !kind && id ? decodeURIComponent(id) : null;
+  const live = useLive();
+  const layers = useLiveLayers(live);
+  const [revision, setRevision] = useState("base");
 
   useEffect(() => {
     loadMap().then(setMap);
@@ -36,6 +41,15 @@ export default function MapPage() {
     if (conditionId) getCondition(conditionId).then((c) => { if (active) setCondition(c); });
     return () => { active = false; };
   }, [conditionId]);
+
+  // The live engine republished this condition: show the new evidence without a reload.
+  useEffect(() => onDataChange(() => { if (conditionId) setRevision(conditionRevision(conditionId)); }), [conditionId]);
+  useEffect(() => {
+    if (!conditionId || revision === "base") return;
+    let active = true;
+    getCondition(conditionId).then((c) => { if (active && c) setCondition(c); });
+    return () => { active = false; };
+  }, [revision, conditionId]);
 
   useEffect(() => {
     setExplore(null);
@@ -77,6 +91,8 @@ export default function MapPage() {
           onStop={selectStep}
           onSelect={(nodeId) => navigate(routes.condition(nodeId))}
           onBackground={() => (conditionId || kind) && navigate("/")}
+          agents={layers.agents}
+          pulses={layers.pulses}
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center text-sm text-slate-400">Drawing the map…</div>
@@ -86,6 +102,8 @@ export default function MapPage() {
         <button aria-pressed={globe} onClick={() => setGlobe(true)} className={`rounded-full px-3 py-1.5 ${globe ? "bg-white/15" : "text-slate-400"}`}>Globe</button>
         <button aria-pressed={!globe} onClick={() => setGlobe(false)} className={`rounded-full px-3 py-1.5 ${!globe ? "bg-white/15" : "text-slate-400"}`}>Flat map</button>
       </div>
+
+      <LivePanel nameOf={(nodeId) => map?.byId.get(nodeId)?.name} />
 
       {/* search, top left like a maps app */}
       <div className="absolute left-3 right-3 top-3 z-20 sm:left-4 sm:right-auto sm:top-4 sm:w-[400px]">
@@ -100,7 +118,10 @@ export default function MapPage() {
       {/* the panel: a side card on desktop, a bottom sheet on phones */}
       <Panel open>
         {conditionId && condition && map ? (
+          <>
+          <LiveConditionBanner conditionId={condition.id} />
           <DirectionsPanel key={condition.id} c={condition} neighbors={neighbors} step={step} onStep={selectStep} emphasized={emphasized} onEmphasize={setEmphasized} onClose={() => navigate("/")} />
+          </>
         ) : conditionId ? (
           <PanelMessage>Loading…</PanelMessage>
         ) : explore ? (
