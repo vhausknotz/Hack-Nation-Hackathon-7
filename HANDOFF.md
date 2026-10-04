@@ -28,10 +28,10 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 
 ## Active jobs and limits
 
-- Luna screening is running with `--budget 30 --workers 96 --max-workers 384 --continuous`. Last observed 03:15 UTC: about **$19.31 actual**, plus retained/reserved amounts, ~514k actual TPM / 354 RPM, no errors in the measured minute. Inspect `data/enrichment/trials/full/throughput.json` and `screening-continuous.log` for current facts. It does not write the ledger or publish findings.
+- Luna screening is running with `--budget 30 --workers 96 --max-workers 384 --continuous`. Last observed 03:35 UTC: about **$21.25 actual**, plus retained/reserved amounts, ~555k actual TPM / 397 RPM, no errors in the measured minute. Inspect `data/enrichment/trials/full/throughput.json` and `screening-continuous.log` for current facts. It does not write the ledger or publish findings.
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
-- Latest full backend suite: **150 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
+- Latest full backend suite: **154 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
 - Codex account usage at checkpoint: 46% used / 54% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
@@ -44,7 +44,7 @@ Website deployment uses `./.venv/Scripts/python tools/deploy_website.py`, creden
 
 ## Next work, in order
 
-1. When Luna stops, run the updated offline full-run export before importing anything. A source-renderer compatibility fix preserves original quote offsets and marks omitted structured eligibility; it was checked read-only against all 10,235 then-positive candidates. The current running process remains unchanged. Do not bulk-import or start a broad paid review campaign.
+1. When Luna stops, run the updated offline full-run export before importing anything. A source-renderer compatibility fix preserves original quote offsets and marks omitted structured eligibility; it was checked read-only against all 10,235 then-positive candidates. Fix committed/pushed as 12a8950. The current running process remains unchanged. Do not bulk-import or start a broad paid review campaign.
 2. Use [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for the patient-leader story and genuine contribution/rejection/retry. Check challenge coverage and any remaining usability problems.
 3. Keep background Luna within its cap, and leave a clean, recoverable repo. Its candidates still require review before family publication.
 4. Assess independent review options without silently spending on a broad new campaign. All current semantic review uses Azure GPT-6 Sol; Luna screening is Azure too. Both are one model family. Different prompts or external coding assistance do not make the published claims independently reviewed.
