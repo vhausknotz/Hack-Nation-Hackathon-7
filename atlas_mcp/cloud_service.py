@@ -93,7 +93,9 @@ class CloudAtlas(Atlas):
         self.writable()
         self.intake.owned_task(tid, self.actor)
         official_url(provider, record_id)
-        cache_key = provider+":"+record_id
+        # Renderer version prevents an older partial eligibility archive from
+        # satisfying a new complete-record request. Old source IDs stay valid.
+        cache_key = provider+("@eligibility-2" if provider == "clinicaltrials" else "")+":"+record_id
         cached = self.intake.store.get("sourcecache", cache_key)
         if cached:
             return {**cached, "cached": True, "next": "get_source"}

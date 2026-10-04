@@ -38,10 +38,10 @@ ASSET_TYPES = {
 }
 
 
-def verify_asset(condition: dict, claim: dict, record: str) -> dict:
+def verify_asset(condition: dict, claim: dict, record: str, chat_json=None) -> dict:
     q = claim["assertion"]["qualifiers"]
     ev = claim["evidence"]
-    reply = llm.chat_json(VERIFY_MODEL, [
+    reply = (chat_json or llm.chat_json)(VERIFY_MODEL, [
         {"role": "system", "content": (
             "You check claims for a rare-disease evidence ledger. A claim says a study record is a reusable asset for one "
             "genetic condition. Judge ONLY from the study record, without outside knowledge:\n"

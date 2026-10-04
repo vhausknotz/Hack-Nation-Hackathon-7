@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "purpose": "Complete eligibility evidence for the shared STXBP1/SYNGAP1 natural-history record and test bounded publication",
+  "max_review_attempts": 2,
+  "allowed_contributors": ["agent:mcp-lead-codex"],
+  "approved_assets": [
+    {"condition_id": "MONDO:0012812", "record_id": "NCT06555965"},
+    {"condition_id": "MONDO:0012960", "record_id": "NCT06555965"}
+  ],
+  "publish_website": true
+}

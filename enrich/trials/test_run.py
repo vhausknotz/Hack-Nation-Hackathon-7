@@ -52,6 +52,20 @@ def test_renderer_preserves_termination_and_is_order_independent():
     assert "Why stopped: Stopping rule met." in pilot.render(original)
 
 
+def test_renderer_keeps_structured_eligibility_fields_separate_from_free_text():
+    record = study()
+    record["protocolSection"]["eligibilityModule"] = {
+        "eligibilityCriteria": "Pathogenic STXBP1 variant", "minimumAge": "18 Years",
+        "maximumAge": "65 Years", "sex": "FEMALE", "healthyVolunteers": False,
+        "studyPopulation": "Participants at one study center",
+    }
+    text = pilot.render(record)
+    for fact in ("Minimum age: 18 Years", "Maximum age: 65 Years", "Sex: FEMALE", "Healthy volunteers: False",
+                 "Study population: Participants at one study center"):
+        assert fact in text
+    assert "Minimum age: Not recorded" in pilot.render(study())
+
+
 def test_budget_reserves_output_before_spending():
     with pytest.raises(RuntimeError, match="budget stop"):
         pilot.budget_allowance([{"content": "x" * 5000}], 1200, 1.9999, 2)

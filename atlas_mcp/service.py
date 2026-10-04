@@ -177,6 +177,10 @@ class Atlas:
             for row in db.execute("SELECT body FROM sources"):
                 cached = json.loads(row[0])
                 if cached["url"] == url:
+                    if provider == "clinicaltrials":
+                        text = sources.read_text(cached, root=self.intake.root / "sources") or ""
+                        if not all("\n" + label + ":" in text for label in ("Minimum age", "Maximum age", "Sex", "Healthy volunteers")):
+                            continue  # retain old archive but refresh the incomplete renderer
                     return {"source_id": cached["source_id"], "cached": True, "next": "get_source"}
             last = db.execute("SELECT MAX(at) FROM activity WHERE stage='source_fetched'").fetchone()[0] or 0
             time.sleep(max(0, 1.25 - (time.time()-last)))

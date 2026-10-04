@@ -40,7 +40,7 @@ def client():
     return _client
 
 
-def chat(model: str, messages: list[dict], task: str, json_mode: bool = False, **options) -> str:
+def chat(model: str, messages: list[dict], task: str, json_mode: bool = False, request_client=None, **options) -> str:
     """Return the model's reply text. `task` labels the call in the usage log (e.g. "cluster-names")."""
     key_material = json.dumps({"model": model, "messages": messages, "json": json_mode, "options": options}, sort_keys=True)
     key = hashlib.sha256(key_material.encode()).hexdigest()
@@ -51,7 +51,7 @@ def chat(model: str, messages: list[dict], task: str, json_mode: bool = False, *
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
     t0 = time.time()
-    resp = client().chat.completions.create(**kwargs)
+    resp = (request_client or client()).chat.completions.create(**kwargs)
     content = resp.choices[0].message.content or ""
     usage = resp.usage
     path.parent.mkdir(parents=True, exist_ok=True)

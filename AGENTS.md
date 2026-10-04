@@ -48,7 +48,7 @@ agents/           campaign.py (literature), communities.py (patient-group scout)
 pipeline/project_actions.py  read-only family projection of reviewed organizations and studies
 pipeline/plain_summaries.py  cached, AI-labeled everyday descriptions
 atlas_mcp/        local stdio + authenticated HTTP MCP, local/Azure intake and explicit ledger worker; README/CLOUD.md have setup
-infra/mcp/        prepared Functions Flex deployment (not yet deployed); no Always Ready or always-on database
+infra/mcp/        deployed Functions Flex service; no Always Ready or always-on database
 enrich/trials/    reviewed v2 screener and budget-capped, resumable bulk registry job (see its README)
 app/              web app (Vite + React + TypeScript + Tailwind, canvas globe and sigma.js flat map); reads app/public/data/
                     routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism
@@ -79,6 +79,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Family brief check:** `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa` (desktop/phone, source fidelity, print/copy and closing).
 Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (cloud/HTTP dependencies: `atlas_mcp/requirements-cloud.txt`; Azurite instructions in `atlas_mcp/CLOUD.md`). `agents/community_coverage/` stages offline research; its explicitly invoked `import_reviewed` command writes the ledger and calls Sol.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
+Bounded contribution/review/publication runner: [atlas_mcp/CYCLE.md](atlas_mcp/CYCLE.md). Paid reviews require the pinned local plan; never reset its persistent reservation state to get more attempts.
 New Ledger instances enforce an OS writer lease. Processes already running when the lease was introduced do not; let the current community scout exit before draining the MCP inbox. MCP intake itself never writes the evidence ledger or spends on models.
 
 ## Azure OpenAI (Foundry)
