@@ -14,6 +14,7 @@ import argparse
 import base64
 import io
 import json
+import os
 import subprocess
 import sys
 import tarfile
@@ -244,6 +245,43 @@ journalctl -u atlas-scouts -n 6 --no-pager
 """
         return self.run(script)
 
+    def site(self):
+        """Full website release from the cloud's current data: VM exports, PC builds the frontend and deploys."""
+        import shutil
+        import tarfile
+        from azure.storage.blob import BlobSasPermissions, generate_blob_sas
+        store = self.op.store()
+        container = store.container
+        key = self.op.arm("POST", self.op.scope + "/providers/Microsoft.Storage/storageAccounts/" + self.op.config["storageName"] + "/listKeys?api-version=2023-05-01")["keys"][0]["value"]
+        sas = generate_blob_sas(container.account_name, container.container_name, "engine-transfer/site.tar.gz", account_key=key,
+                                permission=BlobSasPermissions(write=True, create=True, read=True), expiry=datetime.now(timezone.utc) + timedelta(hours=2))
+        url = f"{container.url}/engine-transfer/site.tar.gz?{sas}"
+        out = self.run(f"""set -e
+cd {REPO}
+rm -rf data/engine/site-export
+sudo -u atlas env ATLAS_EXPORT_OUT=data/engine/site-export /opt/atlas/venv/bin/python pipeline/export_app.py | tail -1
+tar -czf /tmp/site.tar.gz -C data/engine/site-export .
+curl -fsS -X PUT -H 'x-ms-blob-type: BlockBlob' --data-binary @/tmp/site.tar.gz '{url}'
+rm -f /tmp/site.tar.gz
+echo uploaded""")
+        LOCAL.mkdir(parents=True, exist_ok=True)
+        archive = LOCAL / "site.tar.gz"
+        with archive.open("wb") as f:
+            container.download_blob("engine-transfer/site.tar.gz").readinto(f)
+        container.delete_blob("engine-transfer/site.tar.gz")
+        target = ROOT / "app/public/data"
+        staging = ROOT / "app/public/data.new"
+        shutil.rmtree(staging, ignore_errors=True)
+        staging.mkdir(parents=True)
+        with tarfile.open(archive) as tar:
+            tar.extractall(staging, filter="data")
+        shutil.rmtree(target, ignore_errors=True)
+        staging.rename(target)
+        npm = "npm.cmd" if os.name == "nt" else "npm"
+        subprocess.run([npm, "--prefix", str(ROOT / "app"), "run", "build"], check=True, capture_output=True)
+        from tools.deploy_website import deploy
+        return out + "\n" + json.dumps(deploy())
+
     def update(self):
         out = self.ship(with_state=False)
         return out + self.run("systemctl restart atlas-engine && (systemctl is-enabled atlas-scouts >/dev/null 2>&1 && systemctl restart atlas-scouts || true) && sleep 15 && systemctl is-active atlas-engine && journalctl -u atlas-engine -n 8 --no-pager")
@@ -251,7 +289,7 @@ journalctl -u atlas-scouts -n 6 --no-pager
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "status", "stop", "start", "logs"))
+    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "site", "status", "stop", "start", "logs"))
     args = parser.parse_args()
     vm = EngineVM()
     if args.command == "create":
@@ -264,6 +302,8 @@ def main():
         print(vm.update())
     elif args.command == "scouts":
         print(vm.scouts())
+    elif args.command == "site":
+        print(vm.site())
     elif args.command == "status":
         print(json.dumps({"vm": VM, "power": vm.power()}, indent=1))
     elif args.command == "stop":
