@@ -8,6 +8,7 @@ import "./index.css";
 import About from "./pages/About";
 import Agents from "./pages/Agents";
 import Impact from "./pages/Impact";
+import Contributors from "./pages/Contributors";
 import ConditionPage from "./pages/ConditionPage";
 import GenePage from "./pages/GenePage";
 import MapPage from "./pages/MapPage";
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: "/about", element: <About /> },
       { path: "/agents", element: <Agents /> },
       { path: "/impact", element: <Impact /> },
+      { path: "/contributors", element: <Contributors /> },
       { path: "/c/:id/details", element: <ConditionPage /> },
       { path: "/g/:symbol", element: <GenePage /> },
       { path: "/s/:id", element: <SymptomPage /> },

@@ -153,6 +153,12 @@ class Feed:
         return {"at": body["at"], "conditions": [{k: r[k] for k in ("condition_id", "name", "gene", "why", "focus", "requests")}
                                                  for r in body["conditions"][:60]]}
 
+    def contributors(self):
+        try:
+            return json.loads(self.store.container.download_blob("live/contributors.json").readall())
+        except ResourceNotFoundError:
+            return {"at": None, "contributors": []}
+
     def salt(self):
         """Server-side secret for hashing visitors; created once, never leaves storage."""
         if not getattr(self, "_salt", None):
@@ -221,6 +227,12 @@ def add_routes(mcp, feed):
     async def live_frontier(request):
         import anyio
         body = await anyio.to_thread.run_sync(feed.frontier)
+        return JSONResponse(body, headers={**headers, "Cache-Control": "public, max-age=120"})
+
+    @mcp.custom_route("/live/contributors", methods=["GET"])
+    async def live_contributors(request):
+        import anyio
+        body = await anyio.to_thread.run_sync(feed.contributors)
         return JSONResponse(body, headers={**headers, "Cache-Control": "public, max-age=120"})
 
     @mcp.custom_route("/live/request/{condition_id}", methods=["GET"])

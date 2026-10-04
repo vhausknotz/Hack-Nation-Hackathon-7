@@ -103,3 +103,14 @@ def test_public_request_route_hashes_visitors(cloud):  # noqa: F811
     row = cloud.store.get("request", "MONDO:0800032")
     assert "203.0.113.5" not in json.dumps(row) and len(row["visitors"][0]) == 16
     assert feed.frontier() == {"at": None, "conditions": []}
+
+
+@azurite
+def test_suspension_stops_new_work_with_its_reason(cloud):  # noqa: F811
+    actor = cloud.enroll("noisy-agent", "m", "google-gemini", "issuer|n")["id"]
+    cloud.seed([{"id": "evidence:MONDO:0800037", "condition_id": "MONDO:0800037", "kind": "evidence"}])
+    profile = cloud.store.get("profile", actor)
+    cloud.store.table.upsert_entity(cloud.store.entity("profile", actor, {**profile, "suspended": True, "suspended_reason": "quotes from unrelated papers"}))
+    with pytest.raises(ValueError, match="unrelated papers"):
+        cloud.claim("evidence:MONDO:0800037", actor)
+    assert cloud.profile(actor)["id"] == actor  # the worker can still read it for already-submitted findings

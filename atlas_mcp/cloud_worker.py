@@ -80,7 +80,8 @@ def _drain_locked(cloud, local, ledger_path, registry_, limit):
         task = cloud.task(row["task_id"])
         with local.connect() as db:
             old = db.execute("SELECT body FROM profiles WHERE id=?", (actor,)).fetchone()
-            earned = {"allow_review", "qualified_at", "calibration_score", "display"}  # changed by qualification, not identity
+            earned = {"allow_review", "qualified_at", "calibration_score", "display",  # changed by qualification, not identity
+                      "base_quota", "daily_quota", "reputation", "suspended", "suspended_reason", "suspended_at"}  # track record, moderation
             if old:
                 previous = json.loads(old[0])
                 if {k: v for k, v in previous.items() if k not in earned} != {k: v for k, v in profile.items() if k not in earned}:

@@ -156,6 +156,15 @@ class CloudIntake:
             raise ValueError("Contributor is unknown or disabled")
         return profile
 
+    def active(self, actor):
+        """Profile of a contributor allowed to start new work. Suspension (tools/moderate.py) stops new tasks,
+        fetches and submissions; findings already submitted are still processed and stay in the record."""
+        profile = self.profile(actor)
+        if profile.get("suspended"):
+            raise ValueError("This contributor is suspended by the atlas operator: " + (profile.get("suspended_reason") or "no reason given")
+                             + ". Past findings stay in the public record.")
+        return profile
+
     def signer(self, actor):
         profile = self.profile(actor)
         raw = self.store.container.download_blob(profile["key_path"]).readall()
@@ -226,7 +235,7 @@ class CloudIntake:
 
     def claim(self, tid, actor):
         def decide(seq):
-            self.profile(actor)
+            self.active(actor)
             task = self.store.get("task", tid)
             now = time.time()
             if not task or task["state"] == "complete":
@@ -257,7 +266,7 @@ class CloudIntake:
         if existing:
             self.profile(actor)
             return {"submission_id": sid, "state": existing["state"], "duplicate": True}
-        profile = self.profile(actor)
+        profile = self.active(actor)
         self.owned_task(tid, actor)
         quota = self.store.get("quota", actor) or {"submissions": []}
         if sum(t > time.time()-86400 for t in quota["submissions"]) >= profile["daily_quota"]:
@@ -269,7 +278,7 @@ class CloudIntake:
         # Blob becomes discoverable only after the atomic quota/outbox commit.
         self.store.immutable(blob, encoded)
         def decide(seq):
-            profile = self.profile(actor)
+            profile = self.active(actor)
             existing = self.store.get("submission", sid)
             if existing:
                 return {"submission_id": sid, "state": existing["state"], "duplicate": True}, []
@@ -340,7 +349,7 @@ class CloudIntake:
     def reserve_fetch(self, actor, tid):
         """Provider slots and daily quotas survive failure/restart; no free retry loop."""
         def decide(seq):
-            self.profile(actor)
+            self.active(actor)
             task = self.owned_task(tid, actor)
             now = time.time()
             quota = self.store.get("fetchquota", actor) or {"requests": []}

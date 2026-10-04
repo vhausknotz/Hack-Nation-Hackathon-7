@@ -547,6 +547,59 @@ def upload_impact_frontier(engine):
     log(f"impact frontier: top {rows[0]['condition_id'] if rows else '-'} ({sum(1 for r in rows if r['requests'])} requested)")
 
 
+# ---- contributor track records and earned limits ---------------------------------------------------------
+ATLAS_RUN = ("agent:mcp-luna-scout-",)  # MCP identities operated by the atlas itself
+
+
+def upload_track_records(engine):
+    """Public track record per contributor (pipeline/track_record.py); scale MCP contributors' daily limits by level."""
+    if time.time() - engine.state.get("records_at", 0) < 900:
+        return
+    engine.state["records_at"] = time.time()
+    import track_record
+    store = Store(LEDGER, readonly=True)
+    try:
+        claims = [dict(r) for r in store.claims_where("origin = 'contributed'")]
+        reviews = [dict(r) for r in store.all_reviews()]
+        challenges = [dict(r) for r in store.all_challenges()]
+        seqs = {c["created_seq"] for c in claims if c["created_seq"]}
+        times = {r[0]: r[1] for r in store.db.execute("SELECT seq, ts FROM events WHERE type LIKE 'claim%'") if r[0] in seqs}
+    finally:
+        store.close()
+    terms = load_json(ROOT / "data/build/hpo_terms.json", {})
+
+    def label(c):
+        if c["predicate"] == "has_symptom" and terms.get(c["object"]):
+            return terms[c["object"]][0]
+        q = json.loads(c["body"]).get("qualifiers", {}) if c.get("body") else {}
+        return str(q.get("name") or q.get("title") or c["object"])[:120]
+
+    rows = track_record.records(claims, reviews, challenges, lambda seq: times.get(seq), label,
+                                lambda cid: engine.conditions.get(cid, {}).get("name", cid))
+    profiles = {p["id"]: p for p in engine.cloud.rows("profile")}
+    public = []
+    for actor, rec in rows.items():
+        prof = profiles.get(actor, {})
+        mcp = actor.startswith("agent:mcp-")
+        public.append({"id": actor.removeprefix("agent:mcp-").removeprefix("agent:"), "name": prof.get("display") or actor.removeprefix("agent:mcp-").removeprefix("agent:"),
+                       "family": prof.get("model_family"), "model": prof.get("model"),
+                       "run_by": "atlas" if not mcp or actor.startswith(ATLAS_RUN) else "community",
+                       "reviewer": bool(prof.get("allow_review")), "calibration_score": prof.get("calibration_score"),
+                       "suspended": prof.get("suspended_reason") if prof.get("suspended") else None,
+                       "daily_limit": prof.get("daily_quota"), **{k: v for k, v in rec.items() if k not in ("reviews_agreed",)}})
+        if mcp and prof and not actor.startswith(ATLAS_RUN):
+            base = prof.get("base_quota", prof.get("daily_quota", 100))
+            quota = track_record.earned_quota(base, rec["level"])
+            if prof.get("daily_quota") != quota or prof.get("reputation") != rec["level"]:
+                def decide(seq, actor=actor, base=base, quota=quota, lvl=rec["level"]):
+                    current = engine.cloud.get("profile", actor)
+                    return None, [("profile", actor, {**current, "base_quota": base, "daily_quota": quota, "reputation": lvl})]
+                engine.cloud.atomic(decide)
+                log(f"{actor}: level {rec['level']}, daily limit {quota}")
+    public.sort(key=lambda r: (-r["accepted"], -r["reviews_given"], r["id"]))
+    engine.cloud.container.upload_blob("live/contributors.json", json.dumps({"at": time.time(), "contributors": public}).encode(), overwrite=True)
+
+
 # ---- the loop --------------------------------------------------------------------------------------------
 class Engine:
     def __init__(self):
@@ -617,6 +670,10 @@ class Engine:
             upload_peer_frontier(self)
         except Exception as error:
             log(f"peer frontier upload failed: {error}")
+        try:
+            upload_track_records(self)
+        except Exception as error:
+            log(f"track records upload failed: {type(error).__name__}: {error}")
         try:
             upload_impact_frontier(self)
         except Exception as error:
