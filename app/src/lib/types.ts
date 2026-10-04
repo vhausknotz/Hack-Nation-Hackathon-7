@@ -54,7 +54,7 @@ export interface Neighbor extends Brief {
   same_category: boolean;
   symptoms: string[];
   mechanisms: SharedMechanism[];
-  contrast?: { only_here: string[]; only_there: string[]; their_effect: string; their_inheritance: string[]; their_onset: string[]; their_symptom_count: number };
+  contrast?: { only_here: string[]; only_there: string[]; their_effect: string; their_inheritance: string[]; their_onset: string[]; their_symptom_count: number; shared_people?: string[] };
 }
 
 export interface Lookalike extends Brief {
@@ -103,6 +103,8 @@ export interface ConditionBundle {
   prevalence: Prevalence | null;
   phenotypes: Phenotype[];
   phenotype_count: number;
+  people?: { researchers: { name: string; affiliation: string; papers: number; pmids: string[]; latest: string }[];
+    projects: { title: string; pis: string[]; organization: string; years: number[]; url: string }[]; retrieved: string } | null;
   broader_phenotypes?: { from: string; name: string; conditions_below: number; count: number; phenotypes: { id: string; frequency: string }[] } | null;
   xrefs: Record<string, string[]>;
   url: string;
@@ -238,8 +240,9 @@ export interface MechanismBundle {
   url: string;
   genes_with_it: number;
   condition_genes: string[];
-  conditions: Brief[];
+  conditions: (Brief & { group?: boolean; studies?: number })[];
   condition_count: number;
+  bridging_people?: { name: string; affiliation: string; genes: string[] }[];
 }
 
 export interface Meta {

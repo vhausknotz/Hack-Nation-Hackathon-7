@@ -8,6 +8,7 @@ Usage: python pipeline/export_app.py
 import hashlib
 import json
 import math
+import re
 import os
 import shutil
 from collections import defaultdict
@@ -62,6 +63,18 @@ def main() -> None:
                 asset["team"] = teams[asset["id"]]
     collaboration = shared_research(conditions, actions, neighbors)
     plain = {p["id"]: p for p in load("plain.jsonl")} if (BUILD / "plain.jsonl").exists() else {}
+    # Who works on each gene (pipeline/people.py): PubMed investigators and NIH-funded projects.
+    people = json.loads((BUILD / "people.json").read_text(encoding="utf-8")) if (BUILD / "people.json").exists() else {}
+    person_key = lambda r: r["name"].casefold()  # noqa: E731
+    for entry in people.values():  # display-time cleanup of affiliation strings (no e-mail remnants)
+        for r in entry.get("researchers", []):
+            r["affiliation"] = re.sub(r"\s*Electronic address:?\s*|\S+@\S+", " ", r.get("affiliation", "")).strip().rstrip(".;,: ")
+
+    def shared_people(g1: str, g2: str) -> list[str]:
+        if g1 == g2:
+            return []
+        theirs = {person_key(r) for r in people.get(g2, {}).get("researchers", [])}
+        return [r["name"] for r in people.get(g1, {}).get("researchers", []) if person_key(r) in theirs][:4]
 
     def nearest_people(cid: str) -> str | None:
         """Name of the condition's best patient organization, for "nearest community" routes."""
@@ -102,7 +115,8 @@ def main() -> None:
                     "only_here": [h for h in own if h not in set(theirs) and h not in shared][:4],
                     "only_there": [h for h in theirs if h not in set(own) and h not in shared][:4],
                     "their_effect": other["variant_effect"]["value"], "their_inheritance": other["inheritance"][:2],
-                    "their_onset": other["onset"][:2], "their_symptom_count": len(theirs)}}
+                    "their_onset": other["onset"][:2], "their_symptom_count": len(theirs),
+                    "shared_people": shared_people(c["gene"]["symbol"], other["gene"]["symbol"])}}
                 for h in x["contrast"]["only_here"] + x["contrast"]["only_there"]:
                     sym_dict[h] = symptom_entry(h)
                 nb["neighbors"][rank] = x
@@ -140,6 +154,8 @@ def main() -> None:
             "communities": actions.get(cid, {}).get("communities", []), "assets": actions.get(cid, {}).get("assets", []),
             "shared_research": collaboration.get(cid, []),
             "plain": plain.get(cid),
+            "people": ({"researchers": people[c["gene"]["symbol"]]["researchers"][:5], "projects": people[c["gene"]["symbol"]]["projects"][:3],
+                        "retrieved": people[c["gene"]["symbol"]]["retrieved"]} if c["gene"]["symbol"] in people else None),
             "dict": {"symptoms": sym_dict, "mechanisms": mech_dict},
         }
         shards["c"][shard_of("c", cid)][cid] = bundle
@@ -181,12 +197,22 @@ def main() -> None:
         conds = []
         for sym in m["condition_genes"]:
             for cid in gene_by_symbol.get(sym, {}).get("conditions", []):
-                conds.append(brief(cid))
+                act = actions.get(cid, {})
+                conds.append({**brief(cid), "group": any(o["kind"] == "patient_organization" for o in act.get("communities", [])),
+                              "studies": len(act.get("assets", []))})
+        # Researchers who publish on several genes of this machinery: the people a mechanism connects.
+        across: dict[str, dict] = {}
+        for sym in m["condition_genes"]:
+            for r in people.get(sym, {}).get("researchers", []):
+                e = across.setdefault(person_key(r), {"name": r["name"], "affiliation": r["affiliation"], "genes": []})
+                e["genes"].append(sym)
+        bridging = sorted((e for e in across.values() if len(e["genes"]) >= 2), key=lambda e: (-len(e["genes"]), e["name"]))[:8]
         if not m["condition_genes"]:
             continue
         shards["m"][shard_of("m", mid)][mid] = {
             "id": mid, "name": m["name"], "source": m["source"], "url": m["url"], "genes_with_it": m["genes_with_it"],
             "condition_genes": m["condition_genes"], "conditions": conds[:MAX_LIST], "condition_count": len(conds),
+            "bridging_people": bridging,
         }
 
     # ---- write shards ----------------------------------------------------------------------------------------

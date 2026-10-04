@@ -15,7 +15,8 @@ import { routes } from "../lib/links";
 import { loadMap, type StarMapData } from "../lib/map";
 import type { Brief, ConditionBundle } from "../lib/types";
 
-type Explore = { kind: "g" | "s" | "grp" | "m"; title: string; subtitle: string; conditions: Brief[]; total: number; science: string };
+type Explore = { kind: "g" | "s" | "grp" | "m"; title: string; subtitle: string; conditions: (Brief & { group?: boolean; studies?: number })[]; total: number; science: string;
+  people?: { name: string; affiliation: string; genes: string[] }[] };
 
 export default function MapPage() {
   const { id, kind } = useParams();
@@ -65,7 +66,9 @@ export default function MapPage() {
     if (kind === "grp")
       getGroup(key).then((g) => g && setExplore({ kind: "grp", title: g.name, subtitle: "Disease group", conditions: g.conditions, total: g.member_count, science: routes.group(g.id) }));
     if (kind === "m")
-      getMechanism(key).then((m) => m && setExplore({ kind: "m", title: m.name, subtitle: `Shared machinery · ${m.source}`, conditions: m.conditions, total: m.condition_count, science: routes.mechanism(m.id) }));
+      getMechanism(key).then((m) => m && setExplore({ kind: "m", title: m.name, subtitle: `Shared machinery · ${m.source}`, total: m.condition_count, science: routes.mechanism(m.id),
+        // Ranked for someone holding a therapeutic idea for this machinery: communities and studies first.
+        conditions: [...m.conditions].sort((a, b) => Number(!!b.group) - Number(!!a.group) || (b.studies ?? 0) - (a.studies ?? 0)), people: m.bridging_people }));
   }, [kind, id]);
 
   const neighbors = useMemo(() => (condition ? condition.neighbors.filter((n) => !n.same_gene).sort((a, b) => b.score - a.score) : []), [condition]);
@@ -234,6 +237,7 @@ function ExplorePanel({ e, onClose }: { e: Explore; onClose: () => void }) {
   const [filter, setFilter] = useState("");
   const what = { g: "caused by this gene", s: "with this symptom", grp: "in this group", m: "whose genes share this machinery" }[e.kind];
   const shown = e.conditions.filter((b) => !filter || `${b.name} ${b.gene}`.toLowerCase().includes(filter.toLowerCase()));
+  const people = e.people ?? [];
   return (
     <div className="p-6">
       <div className="flex items-start justify-between gap-3">
@@ -244,6 +248,14 @@ function ExplorePanel({ e, onClose }: { e: Explore; onClose: () => void }) {
       <p className="mt-2 text-[15px] text-ink-soft">
         <b className="text-ink">{e.total.toLocaleString("en-US")}</b> condition{e.total === 1 ? "" : "s"} {what}, lit up on the map.
       </p>
+      {e.kind === "m" && people.length > 0 && (
+        <div className="mt-4 rounded-xl bg-ink-wash/70 p-3 text-xs">
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">People working across this machinery</div>
+          <ul className="mt-1.5 space-y-1">{people.map((p) => <li key={p.name}><b className="font-semibold text-ink">{p.name}</b>{p.affiliation ? `, ${p.affiliation}` : ""} <span className="text-ink-faint">· publishes on {p.genes.join(", ")}</span></li>)}</ul>
+          <p className="mt-1.5 text-[10.5px] text-ink-faint">From recent PubMed patient research per gene. The same mechanism under different gene names.</p>
+        </div>
+      )}
+      {e.kind === "m" && <p className="mt-3 text-xs text-ink-faint">Conditions with patient groups and studies are listed first.</p>}
       {e.conditions.length > 8 && (
         <input value={filter} onChange={(ev) => setFilter(ev.target.value)} placeholder="Filter" className="mt-4 w-full rounded-lg border border-ink-line px-3 py-2 text-sm outline-none focus:border-machinery/50" />
       )}
@@ -252,7 +264,11 @@ function ExplorePanel({ e, onClose }: { e: Explore; onClose: () => void }) {
           <li key={b.id}>
             <Link to={routes.condition(b.id)} className="flex items-baseline justify-between gap-3 py-2.5 text-sm hover:text-machinery">
               <span className="min-w-0 truncate">{b.name}</span>
-              <span className="shrink-0 font-mono text-[11px] text-ink-faint">{b.gene}</span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                {b.group && <span className="rounded-full bg-machinery-soft px-1.5 py-0.5 text-[10px] text-machinery">group</span>}
+                {!!b.studies && <span className="rounded-full bg-ink-wash px-1.5 py-0.5 text-[10px] text-ink-soft">{b.studies} stud{b.studies === 1 ? "y" : "ies"}</span>}
+                <span className="font-mono text-[11px] text-ink-faint">{b.gene}</span>
+              </span>
             </Link>
           </li>
         ))}

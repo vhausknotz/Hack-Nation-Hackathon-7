@@ -95,6 +95,15 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
         blocks: studyBlocks,
       },
       {
+        id: "people", title: `People working on ${c.gene.symbol}`,
+        intro: "As listed on publications since 2015 and NIH RePORTER. A name means published or funded work mentioning the gene, not that they treat patients or take enquiries. Use a paper's corresponding-author address or the institution's page.",
+        blocks: c.people && (c.people.researchers.length || c.people.projects.length) ? [
+          { items: c.people.researchers.map((r) => ({ title: r.name, subtitle: r.affiliation, url: `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(`${r.name}[au] AND ${c.gene.symbol}[tiab]`)}`,
+              facts: [`${r.papers} recent paper(s) on ${c.gene.symbol} patients${r.latest ? `, latest ${r.latest}` : ""}. PMIDs: ${r.pmids.join(", ")}`], cautions: [] })) },
+          ...(c.people.projects.length ? [{ heading: "NIH-funded projects", items: c.people.projects.map((pr) => ({ title: pr.title, subtitle: `${pr.pis.join(", ")} · ${pr.organization} · ${pr.years.join(", ")}`, url: pr.url, facts: [], cautions: [] })) }] : []),
+        ] : [{ bullets: [c.people ? `No researchers publishing patient research on ${c.gene.symbol} were found in our searches yet.` : "Not searched yet."] }],
+      },
+      {
         id: "collaboration", title: "Partnership proposal draft: shared research",
         intro: "A sourced starting point for contacting a study team that already includes another community. It rests on reviewed listings of the same research record for both diagnoses. This draft is not an independently reviewed partnership proposal, evidence of matching biology, or permission to combine cohorts.",
         blocks: collaborationQuestions(c).length ? collaborationQuestions(c).map(({ route, asset, question }) => {
@@ -125,6 +134,7 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
                   ...(neighbor ? [
                     `The two conditions are also computed neighbors on the map: ${plainReason(c, neighbor)}`,
                     ...(neighbor.symptoms.length ? [`Shared recorded signs: ${sym(neighbor.symptoms)}.`] : []),
+                    ...(neighbor.contrast?.shared_people?.length ? [`Researchers publishing on both genes: ${neighbor.contrast.shared_people.join(", ")}.`] : []),
                     ...(neighbor.contrast?.only_here.length ? [`Only recorded for ours: ${sym(neighbor.contrast.only_here)}.`] : []),
                     ...(neighbor.contrast?.only_there.length ? [`Only recorded for ${route.partner.gene}: ${sym(neighbor.contrast.only_there)}.`] : []),
                   ] : ["The shared study is the documented link; biological similarity has not been established here."]),

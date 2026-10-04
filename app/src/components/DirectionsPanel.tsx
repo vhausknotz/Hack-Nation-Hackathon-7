@@ -12,6 +12,7 @@ import type { Community, ConditionBundle, Neighbor, ResearchAsset } from "../lib
 import { StudyTeamCard } from "./StudyTeam";
 import { Contrast } from "./Contrast";
 import { DisputeNote } from "./Dispute";
+import { PeopleSection } from "./People";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -79,7 +80,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
             {!neighbors.length && <p>There is too little recorded information to compare this condition reliably.</p>}
             {c.other_conditions_of_gene.length > 0 && <details className="mt-4"><summary className="cursor-pointer text-xs">Other conditions linked to {c.gene.symbol}</summary><p className="mt-2 text-xs">The same gene can act differently in different conditions. These are not automatically close connections.</p>{c.other_conditions_of_gene.slice(0, 4).map(n => <Link className="mt-2 block text-xs underline" key={n.id} to={routes.condition(n.id)}>{n.name}</Link>)}</details>}
           </>}
-          {i === 3 && <Studies c={c} programs={programs} assets={assets} />}
+          {i === 3 && <><Studies c={c} programs={programs} assets={assets} /><PeopleSection c={c} /></>}
           {i === 4 && <>
             <SharedResearchPanel c={c} />
             <p className="mb-3">Nothing here is a recommendation. These questions help you check what the atlas found: whether a group or study includes your diagnosis, and whether it is open now.</p>

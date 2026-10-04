@@ -32,7 +32,7 @@ INSTITUTION = re.compile(r"universit|hospital|institut|center|centre|college|sch
 
 def clean_affiliation(text: str) -> str:
     """The institution and its city/country, not the department: what a family can look up."""
-    text = EMAIL.sub("", text or "").strip().rstrip(".;,")
+    text = re.sub(r"\s*Electronic address:?\s*", " ", EMAIL.sub("", text or "")).strip().rstrip(".;,: ")
     parts = [p.strip() for p in text.split(",") if p.strip()]
     strong = re.compile(r"universit|hospital|college|school|clinic", re.I)
     inst = next((i for i, part in enumerate(parts) if strong.search(part) and not part.lower().startswith(("department", "division"))),

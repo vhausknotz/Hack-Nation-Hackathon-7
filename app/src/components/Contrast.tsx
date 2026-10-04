@@ -41,6 +41,7 @@ export function Contrast({ c, n }: { c: ConditionBundle; n: Neighbor }) {
       <div className="rounded-lg bg-machinery-soft/40 p-2.5">
         <div className="text-[10px] font-semibold uppercase tracking-wide text-machinery">Shared</div>
         <p className="mt-1">{shared.length ? shared.join(" · ") : "No specific symptoms in common"}{n.mechanisms.length ? ` · ${n.mechanisms.length} piece${n.mechanisms.length === 1 ? "" : "s"} of shared machinery` : ""}</p>
+        {k?.shared_people?.length ? <p className="mt-1"><b className="font-semibold text-ink">Researchers publishing on both genes:</b> {k.shared_people.join(", ")}. A natural first contact for a joint question.</p> : null}
       </div>
       {(here.length > 0 || there.length > 0) && (
         <div className="rounded-lg bg-ink-wash p-2.5">
