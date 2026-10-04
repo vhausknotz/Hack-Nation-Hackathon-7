@@ -13,7 +13,7 @@ from pathlib import Path
 from ledger import registry, sources
 from ledger.canonical import canonical_json, content_id, sha256
 from ledger.kernel import Kernel
-from ledger.policy import claim_review_status
+from ledger.policy import claim_review_status, family_key
 from ledger.schema import PREDICATES, QUALIFIER_VALUES, REVIEW_VERDICTS, TEXT_EVIDENCE
 from ledger.store import Store
 from .intake import Intake
@@ -121,7 +121,7 @@ class Atlas:
                                     "AND (? IS NULL OR c.subject=?) ORDER BY c.created_seq LIMIT 100", (family, condition_id, condition_id)).fetchall()
             for r in rows:
                 reviews = [dict(v) for v in store.reviews_for(r["claim_id"])]
-                if claim_review_status(reviews) in {"independently_reviewed", "human_reviewed", "rejected"} or any(v["model_family"] == family for v in reviews):
+                if claim_review_status(reviews) in {"independently_reviewed", "human_reviewed", "rejected"} or any(family_key(v["model_family"]) == family_key(family) for v in reviews):
                     continue
                 if r["subject"] in self.conditions:
                     tasks.append({"id": "review:" + r["claim_id"] + ":" + family, "condition_id": r["subject"], "kind": "review", "model_family": family,

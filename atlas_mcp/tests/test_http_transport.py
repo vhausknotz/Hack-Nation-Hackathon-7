@@ -78,3 +78,21 @@ def test_real_http_mcp_requires_auth_and_isolates_concurrent_callers(credentials
             assert "another contributor" in second.content[0].text
             assert atlas.intake.owned_task("evidence:"+CID, atlas.actor)["actor"] == atlas.actor
     asyncio.run(run())
+
+
+def test_functions_loopback_proxy_keeps_host_validation(credentials):
+    atlas, _, verifier, token = credentials
+    server = build_http_server(lambda _: atlas, verifier, "https://atlas.test/mcp", loopback_proxy=True)
+    app = server.streamable_http_app()
+    async def run():
+        async with server.session_manager.run():
+            async with httpx.AsyncClient(transport=httpx.ASGITransport(app),
+                                         headers={"Authorization": "Bearer " + token()}) as client:
+                body = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+                    "protocolVersion": "2025-03-26", "capabilities": {}, "clientInfo": {"name": "proxy-test", "version": "1"}}}
+                for host in ("127.0.0.1:8000", "localhost:8000"):
+                    response = await client.post(f"http://{host}/mcp", json=body,
+                                                headers={"Accept": "application/json, text/event-stream"})
+                    assert response.status_code == 200
+                assert (await client.post("https://attacker.test/mcp", json=body)).status_code == 421
+    asyncio.run(run())

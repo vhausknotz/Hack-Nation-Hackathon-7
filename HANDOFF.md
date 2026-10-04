@@ -2,6 +2,15 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Hosted contribution milestone (newest)
+
+- Azure MCP is live at `https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp`. Approved storage-key fallback is confined to its private account; no keys printed/committed. Authenticated SDK and minimal-environment stdio bridge checks pass. Use `tools/run_cloud_mcp.py` for a local MCP client backed by Azure. All 13 tools work. `atlas_mcp/CLOUD.md` and operations register have status/off/cost details.
+- A genuine cloud contribution supplied the missing full eligibility restrictions for SNAP25's Simons registry. Cloud fetch -> signed queue -> local kernel -> explicit Sol review succeeded. Receipt `data/campaigns/mcp-first-contribution.json`; publication of this newest review is still pending. Gateway/worker spend no model tokens; the review was a separate authorized operator call.
+- STXBP1 organization alias was kernel-accepted and Sol-supported (`stxbp1-organization-identity.json`). The projection merges only reviewed, unambiguous identity claims and leaves original evidence intact. Simons quote fix is exported. Added review-family alias normalization so historical `openai` and `openai-gpt6` cannot count as independent families.
+- Family UI integrated and desktop/phone brief + Directions checks passed with fresh data; not deployed yet. Keyboard focus is contained/restored for the brief. Backend: 125 tests pass.
+- The second agent delivered community package commit `f382cf4` from `../atlas-community`. Its local-only source archive must be copied/verified; 14 candidates require Sol review before publication. Lead is integrating it next. No other production ledger writer is active.
+- Background Luna remains active, around $9.32 at last check, 375 RPM / 524k actual TPM; its configured admission allowance is 950k TPM. Do not restart it casually.
+
 ### Deployment approval and current permissions boundary
 
 Newest update: the owner cannot involve an administrator and **explicitly approved the dedicated storage key** after being told that a leak could expose/alter MCP data and signing keys, but would not grant access to other Azure resources. Deployment `mcp-initial` is now running with `useManagedIdentity=false`. The earlier approval rejection below is superseded by this explicit authorization. Keep keys out of commands, logs, local files, repository and client output; only protected server settings and transient operator process memory may contain them. Verify the live state before claiming completion.

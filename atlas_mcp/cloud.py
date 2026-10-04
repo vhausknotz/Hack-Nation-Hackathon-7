@@ -43,7 +43,7 @@ def serve(store):
                 refreshed = time.monotonic()
             projection = current
         return CloudAtlas(intake, projection, actor)
-    server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"])
+    server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"], loopback_proxy=True)
     server.run(transport="streamable-http")
 
 

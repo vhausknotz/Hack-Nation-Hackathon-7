@@ -60,6 +60,7 @@ cd app && npm install && npm run dev
 
 Tests: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests` (install `atlas_mcp/requirements.txt` for MCP tests).
 Interactive desktop/phone check: `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
+Family brief, copy/print and source fidelity: `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa`.
 
 ## Data sources
 

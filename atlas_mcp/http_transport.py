@@ -63,11 +63,14 @@ class RequestAtlas:
         return getattr(self.factory(token.client_id), name)
 
 
-def build_http_server(factory, verifier, public_url):
+def build_http_server(factory, verifier, public_url, *, loopback_proxy=False):
     url = urlsplit(public_url)
     if url.scheme != "https" or not url.hostname or url.path != "/mcp" or url.query or url.fragment or url.username:
         raise ValueError("Use the canonical HTTPS /mcp endpoint")
     origin = f"https://{url.netloc}"
+    # Functions' host forwards to the custom handler on a fixed loopback port.
+    # Keep DNS-rebinding checks enabled, adding only those exact internal hosts.
+    hosts = [url.netloc] + (["127.0.0.1:8000", "localhost:8000"] if loopback_proxy else [])
     return build_server(RequestAtlas(factory), stateless_http=True, json_response=True,
         max_request_body_size=65536, host="0.0.0.0", token_verifier=verifier,
         auth=AuthSettings(issuer_url=verifier.issuer, resource_server_url=public_url,
@@ -75,4 +78,4 @@ def build_http_server(factory, verifier, public_url):
         # Audience is checked by EntraVerifier, since Entra uses the API application
         # audience rather than the HTTP resource URL as its access-token aud.
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=True,
-            allowed_hosts=[url.netloc], allowed_origins=[origin]))
+            allowed_hosts=hosts, allowed_origins=[origin]))

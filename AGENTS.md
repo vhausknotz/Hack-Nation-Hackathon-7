@@ -76,6 +76,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Visual check:** `MSYS_NO_PATHCONV=1 ./.venv/Scripts/python tools/screenshot.py <out_dir> http://localhost:4173 / "/c/MONDO:0014590" --width 390` (after `npx vite preview` in app/). Check both desktop and phone widths before deploying.
 
 **Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
+**Family brief check:** `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa` (desktop/phone, source fidelity, print/copy and closing).
 Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests` (MCP dependencies: `atlas_mcp/requirements.txt`).
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 New Ledger instances enforce an OS writer lease. Processes already running when the lease was introduced do not; let the current community scout exit before draining the MCP inbox. MCP intake itself never writes the evidence ledger or spends on models.
@@ -121,7 +122,7 @@ New Ledger instances enforce an OS writer lease. Processes already running when 
 
 ## Working preferences
 
-**Current parallel coordination:** Codex lead owns `atlas_mcp/`, ledger/pipeline/agent code, Luna runs, infrastructure and deployment. The owner's second coding agent should read `docs/agent_tasks/family_journey_parallel.md`, use a separate worktree and own only its scoped family UI files. Record cross-agent requests in the task report; the owner can relay its path/commit. Historical trials-agent instructions are superseded by this assignment for new parallel work.
+**Current parallel coordination:** Codex lead owns MCP, ledger/pipeline, Luna runs, infrastructure, integration and deployment. The second agent's family UI commit `2b2f5b3` is integrated. Its next scoped task is `docs/agent_tasks/community_coverage_parallel.md`, in a separate worktree: staged community evidence and new discovery helpers only, no production-ledger writes or paid campaigns. Record cross-agent requests in the task report; the owner can relay its path/commit. Historical task assignments are superseded.
 
 - Don't put time estimates on tasks or plans. Describe steps by what they produce.
 - Clarity beats feature count. Every screen should make sense at a glance; depth goes behind a click.

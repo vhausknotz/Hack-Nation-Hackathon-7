@@ -153,19 +153,38 @@ export function FamilyBrief({ c, neighbors, onClose }: { c: ConditionBundle; nei
   const [built, setBuilt] = useState<string | null>(null);
   const [copied, setCopied] = useState<"" | "done" | "failed">("");
   const heading = useRef<HTMLHeadingElement>(null);
+  const dialog = useRef<HTMLDivElement>(null);
   const close = useRef(onClose);
   close.current = onClose;
   useEffect(() => {
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const root = document.getElementById("root");
+    const wasInert = root?.inert ?? false;
+    if (root) root.inert = true;
     getMeta().then((m) => setBuilt(m.built)).catch(() => {});
     heading.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close.current();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.preventDefault(); close.current(); }
+      if (e.key !== "Tab") return;
+      const items = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]') ?? []);
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === heading.current)) {
+        e.preventDefault(); last?.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault(); first?.focus();
+      }
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (root) root.inert = wasInert;
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
   }, []);
   const brief = buildBrief(c, neighbors, built, window.location.origin, new Date().toLocaleDateString("en-CA"));
   const copy = async () => setCopied((await copyText(briefText(brief))) ? "done" : "failed");
 
-  return createPortal(<div role="dialog" aria-modal="true" aria-labelledby="family-brief-title" data-family-brief className="fixed inset-0 z-50 overflow-y-auto bg-white text-ink print:static print:overflow-visible">
+  return createPortal(<div ref={dialog} role="dialog" aria-modal="true" aria-labelledby="family-brief-title" data-family-brief className="fixed inset-0 z-50 overflow-y-auto bg-white text-ink print:static print:overflow-visible">
     <style>{"@media print { #root { display: none !important; } @page { margin: 14mm; } }"}</style>
     <div className="sticky top-0 z-10 border-b border-ink-line bg-white/95 backdrop-blur print:hidden">
       <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">

@@ -55,6 +55,7 @@ PREDICATES: dict[str, Predicate] = {
     "interacts_with": Predicate(("gene",), ("gene",), ("score", "species", "evidence_level", "certainty"), "The two proteins physically interact"),
     "has_asset": Predicate(("condition",), ("trial", "asset"), ("asset_type", "status"), "A registry, study, model, biomarker, outcome measure, biorepository, program or trial relevant to the condition"),
     "represented_by": Predicate(("condition",), ("organization",), ("org_type", "scope", "name", "homepage"), "An organization serves this community"),
+    "same_organization_as": Predicate(("organization",), ("organization",), (), "These identifiers refer to the same organization; the object is its canonical identifier"),
     "studied_by": Predicate(("condition",), ("person",), ("role",), "A researcher or clinician works on the condition"),
     "tested_in": Predicate(("intervention",), ("condition",), ("species", "model_system", "evidence_level", "outcome", "certainty"), "An intervention was tested for the condition"),
     "has_prevalence": Predicate(("condition",), ("text",), ("prevalence_kind", "geography"), "How common the condition is"),

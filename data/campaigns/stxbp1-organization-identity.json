@@ -1,0 +1,16 @@
+{
+ "claim_id": "claim:sha256:ec7708f0b7911cf34312721f397ce6dc8e4ffb9cbddd0c40294ac88f34b1b9f3",
+ "review": {
+  "verdict": "supports",
+  "reason": "The foundation.org address permanently redirects to the disorders.org site, whose official page identifies the organization as the STXBP1 Foundation. Both identifiers also cite the same archived official-page source."
+ },
+ "status": "reviewed",
+ "ledger_tree_head": {
+  "size": 1620,
+  "root": "db4da8889b4c33fb8dee61b0cd53537a02d66fd7e474eae34ee65aac31719d22",
+  "ts": "2026-10-04T01:27:16+00:00",
+  "signature": "ed25519:M7cOf7i_oDPcRM_JHG3bhROQXG6y7SX7IdSCl7egNzx-DxOJGpNPdP-GrpPuXTMaBwMYCTj_Gc3Q_082qmb0BQ",
+  "log_key": "ed25519:SqJsN6AYUmYupalFI8NqXI1TJF_AfxKCLEjHmSAB1fk"
+ },
+ "log_verified": true
+}

@@ -27,6 +27,42 @@ def asset_rank(status: str, review_seq: int, claim: dict) -> tuple:
     return (STATUS_RANK.get(status, 0), review_seq, claim["provenance"]["created"])
 
 
+def organization_aliases(store) -> dict[str, tuple[str, list[str]]]:
+    """Resolve only reviewed, unambiguous identity claims. Cycles remain separate.
+
+    A later rejection of the same assertion disables its older support. Original
+    claims/IDs remain in the ledger; this changes only the display projection.
+    """
+    from ledger import policy
+    latest = {}
+    for row in store.claims_where("origin='contributed' AND kernel_ok=1 AND predicate='same_organization_as'"):
+        if row["predicate"] != "same_organization_as":
+            continue
+        reviews = [dict(r) for r in store.reviews_for(row["claim_id"])]
+        if not reviews:
+            continue
+        claim = json.loads(row["body"])
+        a = claim["assertion"]
+        key = (a["subject"], a["object"])
+        rank = reviews[-1]["seq"]
+        if key not in latest or rank > latest[key][0]:
+            latest[key] = (rank, policy.claim_review_status(reviews), row["claim_id"])
+    links = defaultdict(list)
+    for (alias, target), (_, status, cid) in latest.items():
+        if status in STATUS_RANK and alias != target:
+            links[alias].append((target, cid))
+    result = {}
+    for alias in links:
+        target, seen, claims = alias, set(), []
+        while target in links and len(links[target]) == 1 and target not in seen:
+            seen.add(target)
+            target, cid = links[target][0]
+            claims.append(cid)
+        if target not in links:
+            result[alias] = (target, claims)
+    return result
+
+
 def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     """condition id -> {"communities": [...], "assets": [...]} (only conditions that have any)."""
     if not (ROOT / "data" / "ledger" / "ledger.db").exists():
@@ -37,6 +73,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     from ledger.store import Store
 
     store = Store(readonly=True)
+    aliases = organization_aliases(store)
     rows = []
     asset_latest = {}
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1 AND predicate IN ('represented_by', 'has_asset')"):
@@ -45,7 +82,7 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         if row["predicate"] == "has_asset" and reviews:
             claim = json.loads(row["body"])
             a = claim["assertion"]
-            trust = 3 if any(r["reviewer_kind"] == "human" for r in reviews) else min(2, len({r["model_family"] or r["reviewer"] for r in reviews}))
+            trust = 3 if any(r["reviewer_kind"] == "human" for r in reviews) else min(2, len({pol.family_key(r["model_family"]) or r["reviewer"] for r in reviews}))
             rank = (trust, reviews[-1]["seq"], claim["provenance"]["created"])
             key = (a["subject"], a["object"])
             if key not in asset_latest or asset_latest[key][0] < rank:
@@ -94,10 +131,13 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
             targets = by_gene[conditions[a["subject"]]["gene"]["symbol"]] if entry["scope"] == "this_gene" else [a["subject"]]
             for t in targets:
                 e = entry if t == a["subject"] else {**entry, "via": a["subject"]}
-                key = ("org", t, a["object"])
+                canonical, alias_claims = aliases.get(a["object"], (a["object"], []))
+                if alias_claims:
+                    e = {**e, "id": canonical, "original_organization_id": a["object"], "identity_claim_ids": alias_claims}
+                key = ("org", t, canonical)
                 # Corrections must replace an older quote at equal trust, including
                 # newer qualified evidence. A cached first claim must not win forever.
-                rank = (STATUS_RANK.get(status, 0), review_seq, claim["provenance"]["created"], t == a["subject"])
+                rank = (STATUS_RANK.get(status, 0), a["object"] == canonical, review_seq, claim["provenance"]["created"], t == a["subject"])
                 if key not in best or best[key][0] < rank:
                     best[key] = (rank, e)
         else:

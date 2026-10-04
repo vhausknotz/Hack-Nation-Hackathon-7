@@ -1,0 +1,9 @@
+{
+  "endpoint": "https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp",
+  "unauthenticated_http": 401,
+  "metadata": "passed",
+  "authenticated_initialization": "passed",
+  "tool_count": 13,
+  "snap25_search_and_read": "passed",
+  "writes": 0
+}

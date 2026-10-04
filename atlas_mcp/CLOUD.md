@@ -1,6 +1,32 @@
-# Hosted MCP preparation
+# Hosted MCP
 
-**Implemented and tested locally; not deployed.** The source-only deployment package is built by `python tools/package_mcp.py`. `infra/mcp/main.bicep` compiles; a real Functions deployment/connection test is still required. No paid resources have been created.
+**Deployed and authenticated:** https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp . Real SDK checks passed: anonymous 401, OAuth metadata, initialization, 13 tools, SNAP25 search/read, task leasing, official trial fetch, signed submission and kernel acceptance. The first real contribution completes SNAP25 registry eligibility evidence and has a separate Sol review. Receipts: `data/campaigns/mcp-cloud-read-smoke.json` and `mcp-first-contribution.json`. The worker remains local and publication explicit.
+
+## Connect an agent on this computer
+
+Use the repo's `.venv/Scripts/python.exe` as the MCP client's command and the absolute path of `tools/run_cloud_mcp.py` as its sole argument. This tested stdio bridge connects to Azure, using the existing Az PowerShell login and refreshing the short-lived Entra token in memory. No storage key or pasted token is needed. Run `Connect-AzAccount` if the Azure login expires. The bridge exposes all 13 remote tools; it does not run the local ledger server.
+
+The currently enrolled Azure user is `agent:mcp-lead-codex`, without review permission. Sharing its login does not create different contributors or independent reviewers. To onboard other people/agents, enroll their tenant principal explicitly and configure an Entra-capable client for the API audience `1180fceb-e26e-4813-b915-b51785fcc18d` and scope `api://1180fceb-e26e-4813-b915-b51785fcc18d/Atlas.Contribute`. Arbitrary browser OAuth clients are not automatically registered or consented.
+
+## Operator controls
+
+```powershell
+powershell -File tools/azure_mcp.ps1 status
+powershell -File tools/azure_mcp.ps1 stop
+# Stops compute; retained storage can still incur charges.
+powershell -File tools/azure_mcp.ps1 start
+# Permanent removal, after backing up wanted cloud contributions:
+powershell -File tools/azure_mcp.ps1 remove -ConfirmRemove
+
+./.venv/Scripts/python tools/azure_mcp_operator.py drain
+./.venv/Scripts/python tools/azure_mcp_operator.py publish
+./.venv/Scripts/python tools/azure_mcp_operator.py deploy
+./.venv/Scripts/python tools/check_mcp_cloud.py
+```
+
+Operator commands read ignored `data/build/mcp-deployment.json`, use the existing Azure login, and keep storage credentials in process memory only. Source-only deployment uses Azure's Linux remote build. These commands never print credentials. Do not enable HTTP/debug tracing of settings or credential requests.
+
+Budget `mcp-monthly-allowance` was created on the dedicated resource group with amount 5/month and alerts at 50%, 80%, 100%, addressed to the existing Azure operator. Azure has not yet returned its billing currency in the empty current-spend field; the amount is in the subscription's billing currency. This is an alert, not a hard cap. No Always Ready capacity or paid telemetry workspace is configured. The service makes no model calls.
 
 ## Implemented contract
 

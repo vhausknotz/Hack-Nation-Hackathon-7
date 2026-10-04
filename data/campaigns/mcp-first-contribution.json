@@ -1,0 +1,24 @@
+{
+  "purpose": "Complete missing eligibility evidence for the existing SNAP25 registry listing",
+  "endpoint": "https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp",
+  "condition": "MONDO:0014590",
+  "record": "NCT01238250",
+  "source_id": "src:sha256:20a531023312a19ac2743d62647d6a3baa8e51addd18c9a0d824ee956fddaf8b",
+  "submission_id": "submission:sha256:a0f05a6b2ef32e7bae212f24944f78a28dd55b0ef1a20a3b2f772c60ac2e3155",
+  "cloud_state": "queued",
+  "gateway_model_calls": 0,
+  "claim_id": "claim:sha256:fbf5aac09715b8da0257111218e6a4e5c89184c9b6f1aad5182ac476f2774d4c",
+  "review": {
+    "verdict": "supports_with_qualification",
+    "reason": "This is a data-collecting registry that lists SNAP25, but participation requires a supported language, online access, consent, and a SNAP25 change that passes laboratory eligibility review."
+  },
+  "review_status": "reviewed",
+  "log_verified": true,
+  "ledger_tree_head": {
+    "size": 1625,
+    "root": "49f057064a724bf8c8246e5ce1ded64c924114574c9b0ccc6f4f2182a586e138",
+    "ts": "2026-10-04T01:38:39+00:00",
+    "signature": "ed25519:luP6geavrMvkGSdCtZ6pazRcWZMuqvufF4flCI4bcLQV2EKB_1KCPxZ5jlM1eXnHda4wa0vJh1dQIZoZChReDg",
+    "log_key": "ed25519:SqJsN6AYUmYupalFI8NqXI1TJF_AfxKCLEjHmSAB1fk"
+  }
+}

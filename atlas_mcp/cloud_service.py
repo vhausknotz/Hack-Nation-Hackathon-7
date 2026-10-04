@@ -8,7 +8,7 @@ from pathlib import Path
 from azure.core.exceptions import ResourceNotFoundError
 from ledger import sources
 from ledger.canonical import sha256
-from ledger.policy import claim_review_status
+from ledger.policy import claim_review_status, family_key
 from .service import Atlas, bounded
 from .source_fetch import official_url, fetch_official
 
@@ -61,7 +61,7 @@ class CloudAtlas(Atlas):
         for item in self.projection.read("review-frontier.json"):
             if condition_id and item["condition_id"] != condition_id:
                 continue
-            if not profile["allow_review"] or item["contributor"] == self.actor or family in item["reviewed_families"]:
+            if not profile["allow_review"] or item["contributor"] == self.actor or family_key(family) in {family_key(f) for f in item["reviewed_families"]}:
                 continue
             tasks.append({"id": "review:"+item["claim_id"]+":"+family, "condition_id": item["condition_id"], "kind": "review",
                           "model_family": family, "claim_id": item["claim_id"], "title": "Check whether the source supports this claim"})

@@ -12,6 +12,14 @@ POLICY_VERSION = "policy@1"
 SUPPORTING = {"supports", "supports_with_qualification"}
 
 
+def family_key(family: str | None) -> str:
+    """Historical OpenAI labels must not masquerade as independent reviewers."""
+    value = (family or "").strip().lower()
+    if value == "openai" or value.startswith(("openai-", "azure-openai", "gpt-")):
+        return "openai"
+    return value
+
+
 def claim_review_status(reviews: list[dict]) -> str:
     """unreviewed | reviewed | independently_reviewed | human_reviewed | review_disagreement | rejected
 
@@ -26,7 +34,7 @@ def claim_review_status(reviews: list[dict]) -> str:
         return "human_reviewed" if latest in SUPPORTING else "rejected"
     by_family: dict[str, str] = {}
     for r in reviews:  # latest verdict per model family
-        by_family[r["model_family"] or r["reviewer"]] = r["verdict"]
+        by_family[family_key(r["model_family"]) or r["reviewer"]] = r["verdict"]
     support = sum(v in SUPPORTING for v in by_family.values())
     against = sum(v == "does_not_support" for v in by_family.values())
     if support and against:

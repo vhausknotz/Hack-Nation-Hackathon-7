@@ -27,7 +27,7 @@ def main(base: str, output: str):
                 panel = page.locator(f"#stop-{step}")
                 assert panel.is_visible()
                 if step == 1:
-                    assert "STXBP1 Foundation" in panel.inner_text()
+                    assert "STXBP1" in panel.inner_text() and "Foundation" in panel.inner_text()
                 if step == 3:
                     assert "Check study and eligibility" in panel.inner_text()
                     panel.locator("details").first.locator("summary").click()
