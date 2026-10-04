@@ -20,6 +20,20 @@ foreach ($r in $items) {
     }
 }
 
+Write-Host "`nCloud engine VM (about 28 USD/month while running; stop pauses compute billing):"
+$vm = Invoke-AzRestMethod -Method GET -Path "/subscriptions/$sub/resourceGroups/rare-disease-atlas-mcp/providers/Microsoft.Compute/virtualMachines/atlas-engine/instanceView?api-version=2024-03-01"
+if ($vm.StatusCode -eq 200) {
+    $power = (($vm.Content | ConvertFrom-Json).statuses | Where-Object { $_.code -like "PowerState/*" }).displayStatus
+    Write-Host ("    atlas-engine: {0}" -f $power)
+    Write-Host "    pause: python tools/azure_engine_vm.py stop   resume: python tools/azure_engine_vm.py start"
+} else { Write-Host "    not deployed" }
+
+$budget = Invoke-AzRestMethod -Method GET -Path "/subscriptions/$sub/resourceGroups/rare-disease-atlas-mcp/providers/Microsoft.Consumption/budgets/mcp-monthly-allowance?api-version=2023-05-01"
+if ($budget.StatusCode -eq 200) {
+    $bp = ($budget.Content | ConvertFrom-Json).properties
+    Write-Host ("    budget alert: {0} per month; spent so far this month: {1}" -f $bp.amount, $bp.currentSpend.amount)
+}
+
 Write-Host "`nShared model resource (pay per use, only costs money while the pipeline or agents call it):"
 $ai = Invoke-AzRestMethod -Method GET -Path "/subscriptions/$sub/providers/Microsoft.CognitiveServices/accounts?api-version=2024-10-01"
 foreach ($a in (($ai.Content | ConvertFrom-Json).value | Where-Object { $_.name -eq "valiOpenAI" })) {
