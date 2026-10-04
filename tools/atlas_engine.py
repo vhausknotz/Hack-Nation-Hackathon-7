@@ -259,6 +259,13 @@ def file_hashes(folder):
     return out
 
 
+def same_content(a, b):
+    try:
+        return a.exists() and json.loads(a.read_text(encoding="utf-8")) == json.loads(b.read_text(encoding="utf-8"))
+    except ValueError:
+        return False
+
+
 def top_related(neighbors_row):
     rows = [n for n in neighbors_row.get("neighbors", []) if not n.get("same_gene")]
     rows.sort(key=lambda n: (-n["score"], n["id"]))
@@ -300,8 +307,8 @@ def publish(engine, subjects):
     uploaded = 0
     files, hashes = {}, {}
     for path, digest in staged.items():
-        if base.get(path) == digest:
-            continue  # identical to what the website already serves
+        if base.get(path) == digest or same_content(BASE / path, EXPORT / path):
+            continue  # identical to what the website already serves (key order may differ)
         if manifest["hashes"].get(path) == digest:
             files[path], hashes[path] = manifest["files"][path], digest
             continue

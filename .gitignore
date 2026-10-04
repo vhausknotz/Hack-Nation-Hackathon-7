@@ -39,3 +39,6 @@ dist/
 data/ledger/
 data/enrichment/
 data/contributions/
+
+# live engine state, staging export and spend records (local only)
+data/engine/
