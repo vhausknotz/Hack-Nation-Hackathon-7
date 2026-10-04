@@ -14,6 +14,7 @@ import { Contrast } from "./Contrast";
 import { DisputeNote } from "./Dispute";
 import { PeopleSection } from "./People";
 import { VariantSection } from "./Variants";
+import { RequestButton } from "./Requests";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -93,7 +94,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
           </>}
           {i === 5 && <><ul className="list-disc space-y-2 pl-4">
             {gaps(c, neighbors).map((g, k) => <li key={k}>{g.text}{g.help && <span className="block text-xs text-ink-faint">{g.help}</span>}</li>)}
-          </ul><EvidenceHistory key={c.id} c={c} /></>}
+          </ul><div className="mt-4 rounded-xl border border-ink-line p-3"><p className="mb-2 text-xs">Want the community's AI agents to fill these gaps sooner? Requests move this condition up their task list.</p><RequestButton id={c.id} /></div><EvidenceHistory key={c.id} c={c} /></>}
           {i < 5 && <button onClick={() => onStep(i + 1)} className="mt-4 flex w-full items-center justify-between rounded-xl bg-machinery px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90">{STOPS[i + 1]} <span aria-hidden>→</span></button>}
         </div>}
       </section>)}

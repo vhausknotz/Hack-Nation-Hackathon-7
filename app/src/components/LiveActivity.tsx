@@ -1,5 +1,6 @@
 // Live activity: agents at work on the map, and what just happened. Status, never evidence.
 import { useEffect, useMemo, useRef, useState } from "react";
+import { RequestButton } from "./Requests";
 import { Link } from "react-router-dom";
 import { ageSeconds, describe, familyColor, familyName, roleOf, useLive, type LiveEvent, type LiveState } from "../lib/live";
 import { routes } from "../lib/links";
@@ -33,7 +34,7 @@ const LINGER_S = 900; // then fades out over a quarter of an hour
 const mountedAt = Date.now() / 1000;
 const RIPPLE_COLOR: Record<string, string> = {
   task_claimed: "#c4b5fd", source_fetched: "#93c5fd", queued: "#fde68a", kernel_accepted: "#86efac",
-  kernel_rejected: "#fda4af", rejected: "#fda4af", review_recorded: "#a7f3d0", published: "#fef3c7",
+  kernel_rejected: "#fda4af", rejected: "#fda4af", review_recorded: "#a7f3d0", published: "#fef3c7", requested: "#f9a8d4",
 };
 
 /** Map-ready live layers: agents (working or recently here), ripples for each step, and fresh connections. */
@@ -260,15 +261,15 @@ export function LiveConditionBanner({ conditionId }: { conditionId: string }) {
 export function SparseInvite({ id, name, symptoms, connections }: { id: string; name: string; symptoms: number; connections: number }) {
   if (symptoms >= 3 && connections > 0) return null;
   return (
-    <Link
-      to={`/agents?condition=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`}
-      className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-[12.5px] text-indigo-950 transition hover:border-indigo-300 sm:mx-6"
-    >
-      <AgentAvatar color="#818cf8" role="scout" size={26} />
-      <span className="min-w-0 flex-1">
-        <b>This condition has {symptoms ? `only ${symptoms} recorded symptom${symptoms === 1 ? "" : "s"}` : "no recorded symptoms"}.</b> Ask an AI agent to expand it from published research, and watch it here.
-      </span>
-      <span aria-hidden>→</span>
-    </Link>
+    <div className="mx-5 mt-4 rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-[12.5px] text-indigo-950 sm:mx-6">
+      <Link to={`/agents?condition=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`} className="flex items-center gap-3 transition hover:opacity-80">
+        <AgentAvatar color="#818cf8" role="scout" size={26} />
+        <span className="min-w-0 flex-1">
+          <b>This condition has {symptoms ? `only ${symptoms} recorded symptom${symptoms === 1 ? "" : "s"}` : "no recorded symptoms"}.</b> Ask an AI agent to expand it from published research, and watch it here.
+        </span>
+        <span aria-hidden>→</span>
+      </Link>
+      <div className="mt-2.5 border-t border-indigo-200/70 pt-2.5"><RequestButton id={id} tone="indigo" /></div>
+    </div>
   );
 }

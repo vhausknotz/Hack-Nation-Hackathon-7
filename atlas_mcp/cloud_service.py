@@ -155,8 +155,16 @@ class CloudAtlas(Atlas):
         bounded(limit, 1, 50)
         if condition_id and condition_id not in self.conditions:
             raise ValueError("Unknown condition")
-        selected = [self.conditions[condition_id]] if condition_id else sorted(
-            self.conditions.values(), key=lambda c: (c["phenotype_count"], c["id"]))[:50]
+        # Impact frontier published by the engine (pipeline/frontier.py): requests, missing data, people affected.
+        impact = self.live_blob("live/evidence-frontier.json") or {}
+        rank = {r["condition_id"]: r for r in impact.get("conditions", [])}
+        goals = impact.get("goals", {})
+        if condition_id:
+            selected = [self.conditions[condition_id]]
+        elif rank:
+            selected = [self.conditions[r] for r in list(rank)[:50] if r in self.conditions]
+        else:
+            selected = sorted(self.conditions.values(), key=lambda c: (c["phenotype_count"], c["id"]))[:50]
         tasks = [{"id": "evidence:"+c["id"], "condition_id": c["id"], "kind": "evidence",
                   "title": "Find sourced evidence for "+c["name"],
                   "goal": "Find directly relevant sources. Explain population and qualifications; missing records are not proof of absence.",
@@ -177,7 +185,27 @@ class CloudAtlas(Atlas):
             if len(tasks) >= 100:
                 break
         self.intake.seed(tasks)
-        return {"tasks": self.intake.tasks(condition_id, limit), "notice": "Deterministic frontier from the published MCP snapshot."}
+
+        def annotate(t):
+            r = rank.get(t["condition_id"]) if t["kind"] == "evidence" else None
+            if not r:
+                return t
+            return {**t, "priority": r["score"], "why": r["why"], "focus": r["focus"], "requests": r["requests"],
+                    "goal": goals.get(r["focus"], t.get("goal")) + " Missing records are not proof of absence."}
+        rows = sorted(map(annotate, self.intake.tasks(condition_id, 300)),
+                      key=lambda t: (t["kind"] != "review", -(t.get("priority") or 0), t["id"]))
+        return {"tasks": rows[:limit],
+                "notice": "Review tasks first, then evidence tasks by expected impact: requests from families and agents, missing "
+                          "symptoms/groups/studies, and how many people are affected. Each task says why and what to look for."}
+
+    def request_condition(self, condition_id, reason=None):
+        if condition_id not in self.conditions:
+            raise ValueError("Unknown condition")
+        visitor = "agent-" + hashlib.sha256(self.actor.encode()).hexdigest()[:16]
+        result = self.intake.request_condition(condition_id, visitor)
+        return {"condition_id": condition_id, "requests": result["count"], "counted": result["new"],
+                "notice": "Recorded. Requests move this condition up the task list for every contributing agent; they create "
+                          "no claims. To improve it yourself now, call list_frontier with this condition_id and claim its task."}
 
     def source(self, sid, offset=0, limit=12000):
         bounded(offset, 0, 2_000_000); bounded(limit, 1, 20000)

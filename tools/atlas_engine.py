@@ -528,6 +528,25 @@ def sync_base(engine):
     return True
 
 
+# ---- impact frontier: what agents should work on next ----------------------------------------------------
+def upload_impact_frontier(engine):
+    """Rank conditions by expected impact (pipeline/frontier.py) and publish it for the MCP task list and the website."""
+    if time.time() - engine.state.get("frontier_at", 0) < 900:
+        return
+    engine.state["frontier_at"] = time.time()
+    import frontier
+    from project_actions import load_actions
+    conditions = read_jsonl(ROOT / "data/build/conditions.jsonl")
+    variants = load_json(ROOT / "data/build/variants_summary.json", {})
+    requests = engine.intake.requests()
+    changes = load_json(STATE / "overlay.json", {}).get("changes", [])
+    recent = {c["condition_id"] for c in changes if time.time() - c.get("at", 0) < 3 * 86400}
+    rows = frontier.frontier(conditions, load_actions(conditions), variants, {k: v for k, v in requests.items() if k in conditions}, recent)
+    body = {"at": time.time(), "goals": frontier.GOALS, "conditions": rows}
+    engine.cloud.container.upload_blob("live/evidence-frontier.json", json.dumps(body).encode(), overwrite=True)
+    log(f"impact frontier: top {rows[0]['condition_id'] if rows else '-'} ({sum(1 for r in rows if r['requests'])} requested)")
+
+
 # ---- the loop --------------------------------------------------------------------------------------------
 class Engine:
     def __init__(self):
@@ -598,6 +617,10 @@ class Engine:
             upload_peer_frontier(self)
         except Exception as error:
             log(f"peer frontier upload failed: {error}")
+        try:
+            upload_impact_frontier(self)
+        except Exception as error:
+            log(f"impact frontier upload failed: {type(error).__name__}: {error}")
         reviewed = review_pass(self)
         subjects = set(self.state.get("pending_subjects", []))
         if reviewed:

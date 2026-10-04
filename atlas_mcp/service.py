@@ -142,6 +142,9 @@ class Atlas:
             located.append(item)
         return located
 
+    def request_condition(self, condition_id, reason=None):
+        raise ValueError("Requests are recorded on the hosted atlas only")
+
     def calibration_case(self):
         raise ValueError("Reviewer calibration runs on the hosted atlas only")
 

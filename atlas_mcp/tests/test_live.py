@@ -74,3 +74,32 @@ def test_overlay_files_are_restricted_to_shard_paths(cloud):  # noqa: F811
     assert feed.overlay_file("0123456789abcdef/c/12.json") == b'{"x":1}'
     for bad in ("../private/keys/x.pem", "0123456789abcdef/../../x", "0123456789abcdef/c/12.json/../x", "zz/c/1.json"):
         assert feed.overlay_file(bad) is None
+
+
+@azurite
+def test_requests_count_each_visitor_once_and_show_on_the_feed(cloud):  # noqa: F811
+    from atlas_mcp.live import Feed
+    assert cloud.request_condition("MONDO:0800032", "v1") == {"count": 1, "new": True}
+    assert cloud.request_condition("MONDO:0800032", "v1") == {"count": 1, "new": False}
+    assert cloud.request_condition("MONDO:0800032", "v2")["count"] == 2
+    assert cloud.requests() == {"MONDO:0800032": 2}
+    for n in range(10):
+        cloud.request_condition(f"MONDO:000001{n}", "v3")
+    with pytest.raises(ValueError, match="limit"):
+        cloud.request_condition("MONDO:0000099", "v3")
+    events = Feed(cloud.store, ttl=0).since(0)["events"]
+    requested = [e for e in events if e["stage"] == "requested"]
+    assert requested[0]["condition_id"] == "MONDO:0800032" and requested[0]["agent"] == "visitor"
+    assert "v1" not in json.dumps(events)
+
+
+@azurite
+def test_public_request_route_hashes_visitors(cloud):  # noqa: F811
+    from atlas_mcp.live import Feed
+    feed = Feed(cloud.store, ttl=0)
+    assert feed.request("MONDO:0800032", "203.0.113.5")["count"] == 1
+    assert feed.request("MONDO:0800032", "203.0.113.5")["new"] is False
+    assert feed.request_count("MONDO:0800032") == 1
+    row = cloud.store.get("request", "MONDO:0800032")
+    assert "203.0.113.5" not in json.dumps(row) and len(row["visitors"][0]) == 16
+    assert feed.frontier() == {"at": None, "conditions": []}

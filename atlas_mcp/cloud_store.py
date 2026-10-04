@@ -178,6 +178,34 @@ class CloudIntake:
             return seq, [self.event(seq, actor, {"id": None, "condition_id": condition_id}, stage, None, detail)]
         return self.store.atomic(decide)
 
+    def request_condition(self, condition_id, visitor):
+        """Public "please work on this next" signal from a family or an agent. visitor is a salted hash (never an IP);
+        it counts once per condition, at most ten requests per visitor per day. Requests only reorder the agents'
+        task list; they spend nothing and create no claims."""
+        day = time.strftime("%Y-%m-%d", time.gmtime())
+        def decide(seq):
+            row = self.store.get("request", condition_id) or {"condition_id": condition_id, "count": 0, "visitors": [], "first": time.time()}
+            if visitor in row["visitors"]:
+                return {"count": row["count"], "new": False}, []
+            limit = self.store.get("requester", visitor) or {}
+            limit = limit if limit.get("day") == day else {"day": day, "n": 0}
+            if limit["n"] >= 10:
+                raise ValueError("Request limit reached for today")
+            limit["n"] += 1
+            row.update(count=row["count"] + 1, last=time.time(), visitors=(row["visitors"] + [visitor])[-300:])
+            return {"count": row["count"], "new": True}, [
+                ("request", condition_id, row), ("requester", visitor, limit),
+                self.event(seq, "visitor", {"id": None, "condition_id": condition_id}, "requested", None, {"count": row["count"]})]
+        return self.store.atomic(decide)
+
+    def request_count(self, condition_id):
+        row = self.store.get("request", condition_id)
+        return row["count"] if row else 0
+
+    def requests(self):
+        """condition id -> number of distinct requesters (for the impact frontier)."""
+        return {r["condition_id"]: r["count"] for r in self.store.rows("request")}
+
     def seed(self, tasks):
         for task in tasks:
             def decide(seq, task=task):

@@ -121,6 +121,13 @@ class Scout:
         thin = [c for c in self.conditions.values() if len(c.get("phenotypes", [])) < 5 and c["id"] not in worked]
         random.shuffle(thin)
         thin.sort(key=lambda c: per_gene[c["gene"]["symbol"]] > 1)
+        # Conditions that families or agents asked for come first (impact frontier from the engine).
+        try:
+            ranked = json.loads(self.cloud.container.download_blob("live/evidence-frontier.json").readall())["conditions"]
+            wanted = {r["condition_id"] for r in ranked if r["requests"] and r["focus"] == "symptoms"}
+        except Exception:
+            wanted = set()
+        thin.sort(key=lambda c: c["id"] not in wanted)  # stable: keeps the single-gene preference within each group
         for c in thin[:12]:
             gene = c["gene"]["symbol"]
             term = f'{gene}[tiab] AND (patient[tiab] OR patients[tiab] OR case[tiab] OR variant[tiab]) AND hasabstract'

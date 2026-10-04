@@ -15,6 +15,7 @@ PRESENCE_TTL = 900  # seconds an agent stays on the map (fading) after its last 
 FEED_EVENTS = 80
 OVERLAY_PATH = re.compile(r"[a-f0-9]{16}/(c|g|s|grp|m)/\d{1,3}\.json")
 GENE_SYMBOL = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,29}")
+CONDITION_ID = re.compile(r"MONDO:\d{7}(-HGNC:\d{1,6})?")
 
 # Tool -> what the agent is doing, in plain words (shown on the map).
 DOING = {
@@ -143,6 +144,36 @@ class Feed:
         snap = self.snapshot()
         return {**snap, "events": [e for e in snap["events"] if e["seq"] > after]}
 
+    def frontier(self):
+        """Public subset of the engine's impact frontier: what needs work most, and why."""
+        try:
+            body = json.loads(self.store.container.download_blob("live/evidence-frontier.json").readall())
+        except ResourceNotFoundError:
+            return {"at": None, "conditions": []}
+        return {"at": body["at"], "conditions": [{k: r[k] for k in ("condition_id", "name", "gene", "why", "focus", "requests")}
+                                                 for r in body["conditions"][:60]]}
+
+    def salt(self):
+        """Server-side secret for hashing visitors; created once, never leaves storage."""
+        if not getattr(self, "_salt", None):
+            import secrets
+            def decide(seq):
+                row = self.store.get("secret", "request-salt")
+                return (row, []) if row else ({"salt": secrets.token_hex(16)}, [("secret", "request-salt", {"salt": secrets.token_hex(16)})])
+            self.store.atomic(decide)
+            self._salt = self.store.get("secret", "request-salt")["salt"]
+        return self._salt
+
+    def request(self, condition_id, client):
+        import hashlib
+        from .cloud_store import CloudIntake
+        visitor = hashlib.sha256(f"{self.salt()}|{client}".encode()).hexdigest()[:16]
+        return CloudIntake(self.store).request_condition(condition_id, visitor)
+
+    def request_count(self, condition_id):
+        from .cloud_store import CloudIntake
+        return CloudIntake(self.store).request_count(condition_id)
+
     def variants_file(self, symbol):
         """Per-gene ClinVar summary written by pipeline/variants.py (public data)."""
         if not GENE_SYMBOL.fullmatch(symbol):
@@ -185,6 +216,38 @@ def add_routes(mcp, feed):
             return Response("Not found", status_code=404, headers=headers)
         return Response(raw, media_type="application/json",
                         headers={**headers, "Cache-Control": "public, max-age=31536000, immutable"})
+
+    @mcp.custom_route("/live/frontier", methods=["GET"])
+    async def live_frontier(request):
+        import anyio
+        body = await anyio.to_thread.run_sync(feed.frontier)
+        return JSONResponse(body, headers={**headers, "Cache-Control": "public, max-age=120"})
+
+    @mcp.custom_route("/live/request/{condition_id}", methods=["GET"])
+    async def request_count(request):
+        import anyio
+        cid = request.path_params["condition_id"]
+        if not CONDITION_ID.fullmatch(cid):
+            return JSONResponse({"error": "Unknown condition"}, status_code=400, headers=headers)
+        count = await anyio.to_thread.run_sync(feed.request_count, cid)
+        return JSONResponse({"condition_id": cid, "requests": count}, headers=headers)
+
+    @mcp.custom_route("/live/request", methods=["POST"])
+    async def request_condition(request):
+        """Anonymous "work on this next". Sent as text/plain JSON so browsers need no CORS preflight."""
+        import anyio
+        try:
+            cid = json.loads((await request.body())[:500])["condition_id"]
+        except (ValueError, KeyError, TypeError):
+            cid = None
+        if not isinstance(cid, str) or not CONDITION_ID.fullmatch(cid):
+            return JSONResponse({"error": "Unknown condition"}, status_code=400, headers=headers)
+        client = (request.headers.get("x-forwarded-for") or (request.client.host if request.client else "") or "").split(",")[0].strip()
+        try:
+            result = await anyio.to_thread.run_sync(feed.request, cid, client)
+        except ValueError as error:
+            return JSONResponse({"error": str(error)}, status_code=429, headers=headers)
+        return JSONResponse({"condition_id": cid, "requests": result["count"], "counted": result["new"]}, headers=headers)
 
     @mcp.custom_route("/variants/{symbol}", methods=["GET"])
     async def variants(request):

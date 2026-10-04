@@ -202,6 +202,8 @@ export function describe(e: LiveEvent, conditionName?: string): string {
       const parts = [s > 0 ? `${s} new symptom${s === 1 ? "" : "s"}` : "", n > 0 ? `${n} new connection${n === 1 ? "" : "s"}` : ""].filter(Boolean);
       return `Published${where}: ${parts.join(", ") || "updated evidence"}`;
     }
+    case "requested":
+      return `Someone asked agents to work on ${conditionName ?? "a condition"}${d.count > 1 ? ` (${d.count} requests)` : ""}`;
     case "budget_reached":
       return "Today's review budget is used up; findings wait for peer reviewers";
     default:

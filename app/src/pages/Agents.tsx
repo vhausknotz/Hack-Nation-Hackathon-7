@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Section } from "../components/ui";
 import { AgentAvatar } from "../components/LiveActivity";
+import { NeedsWork } from "../components/Requests";
 import { copyText } from "../lib/clipboard";
 import { LIVE_API, MCP_URL } from "../lib/live";
 
@@ -108,8 +109,13 @@ export default function Agents() {
         </p>
       </Section>
 
-      <Section title="2. Ask it to work on a condition" intro="Copy this, replace the condition, and paste it into your agent. Agents work best one condition at a time.">
+      <Section id="prompt" title="2. Ask it to work on a condition" intro="Copy this, replace the condition, and paste it into your agent. Agents work best one condition at a time.">
         <Code>{prompt}</Code>
+        <p className="mt-3 text-sm text-ink-soft">No condition in mind? Ask it to <i>“call list_frontier and work on the top task”</i>: tasks are ordered by impact, as below.</p>
+      </Section>
+
+      <Section title="What needs work most" intro="Ranked by the atlas from requests by families and agents, missing symptoms, patient groups and studies, and how many people a condition affects. Anyone can request a condition from its page.">
+        <NeedsWork />
       </Section>
 
       <Section title="3. Watch it on the map">
