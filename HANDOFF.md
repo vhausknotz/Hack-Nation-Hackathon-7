@@ -2,6 +2,15 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Cloud MCP implementation (newest, not yet deployed)
+
+- Added authenticated stateless HTTP using the official MCP SDK. Entra v2 tokens are checked against a fixed tenant/audience/scope and operator-enrolled issuer/object-ID identity. Request identity is isolated across simultaneous tool calls. Client registration/sign-in still needs actual tenant setup and testing.
+- Added Azure Table/Blob intake, immutable signed payloads, atomic quotas and leases, persistent sources, a local kernel bridge with replay-safe receipts, and versioned published read snapshots. Table submission rows are the durable outbox; no separate Queue dual-write. Cloud publication does not deploy the website or invoke models.
+- The first ledger worker remains on this computer. The cloud inbox accepts durable work when it is offline. This is not a cloud-hosted/failover-ready ledger. Setup, commands and limits: `atlas_mcp/CLOUD.md`.
+- **120 tests passed**, including real SDK HTTP and Azure SDK/Azurite integration. `tools/package_mcp.py` built the source-only ZIP; `infra/mcp/main.bicep` compiled with Microsoft's Bicep compiler. Cloud resource deployment, Linux remote build, real Entra client onboarding and live endpoint smoke are still required. No new Azure resources created.
+- Functions/Blob regional rates were retrieved; a light 10k-invocation example is about $0.42 before grants plus Table/network/overhead, not a forecast/cap. Table price lookup hit 429. New paid resource creation still requires owner approval under AGENTS.md; a $5 monthly planning allowance is proposed. See the runbook for assumptions.
+- The user's second UI agent is active on base `3740d1f`, separate worktree. Its plan is approved: prepare questions, shareable `?brief=1`, retain restrictions/source dates, no guessed entity merges. Confirmed data issues and the exact claim IDs are in `docs/agent_tasks/community_data_audit.md`; correction/re-review remains outstanding before deploying the new brief.
+
 ### Continuous screening and completed community scout (latest)
 
 - Luna now runs `screen --budget 30 --workers 96 --max-workers 384 --continuous`. It continuously refills requests, adapts concurrency, and measures rolling actual and estimated admission TPM/RPM. Azure deployment quota was verified through ARM: 1,000,000 TPM / 1,000 RPM. Admission targets 950k/950; worst-case cost reservations remain separate. `throughput.json` and `screening-continuous.log` under `data/enrichment/trials/full/` are current. Early sustained measurements: approximately 550k actual TPM / 360 RPM, versus 147k / 94 before this change, with no recent 429s. Requested output allowances make admission and billed tokens different.

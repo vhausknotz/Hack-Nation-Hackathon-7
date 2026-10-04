@@ -47,8 +47,8 @@ ledger/           claims ledger (reference imports and contributed claims are ro
 agents/           campaign.py (literature), communities.py (patient-group scout), trials_import.py (trial import + Sol review)
 pipeline/project_actions.py  read-only family projection of reviewed organizations and studies
 pipeline/plain_summaries.py  cached, AI-labeled everyday descriptions
-atlas_mcp/        local stdio MCP, task leases, signed intake queue and explicit ledger worker; README has setup
-api/              (planned) hosted API; remote MCP/storage/auth remain planned (docs/mcp_hosting.md)
+atlas_mcp/        local stdio + authenticated HTTP MCP, local/Azure intake and explicit ledger worker; README/CLOUD.md have setup
+infra/mcp/        prepared Functions Flex deployment (not yet deployed); no Always Ready or always-on database
 enrich/trials/    reviewed v2 screener and budget-capped, resumable bulk registry job (see its README)
 app/              web app (Vite + React + TypeScript + Tailwind, canvas globe and sigma.js flat map); reads app/public/data/
                     routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism

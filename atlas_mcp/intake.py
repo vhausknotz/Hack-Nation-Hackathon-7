@@ -124,6 +124,11 @@ class Intake:
             raise ValueError("Claim or renew this task before submitting work")
         return dict(row)
 
+    def task(self, task_id):
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM tasks WHERE id=?", (task_id,)).fetchone()
+        return dict(row) if row else None
+
     def enqueue(self, actor, task_id, kind, payload):
         profile = self.profile(actor)
         sid = content_id("submission", {"actor": actor, "task": task_id, "kind": kind, "payload": payload})

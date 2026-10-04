@@ -132,8 +132,7 @@ class Atlas:
 
     def claim_task(self, tid):
         profile = self.writable()
-        with self.intake.connect() as db:
-            row = db.execute("SELECT body,kind FROM tasks WHERE id=?", (tid,)).fetchone()
+        row = self.intake.task(tid)
         if row and row["kind"] == "review":
             if not profile["allow_review"] or json.loads(row["body"]).get("model_family") != profile["model_family"]:
                 raise ValueError("This contributor is not enabled as a reviewer")
@@ -167,52 +166,21 @@ class Atlas:
     def fetch_source(self, tid, provider, record_id):
         self.writable()
         self.intake.owned_task(tid, self.actor)
-        if not ((provider == "pubmed" and re.fullmatch(r"[1-9][0-9]{0,8}", record_id)) or
-                (provider == "clinicaltrials" and re.fullmatch(r"NCT[0-9]{8}", record_id))):
-            raise ValueError("Use provider pubmed with a PMID, or clinicaltrials with an NCT ID. Arbitrary URLs are not fetched.")
+        from .source_fetch import official_url, fetch_official
+        url = official_url(provider, record_id)
         # Cross-process cache/rate serialization is held by this separate intake transaction.
         with self.intake.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             recent = db.execute("SELECT COUNT(*) FROM activity WHERE actor=? AND stage='source_fetched' AND at>?", (self.actor, time.time()-86400)).fetchone()[0]
             if recent >= 100:
                 raise ValueError("Daily source-fetch limit reached")
-            url = f"https://pubmed.ncbi.nlm.nih.gov/{record_id}/" if provider == "pubmed" else f"https://clinicaltrials.gov/study/{record_id}"
             for row in db.execute("SELECT body FROM sources"):
                 cached = json.loads(row[0])
                 if cached["url"] == url:
                     return {"source_id": cached["source_id"], "cached": True, "next": "get_source"}
             last = db.execute("SELECT MAX(at) FROM activity WHERE stage='source_fetched'").fetchone()[0] or 0
             time.sleep(max(0, 1.25 - (time.time()-last)))
-            import requests
-            if provider == "pubmed":
-                endpoint = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={record_id}&retmode=xml"
-            else:
-                endpoint = f"https://clinicaltrials.gov/api/v2/studies/{record_id}"
-            # Fixed official origins, no redirects, no caller headers, no server-side arbitrary URL fetching.
-            with requests.get(endpoint, timeout=(10, 25), allow_redirects=False, stream=True) as response:
-                if response.status_code != 200:
-                    raise ValueError(f"Source provider returned HTTP {response.status_code}; retry later")
-                chunks, size = [], 0
-                for chunk in response.iter_content(65536):
-                    size += len(chunk)
-                    if size > 2_000_000:
-                        raise ValueError("Source exceeds the 2 MB intake limit")
-                    chunks.append(chunk)
-                raw = b"".join(chunks)
-            if provider == "pubmed":
-                from lxml import etree
-                doc = etree.fromstring(raw, parser=etree.XMLParser(resolve_entities=False, no_network=True))
-                if doc.findtext(".//MedlineCitation/PMID") != record_id or doc.find(".//Abstract") is None:
-                    raise ValueError("Provider response did not contain the requested abstract")
-                media, license_ = "pubmed_xml", "PubMed abstract"
-            else:
-                from enrich.trials.run import render
-                study = json.loads(raw)
-                if study["protocolSection"]["identificationModule"]["nctId"] != record_id:
-                    raise ValueError("Provider returned a different trial")
-                raw = render(study).encode()
-                media, license_ = "text", "ClinicalTrials.gov (public domain)"
-            src = sources.archive(raw, url, media, license_, True, root=self.intake.root / "sources")
+            src = fetch_official(provider, record_id, self.intake.root / "sources")
             db.execute("INSERT OR IGNORE INTO sources VALUES (?,?)", (src.source_id, json.dumps(src.to_dict())))
             task = db.execute("SELECT * FROM tasks WHERE id=?", (tid,)).fetchone()
             self.intake.event(db, self.actor, task, "source_fetched")
@@ -235,8 +203,8 @@ class Atlas:
         claim = {"assertion": assertion, "evidence": evidence,
                  "provenance": {"contributor": self.actor, "agent": "mcp-contributor", "created": "pending",
                                 "model": profile["model"], "prompt": prompt}}
-        with self.snapshot() as store:
-            check = Kernel(self.registry, store).check_schema(claim)
+        # Schema checking is pure; identifier/source checks belong to the worker.
+        check = Kernel(None, None).check_schema(claim)
         if not check.passed:
             return {"state": "invalid", "checks": [check.to_dict()], "notice": "Correct the claim and resubmit; nothing was queued."}
         return self.intake.enqueue(self.actor, tid, "claim", payload)

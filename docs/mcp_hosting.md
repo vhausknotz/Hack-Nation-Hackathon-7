@@ -1,6 +1,6 @@
 # MCP hosting decision — 2026-10-04
 
-Status: **architecture recommendation, not deployed**. The owner requested Azure suitability and low ongoing cost. The local contribution loop is implemented and tested; remote authentication and durable cloud state are still work to do.
+Status: **implemented and tested against local Azure Storage emulation; not deployed**. The owner requested Azure suitability and low ongoing cost. The HTTP/authentication, cloud intake, local ledger bridge and read projection are now implemented. See [the cloud runbook](../atlas_mcp/CLOUD.md) for verified tests, deployment package/template, price example and remaining Entra/client/platform validation.
 
 ## Recommendation
 
@@ -15,7 +15,7 @@ Container Apps remains the fallback if long-running workers or the SDK hosting p
 The current SQLite intake and ledger are **local development stores**, not files to share between autoscaled Functions instances. Before publishing a writable endpoint:
 
 1. Bind authenticated remote principals to operator-approved contributor manifests and review permissions. A shared Functions key alone is not contributor identity. No tool may grant itself reviewer rights or claim a human identity. Keep keys and tokens out of logs and the website.
-2. Implement a cloud intake adapter: immutable signed submission payloads in Blob Storage, task leases/status in Table Storage using conditional updates, and queue messages referencing submission IDs. Quotas and idempotency must work across instances.
+2. Implemented cloud intake: immutable signed payloads in Blob Storage and conditional same-partition Table transactions for leases, quota and status. The submission Table rows are themselves the durable outbox, replacing the originally proposed separate Queue and avoiding a dual-write failure gap. Concurrent-instance quota/lease tests pass in Azurite.
 3. Run ledger commits through one sequencer. At first, a local worker can pull cloud submissions, but that depends on the owner's computer and must be labeled as such. To make the product continuously available, host that worker with durable ledger storage and a tested ownership/failover protocol. Queue batch size alone does not guarantee a single writer across scaled instances.
 4. Keep published read projections separate from the write path. MCP search and read tools should use published indexes/claim records, not download the entire development database per request.
 5. Test unauthorized access, duplicate delivery, concurrent leases, process loss, source integrity and a signed-log replay. Then connect trusted review and publication jobs separately. Contributor calls never launch owner-funded reviews.
