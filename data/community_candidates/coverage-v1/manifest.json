@@ -1,0 +1,573 @@
+{
+ "package": "community-coverage-v1",
+ "archive_root": "archive/",
+ "redistribution": "Archived pages are organization websites kept for verification only (redistributable=false). Only metadata and short quotes are committed; raw/ and text/ stay local.",
+ "conditions": {
+  "MONDO:0010726": {
+   "name": "MECP2-related Rett syndrome",
+   "gene": "MECP2",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.rettsyndrome.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0018461": {
+   "name": "Angelman syndrome due to a point mutation",
+   "gene": "UBE3A",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.angelman.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0010679": {
+   "name": "DMD-related Duchenne muscular dystrophy",
+   "gene": "DMD",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.parentprojectmd.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0010383": {
+   "name": "FMR1-related fragile X syndrome",
+   "gene": "FMR1",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://fragilex.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0008612": {
+   "name": "TSC1-related tuberous sclerosis",
+   "gene": "TSC1",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.tscalliance.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0018208": {
+   "name": "Neurofibromatosis type 1 due to NF1 mutation or intragenic deletion",
+   "gene": "NF1",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.ctf.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0971069": {
+   "name": "Phelan-McDermid syndrome due to SHANK3 mutation",
+   "gene": "SHANK3",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://pmsf.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0100340": {
+   "name": "FXN-related Friedreich ataxia",
+   "gene": "FXN",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.curefa.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0010651": {
+   "name": "ATP7A-related Menkes disease",
+   "gene": "ATP7A",
+   "why_chosen": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://themenkesfoundation.org/our-mission"
+   ],
+   "rejected": []
+  },
+  "MONDO:0014512": {
+   "name": "PURA-related intellectual disability",
+   "gene": "PURA",
+   "why_chosen": "Gene-specific neurodevelopmental syndrome with a family foundation that the atlas lacks. Not part of the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://purasyndrome.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0017892": {
+   "name": "SYNE1-related AMC",
+   "gene": "SYNE1",
+   "why_chosen": "Scouted before; the only listing was UniteRare (classified company). Gap among the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "https://www.amcsupport.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0033371": {
+   "name": "Developmental and epileptic encephalopathy, 62",
+   "gene": "SCN3A",
+   "why_chosen": "Scouted before with no patient group; a gene-specific search (SCN3A) again found none. Gap among the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "web search: SCN3A foundation patient family organization",
+    "web search: SCN3A families support group developmental epileptic encephalopathy",
+    "https://dee-p.org/"
+   ],
+   "rejected": [
+    {
+     "name": "FamilieSCN2A Foundation",
+     "reason": "SCN2A, a different gene; search engines return it for SCN3A queries"
+    },
+    {
+     "name": "International SCN8A Alliance",
+     "reason": "SCN8A, a different gene"
+    }
+   ]
+  },
+  "MONDO:0030957": {
+   "name": "Developmental and epileptic encephalopathy 103",
+   "gene": "KCNC2",
+   "why_chosen": "Scouted before with no patient group. Gap among the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "web search: KCNC2 patient foundation epilepsy families",
+    "https://dee-p.org/"
+   ],
+   "rejected": [
+    {
+     "name": "KCNA2 Epilepsy (kcna2epilepsy.org)",
+     "reason": "KCNA2, a different gene whose symbol differs by one letter from KCNC2; the search engine returned it for the KCNC2 query"
+    }
+   ]
+  },
+  "MONDO:0033372": {
+   "name": "Developmental and epileptic encephalopathy, 63",
+   "gene": "CPLX1",
+   "why_chosen": "Scouted before; the only results were an information service and a company, both rejected. Gap among the 62 scouted conditions.",
+   "candidates_staged": 1,
+   "outcome": "candidates",
+   "notes": "",
+   "searched": [
+    "web search: CPLX1 epilepsy complexin 1 families foundation patient group",
+    "https://dee-p.org/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0980940": {
+   "name": "UNC13A-related congenital neurodevelopmental disorder with epilepsy",
+   "gene": "UNC13A",
+   "why_chosen": "Scouted before; every earlier hit was an ALS organization or a curation consortium. A deliberate test that ALS membership is not inferred.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "The 2025 discovery paper (Nature Genetics) reports about 50 patients; no family organization was found in search results or on the pages checked. Honest outcome: no group found yet.",
+   "searched": [
+    "web search: UNC13A neurodevelopmental disorder families patient group"
+   ],
+   "rejected": [
+    {
+     "name": "ALS and motor neurone organizations (Target ALS, My Name'5 Doddie Foundation, MND Association, TRICALS)",
+     "reason": "UNC13A is an ALS risk gene, but these organizations serve ALS. The developmental disorder is a different condition; the earlier scout listed them anyway and the reviewer rejected them."
+    }
+   ]
+  },
+  "MONDO:0030909": {
+   "name": "CNKSR2-related intellectual disability with epilepsy",
+   "gene": "CNKSR2",
+   "why_chosen": "Scouted before; eight organizations were named and none survived. A published cohort describes a family-driven CNKSR2 support group, so a group likely exists.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "The BMC Medical Genomics 2021 cohort paper (PMC8281706) thanks an 'international CNKSR2 Family Support Group', but no official website for it was found. Unresolved gap: a lead for a person who can ask the paper's authors or the platform.",
+   "searched": [
+    "web search: CNKSR2 foundation families",
+    "web search: \"CNKSR2\" family support group website",
+    "https://cnksr2.org/ and https://www.cnksr2.org/ (do not resolve)",
+    "https://rareshare.org/communities/cnksr2"
+   ],
+   "rejected": [
+    {
+     "name": "Rareshare CNKSR2 community",
+     "reason": "a forum on a general platform, hosted by a third party; not itself a patient organization, and its page text is mostly a copied study abstract and a parent's post"
+    },
+    {
+     "name": "Human Disease Genes (humandiseasegenes.nl)",
+     "reason": "information service; the atlas already lists this category as not a community"
+    }
+   ]
+  },
+  "MONDO:0013464": {
+   "name": "Episodic ataxia type 5",
+   "gene": "CACNB4",
+   "why_chosen": "Scouted before with nothing found. The National Ataxia Foundation very likely serves it, but the evidence is a PDF.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "The National Ataxia Foundation's episodic ataxia page redirects to a PDF listing EA1 to EA8 (https://www.ataxia.org/wp-content/uploads/2017/07/Episodic-Ataxia.pdf). The staging fetcher, like the existing scout, archives HTML only, so no quote could be archived. The homepage speaks of Ataxia in general and does not name episodic ataxia. Promising but unproven; the lead would need PDF text support in the source archive to import it.",
+   "searched": [
+    "web search: National Ataxia Foundation episodic ataxia type 5 CACNB4",
+    "web search: ataxia.org episodic ataxia types National Ataxia Foundation",
+    "https://www.ataxia.org/",
+    "https://www.ataxia.org/scasupport/episodic-ataxia/"
+   ],
+   "rejected": []
+  },
+  "MONDO:0014517": {
+   "name": "STX1B-related generalized epilepsy with febrile seizures plus",
+   "gene": "STX1B",
+   "why_chosen": "Scouted before; the only result was an information service. Same SNARE neighborhood as the first campaign.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "Only clinical literature found (49 patients in 23 families). No group found.",
+   "searched": [
+    "web search: STX1B epilepsy patient group families foundation"
+   ],
+   "rejected": [
+    {
+     "name": "STXBP1 Foundation",
+     "reason": "STXBP1 is a different gene (the search engine suggested it for STX1B); the foundation does not serve STX1B families"
+    }
+   ]
+  },
+  "MONDO:0013523": {
+   "name": "BANF1-related Nestor-Guillermo progeria syndrome",
+   "gene": "BANF1",
+   "why_chosen": "Scouted before; only an information service was listed. Progeria is a strong atlas example, so checking whether the family-facing progeria group covers this form matters.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "Search found NORD, GARD and Orphanet reference pages only. The Progeria Research Foundation's live site returns 403 to automated visitors, so its pages were not read for any mention of Nestor-Guillermo or progeroid syndromes. Unresolved: worth asking the foundation whether it serves progeroid syndromes beyond HGPS.",
+   "searched": [
+    "web search: Nestor-Guillermo progeria syndrome patient organization"
+   ],
+   "rejected": []
+  },
+  "MONDO:0032784": {
+   "name": "CACNA1B-related neurodevelopmental disorder with seizures and nonepileptic hyperkinetic movements",
+   "gene": "CACNA1B",
+   "why_chosen": "Scouted before; only curation consortia and panels were found. Very rare (biallelic, a handful of families), a good test of 'no group yet'.",
+   "candidates_staged": 0,
+   "outcome": "unresolved_gap",
+   "notes": "Only literature found (AJHG 2019 and later cases). No group found, consistent with a condition reported in very few families.",
+   "searched": [
+    "web search: CACNA1B family foundation neurodevelopmental disorder"
+   ],
+   "rejected": []
+  }
+ },
+ "candidates": {
+  "MONDO:0010726|org:rettsyndrome-org": [
+   "src:sha256:637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4",
+   "src:sha256:637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4"
+  ],
+  "MONDO:0018461|org:angelman-org": [
+   "src:sha256:82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22",
+   "src:sha256:82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22"
+  ],
+  "MONDO:0010679|org:parentprojectmd-org": [
+   "src:sha256:f531f7863fe9d4b50e9fda2dc3838423d6f3ef4da5753aa73da7fb1c360c1b2e"
+  ],
+  "MONDO:0010383|org:fragilex-org": [
+   "src:sha256:a4b3d5635e2cd88f75ddbbf9c5e026ee16a561fde9a008ec46792ff6a5a9414f"
+  ],
+  "MONDO:0008612|org:tscalliance-org": [
+   "src:sha256:e545941ffc1400666c8458e224072864cac6c31596df99a3814286a946e1067c"
+  ],
+  "MONDO:0018208|org:ctf-org": [
+   "src:sha256:1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e",
+   "src:sha256:1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e"
+  ],
+  "MONDO:0971069|org:pmsf-org": [
+   "src:sha256:153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6",
+   "src:sha256:153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6"
+  ],
+  "MONDO:0100340|org:curefa-org": [
+   "src:sha256:5cbf0c9d77ae5c5ac9ed00051e40449bcaeaf58d1221eb6ff52e10ca59cd3d70"
+  ],
+  "MONDO:0010651|org:themenkesfoundation-org": [
+   "src:sha256:954aa2961bed4440d45c5af186386e100c67b9f02bea45f4f6f4201b0b2917b0"
+  ],
+  "MONDO:0014512|org:purasyndrome-org": [
+   "src:sha256:7f028c363e5e09f2ce122e99c9f518a268b69d70fc31633d17ba027794834a60"
+  ],
+  "MONDO:0017892|org:amcsupport-org": [
+   "src:sha256:daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532",
+   "src:sha256:daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532"
+  ],
+  "MONDO:0033371|org:dee-p-org": [
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2",
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2"
+  ],
+  "MONDO:0030957|org:dee-p-org": [
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2",
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2"
+  ],
+  "MONDO:0033372|org:dee-p-org": [
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2",
+   "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2"
+  ]
+ },
+ "sources": {
+  "src:sha256:637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4": {
+   "source": {
+    "source_id": "src:sha256:637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4",
+    "url": "https://www.rettsyndrome.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:48dd482c468f1cc4150423268183f9abc3f15e15696ab45fe9438eeea2f1f56c",
+    "text_hash": "sha256:637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:00+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Research. Family Support. Advocacy. | International Rett Syndrome Foundation"
+   },
+   "files": {
+    "raw": "archive/raw/48dd482c468f1cc4150423268183f9abc3f15e15696ab45fe9438eeea2f1f56c.bin",
+    "text": "archive/text/637bb2ce327573ba71ae14c80f3ada37296b0e2596a1404dfe4a6452ab14dce4.txt"
+   },
+   "requested_url": "https://www.rettsyndrome.org/"
+  },
+  "src:sha256:82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22": {
+   "source": {
+    "source_id": "src:sha256:82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22",
+    "url": "https://angelman.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:9fd635d52ac0d3a41db143efc8b794e2c5ff1c3642006c1c11dc155932b6e607",
+    "text_hash": "sha256:82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:02+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Angelman Syndrome Foundation - Home"
+   },
+   "files": {
+    "raw": "archive/raw/9fd635d52ac0d3a41db143efc8b794e2c5ff1c3642006c1c11dc155932b6e607.bin",
+    "text": "archive/text/82ac0b28ba2e644cfbde229df3c160a8c6881802f051e1789238598bbc241c22.txt"
+   },
+   "requested_url": "https://www.angelman.org/"
+  },
+  "src:sha256:f531f7863fe9d4b50e9fda2dc3838423d6f3ef4da5753aa73da7fb1c360c1b2e": {
+   "source": {
+    "source_id": "src:sha256:f531f7863fe9d4b50e9fda2dc3838423d6f3ef4da5753aa73da7fb1c360c1b2e",
+    "url": "https://www.parentprojectmd.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:7450a2e6df822b7be629627a1d9def01b83e4c81ea32c796533412413599de79",
+    "text_hash": "sha256:f531f7863fe9d4b50e9fda2dc3838423d6f3ef4da5753aa73da7fb1c360c1b2e",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:04+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Parent Project Muscular Dystrophy (PPMD) | Fighting to End Duchenne"
+   },
+   "files": {
+    "raw": "archive/raw/7450a2e6df822b7be629627a1d9def01b83e4c81ea32c796533412413599de79.bin",
+    "text": "archive/text/f531f7863fe9d4b50e9fda2dc3838423d6f3ef4da5753aa73da7fb1c360c1b2e.txt"
+   },
+   "requested_url": "https://www.parentprojectmd.org/"
+  },
+  "src:sha256:a4b3d5635e2cd88f75ddbbf9c5e026ee16a561fde9a008ec46792ff6a5a9414f": {
+   "source": {
+    "source_id": "src:sha256:a4b3d5635e2cd88f75ddbbf9c5e026ee16a561fde9a008ec46792ff6a5a9414f",
+    "url": "https://fragilex.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:b22b21b9aecacbc004436cc9f09541dec073a7161fd507ab0f29242ec4596433",
+    "text_hash": "sha256:a4b3d5635e2cd88f75ddbbf9c5e026ee16a561fde9a008ec46792ff6a5a9414f",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:06+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Fragile X Syndrome, Premutation, FXTAS, & FXPOI Resources & Support"
+   },
+   "files": {
+    "raw": "archive/raw/b22b21b9aecacbc004436cc9f09541dec073a7161fd507ab0f29242ec4596433.bin",
+    "text": "archive/text/a4b3d5635e2cd88f75ddbbf9c5e026ee16a561fde9a008ec46792ff6a5a9414f.txt"
+   },
+   "requested_url": "https://fragilex.org/"
+  },
+  "src:sha256:e545941ffc1400666c8458e224072864cac6c31596df99a3814286a946e1067c": {
+   "source": {
+    "source_id": "src:sha256:e545941ffc1400666c8458e224072864cac6c31596df99a3814286a946e1067c",
+    "url": "https://www.tscalliance.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:0f03eb05854252ab4011a0105371e7ad2085ccfc813eeb547ef9b21ea49ea038",
+    "text_hash": "sha256:e545941ffc1400666c8458e224072864cac6c31596df99a3814286a946e1067c",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:07+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "TSC Alliance"
+   },
+   "files": {
+    "raw": "archive/raw/0f03eb05854252ab4011a0105371e7ad2085ccfc813eeb547ef9b21ea49ea038.bin",
+    "text": "archive/text/e545941ffc1400666c8458e224072864cac6c31596df99a3814286a946e1067c.txt"
+   },
+   "requested_url": "https://www.tscalliance.org/"
+  },
+  "src:sha256:1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e": {
+   "source": {
+    "source_id": "src:sha256:1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e",
+    "url": "https://www.ctf.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:7ff4cc5475baba0ddb16d3b302be5053e32bdc11e4435d893958818334bdaf12",
+    "text_hash": "sha256:1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:09+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Home - Children's Tumor Foundation"
+   },
+   "files": {
+    "raw": "archive/raw/7ff4cc5475baba0ddb16d3b302be5053e32bdc11e4435d893958818334bdaf12.bin",
+    "text": "archive/text/1aaf88bd28009cf301b307b79dbf5475557721d084367bce4316ad587e7f3a7e.txt"
+   },
+   "requested_url": "https://www.ctf.org/"
+  },
+  "src:sha256:153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6": {
+   "source": {
+    "source_id": "src:sha256:153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6",
+    "url": "https://pmsf.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:b65cb0aaf853cf3a368285d516fbd7be6f24930d995d5d60d44fbcbfd110741b",
+    "text_hash": "sha256:153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:12+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Phelan-McDermid Syndrome Foundation – The support you need today, the treatments and cures you're counting on tomorrow."
+   },
+   "files": {
+    "raw": "archive/raw/b65cb0aaf853cf3a368285d516fbd7be6f24930d995d5d60d44fbcbfd110741b.bin",
+    "text": "archive/text/153c917f3357a4eda433ceca1109fd3fcd3768f38289b0eca813a73349e3b8f6.txt"
+   },
+   "requested_url": "https://pmsf.org/"
+  },
+  "src:sha256:5cbf0c9d77ae5c5ac9ed00051e40449bcaeaf58d1221eb6ff52e10ca59cd3d70": {
+   "source": {
+    "source_id": "src:sha256:5cbf0c9d77ae5c5ac9ed00051e40449bcaeaf58d1221eb6ff52e10ca59cd3d70",
+    "url": "https://www.curefa.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:4a22a091ceb89d6f1e1f8c556121ccbeb782b4e42a4ec980c335da2f950f856f",
+    "text_hash": "sha256:5cbf0c9d77ae5c5ac9ed00051e40449bcaeaf58d1221eb6ff52e10ca59cd3d70",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:13+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "FARA - Friedreich's Ataxia Research Alliance - Funding Research to Cure FA"
+   },
+   "files": {
+    "raw": "archive/raw/4a22a091ceb89d6f1e1f8c556121ccbeb782b4e42a4ec980c335da2f950f856f.bin",
+    "text": "archive/text/5cbf0c9d77ae5c5ac9ed00051e40449bcaeaf58d1221eb6ff52e10ca59cd3d70.txt"
+   },
+   "requested_url": "https://www.curefa.org/"
+  },
+  "src:sha256:954aa2961bed4440d45c5af186386e100c67b9f02bea45f4f6f4201b0b2917b0": {
+   "source": {
+    "source_id": "src:sha256:954aa2961bed4440d45c5af186386e100c67b9f02bea45f4f6f4201b0b2917b0",
+    "url": "https://themenkesfoundation.org/our-mission",
+    "media_type": "html",
+    "raw_hash": "sha256:fbad42f4da1c8e6c03a484084821cc7d33dbffee7590ab7e7dbd4c7012d99ad2",
+    "text_hash": "sha256:954aa2961bed4440d45c5af186386e100c67b9f02bea45f4f6f4201b0b2917b0",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:15+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Our Mission"
+   },
+   "files": {
+    "raw": "archive/raw/fbad42f4da1c8e6c03a484084821cc7d33dbffee7590ab7e7dbd4c7012d99ad2.bin",
+    "text": "archive/text/954aa2961bed4440d45c5af186386e100c67b9f02bea45f4f6f4201b0b2917b0.txt"
+   },
+   "requested_url": "https://themenkesfoundation.org/our-mission"
+  },
+  "src:sha256:7f028c363e5e09f2ce122e99c9f518a268b69d70fc31633d17ba027794834a60": {
+   "source": {
+    "source_id": "src:sha256:7f028c363e5e09f2ce122e99c9f518a268b69d70fc31633d17ba027794834a60",
+    "url": "https://purasyndrome.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:09756f0a88dba61044a168c786751f975617b2461b6effa3626937400e5ad3a2",
+    "text_hash": "sha256:7f028c363e5e09f2ce122e99c9f518a268b69d70fc31633d17ba027794834a60",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:16+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "PURA Syndrome Foundation | Connecting, Educating, Serving, and Empowering Families Impacted by PURA Syndrome"
+   },
+   "files": {
+    "raw": "archive/raw/09756f0a88dba61044a168c786751f975617b2461b6effa3626937400e5ad3a2.bin",
+    "text": "archive/text/7f028c363e5e09f2ce122e99c9f518a268b69d70fc31633d17ba027794834a60.txt"
+   },
+   "requested_url": "https://purasyndrome.org/"
+  },
+  "src:sha256:daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532": {
+   "source": {
+    "source_id": "src:sha256:daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532",
+    "url": "https://amcsupport.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:d8671dea9d96d8208961c5c4b33127a9fd386c0eff97a90844e83a662ea9cf6c",
+    "text_hash": "sha256:daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:20+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "Supporting Families with Arthrogryposis for over 20 Years | AMC Strong"
+   },
+   "files": {
+    "raw": "archive/raw/d8671dea9d96d8208961c5c4b33127a9fd386c0eff97a90844e83a662ea9cf6c.bin",
+    "text": "archive/text/daed63b85f2013b976198f36a148f5ee3df936040c2ec00a8af7925168e88532.txt"
+   },
+   "requested_url": "https://www.amcsupport.org/"
+  },
+  "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2": {
+   "source": {
+    "source_id": "src:sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2",
+    "url": "https://dee-p.org/",
+    "media_type": "html",
+    "raw_hash": "sha256:06550d8207bc865d78d7576cc5b4c734415668ce937e4ceac8ee6f6b761aa576",
+    "text_hash": "sha256:5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2",
+    "extractor": "html-text@1+text-canon@1",
+    "retrieved": "2026-10-04T01:25:24+00:00",
+    "license": "organization website, quoted for citation",
+    "redistributable": false,
+    "title": "DEEP | Developmental Epileptic Encephalopathies Patient Advocacy - DEEP | Community Connections. Transformative Outcomes."
+   },
+   "files": {
+    "raw": "archive/raw/06550d8207bc865d78d7576cc5b4c734415668ce937e4ceac8ee6f6b761aa576.bin",
+    "text": "archive/text/5bc8dce31619e59bb87356ab84d55f2a7e4a8abb4cdaeffd9a580f2d7c6602e2.txt"
+   },
+   "requested_url": "https://dee-p.org/"
+  }
+ },
+ "failures": []
+}

@@ -1,0 +1,256 @@
+{
+  "researcher_model": "Claude via Claude Code (Opus 5.5 and Sonnet 5.5 sessions); research by web search and reading each organization's own page",
+  "conditions": [
+    {
+      "id": "MONDO:0010726", "name": "MECP2-related Rett syndrome", "gene": "MECP2",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.rettsyndrome.org/"],
+      "candidates": [{
+        "org_id": "org:rettsyndrome-org", "name": "International Rett Syndrome Foundation", "homepage": "https://www.rettsyndrome.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The organization's homepage describes itself as the research, family support and advocacy organization for Rett syndrome, and the same page states Rett is caused by MECP2 variants.",
+        "caveats": ["The page describes Rett syndrome as a MECP2 disorder; it does not discuss the MECP2-related variants of Rett separately."],
+        "evidence": [
+          {"url": "https://www.rettsyndrome.org/", "supports": "serves_condition", "quote": "The International Rett Syndrome Foundation (IRSF) is the leading research, family support, and advocacy organization for Rett syndrome."},
+          {"url": "https://www.rettsyndrome.org/", "supports": "names_gene", "quote": "Rett is a genetic disorder caused by a spontaneous pathogenic variant in the MECP2 gene."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0018461", "name": "Angelman syndrome due to a point mutation", "gene": "UBE3A",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.angelman.org/"],
+      "candidates": [{
+        "org_id": "org:angelman-org", "name": "Angelman Syndrome Foundation", "homepage": "https://www.angelman.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The foundation's homepage says it supports families and works to advance the treatment of Angelman syndrome.",
+        "caveats": ["This atlas condition is the UBE3A point-mutation form. The page speaks of Angelman syndrome as a whole and never names UBE3A or the molecular subtype, so a reviewer should decide whether the scope fits or should be broader_group."],
+        "evidence": [
+          {"url": "https://www.angelman.org/", "supports": "serves_condition", "quote": "The Angelman Syndrome Foundation (ASF) is committed to supporting families when and where they need it most."},
+          {"url": "https://www.angelman.org/", "supports": "organization_mission", "quote": "Our mission is to advance the awareness and treatment of AS with the ultimate goal of finding a cure."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0010679", "name": "DMD-related Duchenne muscular dystrophy", "gene": "DMD",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.parentprojectmd.org/"],
+      "candidates": [{
+        "org_id": "org:parentprojectmd-org", "name": "Parent Project Muscular Dystrophy", "homepage": "https://www.parentprojectmd.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The homepage says the organization works for every family affected by Duchenne and runs the Duchenne Registry.",
+        "caveats": ["The Duchenne Registry is a separate research program that families can join; it should be a distinct listing, not folded into this one."],
+        "evidence": [
+          {"url": "https://www.parentprojectmd.org/", "supports": "serves_condition", "quote": "Parent Project Muscular Dystrophy fights to end Duchenne. We accelerate research, raise our voices to impact policy, demand optimal care for every single family, and strive to ensure access to approved therapies."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0010383", "name": "FMR1-related fragile X syndrome", "gene": "FMR1",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://fragilex.org/"],
+      "candidates": [{
+        "org_id": "org:fragilex-org", "name": "National Fragile X Foundation", "homepage": "https://fragilex.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The homepage addresses families living with Fragile X and lists advocacy, resources and treatment access.",
+        "caveats": ["The page title also covers the premutation conditions FXTAS and FXPOI; the quote is about Fragile X families generally."],
+        "evidence": [
+          {"url": "https://fragilex.org/", "supports": "serves_condition", "quote": "Empowering families living with Fragile X and the professionals who serve them every day"}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0008612", "name": "TSC1-related tuberous sclerosis", "gene": "TSC1",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.tscalliance.org/"],
+      "candidates": [{
+        "org_id": "org:tscalliance-org", "name": "TSC Alliance", "homepage": "https://www.tscalliance.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The homepage states a mission to improve quality of life for everyone affected by tuberous sclerosis complex.",
+        "caveats": ["The page names tuberous sclerosis complex, not TSC1 specifically; TSC2-related disease is the same organization's remit (not staged separately here)."],
+        "evidence": [
+          {"url": "https://www.tscalliance.org/", "supports": "serves_condition", "quote": "To improve quality of life for everyone affected by tuberous sclerosis complex by catalyzing new treatments, driving research toward a cure and expanding access to lifelong support."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0018208", "name": "Neurofibromatosis type 1 due to NF1 mutation or intragenic deletion", "gene": "NF1",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.ctf.org/"],
+      "candidates": [{
+        "org_id": "org:ctf-org", "name": "Children's Tumor Foundation", "homepage": "https://www.ctf.org/",
+        "org_type": "patient_organization", "scope": "broader_group",
+        "rationale": "The homepage names NF1 explicitly within the NF conditions it serves, offers an NF registry and a clinic network, and addresses families.",
+        "caveats": ["Its remit is all forms of NF (NF1, NF2-related schwannomatosis, schwannomatosis), hence broader_group. It describes itself as a drug-discovery engine as well as a patient group; a reviewer may prefer a mixed classification.", "The NF Registry it runs is a separate research listing."],
+        "evidence": [
+          {"url": "https://www.ctf.org/", "supports": "names_condition", "quote": "NF includes neurofibromatosis type 1 (NF1) and all types of schwannomatosis (SWN), including NF2-related schwannomatosis (NF2-SWN), formerly known as neurofibromatosis type 2, or NF2."},
+          {"url": "https://www.ctf.org/", "supports": "serves_patients", "quote": "We connect patients with the education and information they need through patient brochures and educational webinars."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0971069", "name": "Phelan-McDermid syndrome due to SHANK3 mutation", "gene": "SHANK3",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://pmsf.org/"],
+      "candidates": [{
+        "org_id": "org:pmsf-org", "name": "Phelan-McDermid Syndrome Foundation", "homepage": "https://pmsf.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The homepage says the foundation works for everyone living with Phelan-McDermid syndrome and was started by families.",
+        "caveats": ["The page names Phelan-McDermid syndrome, not the SHANK3-mutation subtype specifically."],
+        "evidence": [
+          {"url": "https://pmsf.org/", "supports": "serves_condition", "quote": "The Phelan-McDermid Syndrome Foundation is doing everything it takes to make today better and the future brighter for everyone living with Phelan-McDermid syndrome"},
+          {"url": "https://pmsf.org/", "supports": "family_led", "quote": "Families supporting families is the driving force behind the Phelan-McDermid Syndrome Foundation."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0100340", "name": "FXN-related Friedreich ataxia", "gene": "FXN",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://www.curefa.org/"],
+      "candidates": [{
+        "org_id": "org:curefa-org", "name": "Friedreich's Ataxia Research Alliance", "homepage": "https://www.curefa.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The homepage addresses newly affected people, describes an active FA community and funds research on Friedreich's ataxia.",
+        "caveats": ["The organization frames itself as a research funder; it also runs community events. A reviewer may classify it as a research alliance rather than a patient group."],
+        "evidence": [
+          {"url": "https://www.curefa.org/", "supports": "serves_condition", "quote": "The FA Community is an active and supportive one. Together, we fund and facilitate research to slow, stop, reverse, and cure Friedreich’s ataxia (FA)."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0010651", "name": "ATP7A-related Menkes disease", "gene": "ATP7A",
+      "why": "Recognizable diagnosis with no reviewed patient group in the atlas. Not part of the 62 scouted conditions.",
+      "searched": ["https://themenkesfoundation.org/our-mission"],
+      "candidates": [{
+        "org_id": "org:themenkesfoundation-org", "name": "The Menkes Foundation", "homepage": "https://themenkesfoundation.org/",
+        "org_type": "patient_organization", "scope": "this_condition",
+        "rationale": "The mission page says the foundation is run by a family and offers comfort and support to families with a child with Menkes disease.",
+        "caveats": ["The mission page is undated and lists a postal address only; current activity is unconfirmed. Treat as a small family foundation."],
+        "evidence": [
+          {"url": "https://themenkesfoundation.org/our-mission", "supports": "serves_condition", "quote": "We strive to educate the medical community on Menkes disease, as well as lend comfort and support to families with a child inflicted with this disease."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0014512", "name": "PURA-related intellectual disability", "gene": "PURA",
+      "why": "Gene-specific neurodevelopmental syndrome with a family foundation that the atlas lacks. Not part of the 62 scouted conditions.",
+      "searched": ["https://purasyndrome.org/"],
+      "candidates": [{
+        "org_id": "org:purasyndrome-org", "name": "PURA Syndrome Foundation", "homepage": "https://purasyndrome.org/",
+        "org_type": "patient_organization", "scope": "this_gene",
+        "rationale": "The homepage states a mission to support research and to connect, educate and empower families impacted by PURA syndrome, and describes sibling and grandparent communities.",
+        "caveats": ["PURA syndrome in the page covers all PURA-gene variants; the atlas also lists a separate PURA-related neonatal hypotonia condition (MONDO:0017811)."],
+        "evidence": [
+          {"url": "https://purasyndrome.org/", "supports": "serves_condition", "quote": "Our mission is to support and drive research, raise public awareness and connect, educate, serve, and empower families impacted by PURA Syndrome."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0017892", "name": "SYNE1-related AMC", "gene": "SYNE1",
+      "why": "Scouted before; the only listing was UniteRare (classified company). Gap among the 62 scouted conditions.",
+      "searched": ["https://www.amcsupport.org/"],
+      "candidates": [{
+        "org_id": "org:amcsupport-org", "name": "AMC Strong", "homepage": "https://www.amcsupport.org/",
+        "org_type": "patient_organization", "scope": "broader_group",
+        "rationale": "The condition is arthrogryposis multiplex congenita (AMC), and this organization's homepage says it supports families affected by AMC and its many variations.",
+        "caveats": ["The page never names SYNE1; its remit is AMC as a whole (over 500 variations). Scope is broader_group, and the connection to this genetic form rests on the condition being AMC."],
+        "evidence": [
+          {"url": "https://www.amcsupport.org/", "supports": "serves_condition", "quote": "Arthrogryposis multiplex congenita (AMC) is a term used to describe a group of congenital conditions characterized by joint contractures in two or more body areas."},
+          {"url": "https://www.amcsupport.org/", "supports": "serves_patients", "quote": "We encourage you to explore our extensive navigation bar, thoughtfully designed to help individuals and families affected by Arthrogryposis Multiplex Congenita (AMC) quickly find the support, information, and connections they need."}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0033371", "name": "Developmental and epileptic encephalopathy, 62", "gene": "SCN3A",
+      "why": "Scouted before with no patient group; a gene-specific search (SCN3A) again found none. Gap among the 62 scouted conditions.",
+      "searched": ["web search: SCN3A foundation patient family organization", "web search: SCN3A families support group developmental epileptic encephalopathy", "https://dee-p.org/"],
+      "rejected": [{"name": "FamilieSCN2A Foundation", "reason": "SCN2A, a different gene; search engines return it for SCN3A queries"}, {"name": "International SCN8A Alliance", "reason": "SCN8A, a different gene"}],
+      "candidates": [{
+        "org_id": "org:dee-p-org", "name": "DEEP (Developmental Epileptic Encephalopathies Patient Advocacy)", "homepage": "https://dee-p.org/",
+        "org_type": "patient_organization", "scope": "broader_group",
+        "rationale": "The condition is a developmental and epileptic encephalopathy (DEE) by definition, and DEEP's own page says it is a patient advocacy organization for DEEs serving families.",
+        "caveats": ["The page never names SCN3A. The remit is DEEs as a class; it is a legitimate broader community, not a group for SCN3A families specifically.", "The page also mentions 'SNIs' (severe neurological impairments), which are outside this condition."],
+        "evidence": [
+          {"url": "https://dee-p.org/", "supports": "serves_condition_class", "quote": "DEEP | Developmental Epileptic Encephalopathies Patient Advocacy - DEEP | Community Connections. Transformative Outcomes."},
+          {"url": "https://dee-p.org/", "supports": "serves_families", "quote": "Proudly serving Families, Patient Advocacy Groups, Clinicians, and Researchers"}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0030957", "name": "Developmental and epileptic encephalopathy 103", "gene": "KCNC2",
+      "why": "Scouted before with no patient group. Gap among the 62 scouted conditions.",
+      "searched": ["web search: KCNC2 patient foundation epilepsy families", "https://dee-p.org/"],
+      "rejected": [{"name": "KCNA2 Epilepsy (kcna2epilepsy.org)", "reason": "KCNA2, a different gene whose symbol differs by one letter from KCNC2; the search engine returned it for the KCNC2 query"}],
+      "candidates": [{
+        "org_id": "org:dee-p-org", "name": "DEEP (Developmental Epileptic Encephalopathies Patient Advocacy)", "homepage": "https://dee-p.org/",
+        "org_type": "patient_organization", "scope": "broader_group",
+        "rationale": "The condition is a DEE by definition; DEEP's own page says it is a patient advocacy organization for DEEs serving families.",
+        "caveats": ["The page never names KCNC2. The remit is DEEs as a class."],
+        "evidence": [
+          {"url": "https://dee-p.org/", "supports": "serves_condition_class", "quote": "DEEP | Developmental Epileptic Encephalopathies Patient Advocacy - DEEP | Community Connections. Transformative Outcomes."},
+          {"url": "https://dee-p.org/", "supports": "serves_families", "quote": "Proudly serving Families, Patient Advocacy Groups, Clinicians, and Researchers"}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0033372", "name": "Developmental and epileptic encephalopathy, 63", "gene": "CPLX1",
+      "why": "Scouted before; the only results were an information service and a company, both rejected. Gap among the 62 scouted conditions.",
+      "searched": ["web search: CPLX1 epilepsy complexin 1 families foundation patient group", "https://dee-p.org/"],
+      "candidates": [{
+        "org_id": "org:dee-p-org", "name": "DEEP (Developmental Epileptic Encephalopathies Patient Advocacy)", "homepage": "https://dee-p.org/",
+        "org_type": "patient_organization", "scope": "broader_group",
+        "rationale": "The condition is a DEE by definition; DEEP's own page says it is a patient advocacy organization for DEEs serving families. A CPLX1-specific search found only literature.",
+        "caveats": ["The page never names CPLX1. The remit is DEEs as a class. CPLX1 DEE is autosomal recessive and described in very few families, so a gene-specific group may not exist."],
+        "evidence": [
+          {"url": "https://dee-p.org/", "supports": "serves_condition_class", "quote": "DEEP | Developmental Epileptic Encephalopathies Patient Advocacy - DEEP | Community Connections. Transformative Outcomes."},
+          {"url": "https://dee-p.org/", "supports": "serves_families", "quote": "Proudly serving Families, Patient Advocacy Groups, Clinicians, and Researchers"}
+        ]
+      }]
+    },
+    {
+      "id": "MONDO:0980940", "name": "UNC13A-related congenital neurodevelopmental disorder with epilepsy", "gene": "UNC13A",
+      "why": "Scouted before; every earlier hit was an ALS organization or a curation consortium. A deliberate test that ALS membership is not inferred.",
+      "searched": ["web search: UNC13A neurodevelopmental disorder families patient group"],
+      "candidates": [],
+      "rejected": [{"name": "ALS and motor neurone organizations (Target ALS, My Name'5 Doddie Foundation, MND Association, TRICALS)", "reason": "UNC13A is an ALS risk gene, but these organizations serve ALS. The developmental disorder is a different condition; the earlier scout listed them anyway and the reviewer rejected them."}],
+      "notes": "The 2025 discovery paper (Nature Genetics) reports about 50 patients; no family organization was found in search results or on the pages checked. Honest outcome: no group found yet."
+    },
+    {
+      "id": "MONDO:0030909", "name": "CNKSR2-related intellectual disability with epilepsy", "gene": "CNKSR2",
+      "why": "Scouted before; eight organizations were named and none survived. A published cohort describes a family-driven CNKSR2 support group, so a group likely exists.",
+      "searched": ["web search: CNKSR2 foundation families", "web search: \"CNKSR2\" family support group website", "https://cnksr2.org/ and https://www.cnksr2.org/ (do not resolve)", "https://rareshare.org/communities/cnksr2"],
+      "candidates": [],
+      "rejected": [{"name": "Rareshare CNKSR2 community", "reason": "a forum on a general platform, hosted by a third party; not itself a patient organization, and its page text is mostly a copied study abstract and a parent's post"}, {"name": "Human Disease Genes (humandiseasegenes.nl)", "reason": "information service; the atlas already lists this category as not a community"}],
+      "notes": "The BMC Medical Genomics 2021 cohort paper (PMC8281706) thanks an 'international CNKSR2 Family Support Group', but no official website for it was found. Unresolved gap: a lead for a person who can ask the paper's authors or the platform."
+    },
+    {
+      "id": "MONDO:0013464", "name": "Episodic ataxia type 5", "gene": "CACNB4",
+      "why": "Scouted before with nothing found. The National Ataxia Foundation very likely serves it, but the evidence is a PDF.",
+      "searched": ["web search: National Ataxia Foundation episodic ataxia type 5 CACNB4", "web search: ataxia.org episodic ataxia types National Ataxia Foundation", "https://www.ataxia.org/", "https://www.ataxia.org/scasupport/episodic-ataxia/"],
+      "candidates": [],
+      "notes": "The National Ataxia Foundation's episodic ataxia page redirects to a PDF listing EA1 to EA8 (https://www.ataxia.org/wp-content/uploads/2017/07/Episodic-Ataxia.pdf). The staging fetcher, like the existing scout, archives HTML only, so no quote could be archived. The homepage speaks of Ataxia in general and does not name episodic ataxia. Promising but unproven; the lead would need PDF text support in the source archive to import it."
+    },
+    {
+      "id": "MONDO:0014517", "name": "STX1B-related generalized epilepsy with febrile seizures plus", "gene": "STX1B",
+      "why": "Scouted before; the only result was an information service. Same SNARE neighborhood as the first campaign.",
+      "searched": ["web search: STX1B epilepsy patient group families foundation"],
+      "candidates": [],
+      "rejected": [{"name": "STXBP1 Foundation", "reason": "STXBP1 is a different gene (the search engine suggested it for STX1B); the foundation does not serve STX1B families"}],
+      "notes": "Only clinical literature found (49 patients in 23 families). No group found."
+    },
+    {
+      "id": "MONDO:0013523", "name": "BANF1-related Nestor-Guillermo progeria syndrome", "gene": "BANF1",
+      "why": "Scouted before; only an information service was listed. Progeria is a strong atlas example, so checking whether the family-facing progeria group covers this form matters.",
+      "searched": ["web search: Nestor-Guillermo progeria syndrome patient organization"],
+      "candidates": [],
+      "notes": "Search found NORD, GARD and Orphanet reference pages only. The Progeria Research Foundation's live site returns 403 to automated visitors, so its pages were not read for any mention of Nestor-Guillermo or progeroid syndromes. Unresolved: worth asking the foundation whether it serves progeroid syndromes beyond HGPS."
+    },
+    {
+      "id": "MONDO:0032784", "name": "CACNA1B-related neurodevelopmental disorder with seizures and nonepileptic hyperkinetic movements", "gene": "CACNA1B",
+      "why": "Scouted before; only curation consortia and panels were found. Very rare (biallelic, a handful of families), a good test of 'no group yet'.",
+      "searched": ["web search: CACNA1B family foundation neurodevelopmental disorder"],
+      "candidates": [],
+      "notes": "Only literature found (AJHG 2019 and later cases). No group found, consistent with a condition reported in very few families."
+    }
+  ]
+}
