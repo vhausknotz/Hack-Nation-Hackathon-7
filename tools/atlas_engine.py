@@ -45,7 +45,8 @@ PUBLISHER = "agent:atlas-publisher"
 MODEL, FAMILY = "gpt-6-sol", "openai-gpt6"
 MAX_OUTPUT_TOKENS = 4000
 DEFAULT_CONFIG = {
-    "daily_usd_cap": 5.0,
+    "daily_usd_cap": 1.0,
+    "monthly_usd_cap": 6.0,  # the owner's total Azure ceiling is $45/month; reviews get this share
     # Assumed list prices (USD per million tokens) until real Sol pricing is configured. Conservative on purpose.
     "prices": {"gpt-6-sol": [5.0, 30.0]},
     "peer_review_grace_seconds": 180,
@@ -76,18 +77,26 @@ def load_json(path, default):
 class Budget:
     def __init__(self, config):
         self.cap, self.prices = float(config["daily_usd_cap"]), config["prices"]
+        self.month_cap = float(config.get("monthly_usd_cap", 6.0))
 
     def path(self):
         return STATE / "spend" / (datetime.now(timezone.utc).strftime("%Y-%m-%d") + ".json")
 
-    def spent(self):
-        rows = load_json(self.path(), {})
+    @staticmethod
+    def total(rows):
         return sum(r["actual"] if r.get("actual") is not None else r["reserved"] for r in rows.values())
+
+    def spent(self):
+        return self.total(load_json(self.path(), {}))
+
+    def spent_month(self):
+        month = datetime.now(timezone.utc).strftime("%Y-%m")
+        return sum(self.total(load_json(p, {})) for p in (STATE / "spend").glob(month + "-*.json"))
 
     def reserve(self, key, model, input_bytes):
         pin, pout = self.prices[model]
         reserved = round((input_bytes / 3) / 1e6 * pin + MAX_OUTPUT_TOKENS / 1e6 * pout, 6)
-        if self.spent() + reserved > self.cap:
+        if self.spent() + reserved > self.cap or self.spent_month() + reserved > self.month_cap:
             return None
         rows = load_json(self.path(), {})
         rows[key] = {"model": model, "reserved": reserved, "actual": None, "at": time.time()}
@@ -483,13 +492,18 @@ class Engine:
         if not CONFIG.exists():
             save_json(CONFIG, DEFAULT_CONFIG)
         self.config = {**DEFAULT_CONFIG, **load_json(CONFIG, {})}
-        from tools.azure_mcp_operator import Operator
         from atlas_mcp.cloud_store import CloudIntake
-        self.cloud = Operator().store()
+        if os.environ.get("ATLAS_STORAGE_CONNECTION_STRING"):  # cloud engine: protected environment file
+            from atlas_mcp.cloud import configured_store
+            self.cloud = configured_store()
+        else:  # operator's PC: Az PowerShell login fetches the key into memory
+            from tools.azure_mcp_operator import Operator
+            self.cloud = Operator().store()
         self.intake = CloudIntake(self.cloud)
         self.conditions = read_jsonl(ROOT / "data/build/conditions.jsonl")
         self.referee = Referee(self.config, self.conditions)
         self.state = load_json(STATE / "state.json", {"published_size": 0, "pending_subjects": []})
+        self.last_beat = 0.0
 
     def post(self, condition_id, stage, detail=None, actor=PUBLISHER):
         try:
@@ -534,9 +548,17 @@ class Engine:
         elif size != self.state["published_size"] and not subjects:
             self.state["published_size"] = size  # e.g. rejected claims only: nothing visible changed
             save_json(STATE / "state.json", self.state)
-        save_json(STATE / "status.json", {"at": time.time(), "processed": len(processed), "reviewed": len(reviewed),
-                                          "ledger_size": size, "spent_today_usd": round(self.referee.budget.spent(), 4),
-                                          "cap_usd": self.config["daily_usd_cap"]})
+        status = {"at": time.time(), "host": os.environ.get("ATLAS_ENGINE_HOST", "operator-pc"), "processed": len(processed),
+                  "reviewed": len(reviewed), "ledger_size": size, "spent_today_usd": round(self.referee.budget.spent(), 4),
+                  "spent_month_usd": round(self.referee.budget.spent_month(), 4), "cap_usd": self.config["daily_usd_cap"],
+                  "month_cap_usd": self.config["monthly_usd_cap"]}
+        save_json(STATE / "status.json", status)
+        if time.time() - self.last_beat > 60:  # public heartbeat: the website shows whether the engine is online
+            try:
+                self.cloud.container.upload_blob("live/engine.json", json.dumps(status).encode(), overwrite=True)
+                self.last_beat = time.time()
+            except Exception as error:
+                log(f"heartbeat failed: {error}")
 
 
 def main():
@@ -548,7 +570,7 @@ def main():
     lease = WriterLease(STATE / "engine.lock")
     try:
         engine = Engine()
-        log(f"engine started (cap ${engine.config['daily_usd_cap']}/day)")
+        log(f"engine started (caps ${engine.config['daily_usd_cap']}/day, ${engine.config['monthly_usd_cap']}/month)")
         upload_calibration(engine)
         while True:
             try:

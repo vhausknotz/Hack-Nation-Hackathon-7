@@ -112,6 +112,13 @@ class Feed:
         except ResourceNotFoundError:
             return None
 
+    def _engine(self):
+        try:
+            beat = json.loads(self.store.container.download_blob("live/engine.json").readall())
+        except ResourceNotFoundError:
+            return None
+        return {"online": time.time() - beat.get("at", 0) < 300, "at": beat.get("at"), "host": beat.get("host")}
+
     def snapshot(self):
         with self.lock:
             if self.cached is None or time.time() - self.cached_at > self.ttl:
@@ -126,7 +133,8 @@ class Feed:
                     events.append({"seq": e["seq"], "at": e["at"], "agent": display(prof), "family": prof.get("model_family"),
                                    "stage": e["stage"], "condition_id": e.get("condition_id"), "detail": e.get("detail")})
                 self.cached = {"now": now, "events": events, "presence": sorted(presence, key=lambda p: -p["at"]),
-                               "overlay": self._overlay(), "notice": "Activity is operational status, not evidence."}
+                               "overlay": self._overlay(), "engine": self._engine(),
+                               "notice": "Activity is operational status, not evidence."}
                 self.cached_at = time.time()
             return self.cached
 

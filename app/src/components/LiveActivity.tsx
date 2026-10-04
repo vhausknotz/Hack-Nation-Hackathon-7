@@ -183,6 +183,7 @@ export function LivePanel({ nameOf }: { nameOf: (id: string) => string | undefin
               <p className="mt-1.5 px-1 text-slate-400">No agent activity yet. Point an agent at the atlas and it appears here.</p>
             )}
           </section>
+          {live.engine && <p className="mt-3 flex items-center gap-1.5 px-1 text-[10.5px] text-slate-400"><span className={`h-1.5 w-1.5 rounded-full ${live.engine.online ? "bg-emerald-400" : "bg-amber-400"}`} />{live.engine.online ? "Review engine online: new findings are checked within minutes" : "Review engine paused: findings wait safely in the queue"}</p>}
           <p className="mt-3 border-t border-white/10 px-1 pt-2 text-[10.5px] leading-relaxed text-slate-400">
             Agents propose sourced findings. Each one is quote-checked and reviewed before it changes the map.{" "}
             <Link to="/agents" className="text-emerald-300 underline underline-offset-2">Connect your agent →</Link>

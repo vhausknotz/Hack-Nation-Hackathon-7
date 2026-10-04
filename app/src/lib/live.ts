@@ -48,10 +48,11 @@ export interface LiveState {
   events: LiveEvent[];
   presence: Presence[];
   overlay: Overlay | null;
+  engine: { online: boolean; at: number | null; host: string | null } | null;
   serverOffset: number; // server clock minus local clock, seconds
 }
 
-let state: LiveState = { connected: false, events: [], presence: [], overlay: null, serverOffset: 0 };
+let state: LiveState = { connected: false, events: [], presence: [], overlay: null, engine: null, serverOffset: 0 };
 const listeners = new Set<() => void>();
 let cursor = 0;
 let timer: number | undefined;
@@ -72,7 +73,7 @@ async function poll() {
   try {
     const r = await fetch(`${LIVE_API}/live/feed?after=${cursor}`, { cache: "no-store" });
     if (!r.ok) throw new Error(String(r.status));
-    const body = (await r.json()) as { now: number; events: LiveEvent[]; presence: Presence[]; overlay: Overlay | null };
+    const body = (await r.json()) as { now: number; events: LiveEvent[]; presence: Presence[]; overlay: Overlay | null; engine?: LiveState["engine"] };
     const fresh = body.events.filter((e) => e.seq > cursor);
     if (fresh.length) cursor = fresh[fresh.length - 1].seq;
     failures = 0;
@@ -81,6 +82,7 @@ async function poll() {
       events: [...state.events, ...fresh].slice(-120),
       presence: body.presence,
       overlay: body.overlay,
+      engine: body.engine ?? null,
       serverOffset: body.now - Date.now() / 1000,
     });
     schedule(4000);

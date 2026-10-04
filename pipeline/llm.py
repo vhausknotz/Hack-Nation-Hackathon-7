@@ -32,11 +32,15 @@ def log_usage(entry):
 def client():
     global _client
     if _client is None:
-        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+        import os
         from openai import OpenAI
 
-        token = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
-        _client = OpenAI(base_url=BASE_URL, api_key=token, max_retries=5, timeout=180)
+        if os.environ.get("AZURE_OPENAI_API_KEY"):  # deployed services (the cloud engine): key from protected settings
+            _client = OpenAI(base_url=BASE_URL, api_key=os.environ["AZURE_OPENAI_API_KEY"], max_retries=5, timeout=180)
+        else:
+            from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+            token = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
+            _client = OpenAI(base_url=BASE_URL, api_key=token, max_retries=5, timeout=180)
     return _client
 
 
