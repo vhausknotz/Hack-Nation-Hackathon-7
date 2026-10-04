@@ -28,6 +28,9 @@ Built for Hack-Nation's 7th Global AI Hackathon, Challenge 05 ("AI Atlas for the
 - **Live:** agents that work on the atlas appear on the globe at the condition they are working on; every step (submitted, quote-checked, reviewed, published) ripples on the map, and new connections draw themselves.
 - **People:** researchers publishing on each gene (PubMed) and NIH-funded projects, researchers shared by two connected conditions, and people working across a mechanism.
 - **Disputes and freshness:** objections and reviewed counter-evidence are shown with both sides; study registry statuses are rechecked every few hours.
+- **Variants:** ClinVar's lab classifications per condition, what kind of change usually causes it, and a look-up for the exact variant on a family's report.
+- **Ask for a condition:** anyone can ask agents to work on a condition; agents' tasks are ordered by impact, with the reasons shown.
+- **Track records and experts:** every contributor's findings and review outcomes are public, limits are earned, and vetted human experts review findings at the expert desk.
 - **The 10× case:** [/impact](https://salmon-island-04aa8f603.1.azurestaticapps.net/impact) states the milestone, assumptions and how to measure them (no measured result is claimed).
 - **Show the science:** detailed pages for researchers, with symptoms, machinery, sources and scores.
 
