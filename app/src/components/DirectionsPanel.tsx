@@ -55,6 +55,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
         {step === i && <div id={`stop-${i}`} className="pb-4 pt-2 text-sm leading-relaxed text-ink-soft">
           {i === 0 && <>
             <p>{c.plain?.summary || `This genetic condition is linked to changes in the ${c.gene.symbol} gene. Its name is a starting point for finding relevant people and research.`}</p>
+            {c.phenotype_count === 0 && c.broader_phenotypes && <BroaderSigns c={c} />}
             <Link to={routes.conditionDetails(c.id)} className="mt-3 block text-xs underline underline-offset-2">{c.plain ? "AI summary from MONDO and HPO data · see sources" : "See the diagnosis sources"}</Link>
             <p className="mt-3 rounded-lg bg-ink-wash p-3 text-xs">The lights nearby are other conditions with shared features. Their position is a research lead, not a medical conclusion.</p>
           </>}
@@ -163,6 +164,18 @@ function Study({ asset: a }: { asset: ResearchAsset }) {
     <a className="mt-3 inline-block text-xs font-semibold text-machinery underline" href={a.url} target="_blank" rel="noreferrer">Check study and eligibility ↗</a>
     <details className="mt-2 text-xs"><summary className="cursor-pointer text-ink-faint">Source and review</summary>{a.quotes.map((q, i) => <blockquote className="mt-2 border-l-2 border-ink-line pl-2" key={i}>“{q}”</blockquote>)}<p className="mt-2">{reviewLabel(a.review)} · record read {a.source_date || "on the archived source date"}. Recruitment may have changed.</p></details>
   </article>;
+}
+
+function BroaderSigns({ c }: { c: ConditionBundle }) {
+  const b = c.broader_phenotypes!;
+  const names = b.phenotypes.map(p => { const e = c.dict.symptoms[p.id]; return (e?.[1] || e?.[0] || p.id); });
+  const unique = [...new Set(names.map(n => n.charAt(0).toUpperCase() + n.slice(1)))].slice(0, 10);
+  return <div className="mt-3 rounded-lg border border-ink-line p-3 text-xs">
+    <p className="font-semibold text-ink">No signs are recorded for this exact form yet.</p>
+    <p className="mt-1">For <b className="font-semibold text-ink">{b.name}</b> in general, the broader diagnosis this form belongs to, the Human Phenotype Ontology records {b.count} signs, including:</p>
+    <ul className="mt-2 flex flex-wrap gap-1.5">{unique.map(n => <li key={n} className="rounded-full bg-ink-wash px-2 py-0.5">{n}</li>)}</ul>
+    <p className="mt-2 text-caution">These describe the broader diagnosis. The form caused by {c.gene.symbol} may look different, so they are not used for this condition's connections.</p>
+  </div>;
 }
 
 function QuestionCard({ q, first }: { q: Question; first: boolean }) {

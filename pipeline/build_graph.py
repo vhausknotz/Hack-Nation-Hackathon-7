@@ -545,6 +545,29 @@ def main() -> None:
                 unique.append(n)
         return unique[0][0].upper() + unique[0][1:], unique[1:]
 
+    def related_phenotypes(c: Condition) -> dict | None:
+        """For a condition with no symptoms of its own: the nearest broader disease whose symptoms are recorded.
+
+        Shown to families clearly labelled as describing the broader disease, never merged into this condition's
+        own profile or used for its connections (same name is not same presentation)."""
+        frontier, seen = [c.disease], {c.disease}
+        for _ in range(4):
+            nxt = []
+            for mid in frontier:
+                for parent in (umbrella_of.get(mid, []) + (diseases[mid].parents if mid in diseases else [])):
+                    if parent in seen or parent not in diseases:
+                        continue
+                    seen.add(parent)
+                    below = len([x for x in descendants(parent) if x in conditions or x in condition_diseases])
+                    terms = {h: e for h, e in pheno.get(parent, {}).items() if onto.is_phenotypic_abnormality(h)}
+                    if len(terms) >= 3 and below <= 60:
+                        ranked = sorted(terms, key=lambda h: (-(symptom_index.term_ic(h) if h in symptom_index.col else 0), h))[:20]
+                        return {"from": parent, "name": diseases[parent].name, "conditions_below": below, "count": len(terms),
+                                "phenotypes": [{"id": h, "frequency": terms[h]["frequency"]} for h in ranked]}
+                    nxt.append(parent)
+            frontier = nxt
+        return None
+
     with open(OUT / "conditions.jsonl", "w", encoding="utf-8") as f:
         for cid in cond_ids:
             c = conditions[cid]
@@ -556,6 +579,9 @@ def main() -> None:
                     for h, e in cond_pheno[cid].items()]
             phen.sort(key=lambda p: (-(symptom_index.term_ic(p["id"]) if p["id"] in symptom_index.col else 0), p["id"]))
             referenced_hpo.update(p["id"] for p in phen)
+            broader = None if phen else related_phenotypes(c)
+            if broader:
+                referenced_hpo.update(p["id"] for p in broader["phenotypes"])
             row = {
                 "id": cid, "name": title, "also_known_as": aka[:15], "disease": c.disease, "disease_name": d.name,
                 "synthetic": c.synthetic, "definition": d.definition, "category": category_of(c),
@@ -566,6 +592,7 @@ def main() -> None:
                 "onset": sorted({onto.label(t) for t in course.get(c.disease, set()) if ONSET_ROOT in onto.ancestors(t)}),
                 "prevalence": prevalence_of(c.disease),
                 "phenotypes": phen,
+                "broader_phenotypes": broader,
                 "xrefs": {p: d.equivalent(p) for p in ("OMIM", "Orphanet", "GARD", "MEDGEN", "DOID", "MESH") if d.equivalent(p)},
                 "subsets": sorted(d.subsets), "umbrella_terms": umbrella_of.get(c.disease, []),
                 "source_records": records_of.get(c.disease, []),

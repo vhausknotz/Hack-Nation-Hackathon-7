@@ -103,6 +103,9 @@ def main() -> None:
         phen = c["phenotypes"][:MAX_SYMPTOMS]
         for p in phen:
             sym_dict[p["id"]] = symptom_entry(p["id"])
+        broader = c.get("broader_phenotypes")
+        for p in (broader or {}).get("phenotypes", []):
+            sym_dict[p["id"]] = symptom_entry(p["id"])
         g = genes.get(c["gene"]["hgnc_id"], {})
         for m in g.get("complexes", []) + g.get("pathways", [])[:6] + g.get("go", [])[:8]:
             mech_dict[m] = mech_entry(m)
@@ -114,6 +117,7 @@ def main() -> None:
             "variant_effect": c["variant_effect"], "inheritance": c["inheritance"], "onset": c["onset"], "prevalence": c["prevalence"],
             "phenotypes": [{"id": p["id"], "frequency": p["frequency"], "sources": p["sources"][:4], "refs": p["refs"][:3]} for p in phen],
             "phenotype_count": len(c["phenotypes"]),
+            "broader_phenotypes": broader,
             "xrefs": c["xrefs"], "url": c["url"],
             "machinery": {"complexes": g.get("complexes", []), "pathways": g.get("pathways", [])[:6], "go": g.get("go", [])[:8],
                           "partners": g.get("partners", [])[:12], "dosage": g.get("dosage")},

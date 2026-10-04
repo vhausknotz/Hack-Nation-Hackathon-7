@@ -102,6 +102,7 @@ export interface ConditionBundle {
   prevalence: Prevalence | null;
   phenotypes: Phenotype[];
   phenotype_count: number;
+  broader_phenotypes?: { from: string; name: string; conditions_below: number; count: number; phenotypes: { id: string; frequency: string }[] } | null;
   xrefs: Record<string, string[]>;
   url: string;
   machinery: { complexes: string[]; pathways: string[]; go: string[]; partners: Partner[]; dosage: Dosage | null };
