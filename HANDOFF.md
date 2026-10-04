@@ -1,4 +1,4 @@
-# Lead handoff — 2026-10-04, 03:25 UTC
+# Lead handoff — 2026-10-04, 03:35 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
@@ -8,7 +8,7 @@ This file supersedes the contradictory historical checkpoints preserved in [the 
 
 - Website: https://salmon-island-04aa8f603.1.azurestaticapps.net. Globe/flat map, search, 7,328 conditions, plain descriptions, six-stop Directions, reviewed groups/studies, restrictions and printable/copyable question brief (`?brief=1`). Sparse data says not found, never nonexistent.
 - Shared research in step 5 connects identical reviewed non-treatment records across different genes. SNAP25 → STXBP1 through NCT01238250; STXBP1 → SYNGAP1 through NCT06555965. Both diagnoses' evidence and restrictions stay attached. Questions about protocols, questionnaires and data definitions are descriptive leads, not independently reviewed partnership recommendations.
-- The bounded cycle release afe2a35 is live; receipts/docs were pushed as 0feca02. The next tested release adds listing-check history in step 6 and recorded review dates in the brief, plus accurate About text. Check Git and live assets before declaring that newer interface deployed.
+- **Website release 5e8d4f7 is live and verified**, JS `index-C2PuUDQP.js`. Step 6 shows actual listing-check history; the brief includes recorded review dates/models; About correctly explains the single-family review boundary. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched data and expanded history.
 - Family agent commit 2b2f5b3 and community agent f382cf4 are integrated. Community candidates: 13 Sol-supported, Angelman unresolved. 57 conditions have patient groups and 77 have any listing. STXBP1 organization alias and Simons profile/source issues were corrected through reviewed claims.
 - MCP: https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp. All 13 authenticated tools verified with the official SDK. Entra-enrolled contributors, fixed official sources, durable private storage, quotas, signed submissions, explicit local ledger worker. `tools/run_cloud_mcp.py` is the tested stdio bridge. Gateway intake never invokes paid models.
 
@@ -32,7 +32,7 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
 - Latest full backend suite: **150 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 41% used / 59% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Codex account usage at checkpoint: 46% used / 54% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 
@@ -44,7 +44,7 @@ Website deployment uses `./.venv/Scripts/python tools/deploy_website.py`, creden
 
 ## Next work, in order
 
-1. Commit/deploy the verified evidence-history and About milestone; run the updated live check.
+1. When Luna stops, run the updated offline full-run export before importing anything. A source-renderer compatibility fix preserves original quote offsets and marks omitted structured eligibility; it was checked read-only against all 10,235 then-positive candidates. The current running process remains unchanged. Do not bulk-import or start a broad paid review campaign.
 2. Use [docs/demo_walkthrough.md](docs/demo_walkthrough.md) for the patient-leader story and genuine contribution/rejection/retry. Check challenge coverage and any remaining usability problems.
 3. Keep background Luna within its cap, and leave a clean, recoverable repo. Its candidates still require review before family publication.
 4. Assess independent review options without silently spending on a broad new campaign. All current semantic review uses Azure GPT-6 Sol; Luna screening is Azure too. Both are one model family. Different prompts or external coding assistance do not make the published claims independently reviewed.

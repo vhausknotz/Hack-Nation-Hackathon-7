@@ -22,7 +22,7 @@ from contextlib import contextmanager
 
 from . import run as pilot
 from pipeline import http_cache, llm
-from ledger.canonical import sha256
+from ledger.canonical import sha256, canonical_text, canonical_quote
 from ledger.sources import archive
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -238,6 +238,7 @@ def screen_one(job, gate):
         answer = {}
     positive = error is None and spans is not None and answer.get("relevance") in {"direct", "includes_this_condition"}
     return {"condition_id": c["id"], "nct_id": nct, "decision": answer, "span": spans,
+            "source_text_sha256": sha256(text.encode("utf-8")),
             "validation_error": error, "candidate": positive, "created": pilot.now(), "attempts": attempts,
             "truncated_fields": truncated, "status": study["protocolSection"].get("statusModule", {}).get("overallStatus", ""),
             "input_hash": sha256(json.dumps(messages, ensure_ascii=False, sort_keys=True).encode())}
@@ -348,6 +349,33 @@ def screen(budget, workers, max_pairs=0):
         raise RuntimeError("Screening stopped on request errors; see manifest and retained budget reservation")
 
 
+def decision_text(decision, study):
+    """Recover the precise source version screened, never shift old quote offsets.
+
+    Decisions before source hashes were introduced used the original renderer,
+    which omitted structured eligibility. Keep that omission explicit rather than
+    silently replacing their source with a more complete, unreviewed rendering.
+    """
+    original = canonical_text("\n".join(f"{key}: {value}" for key, value in pilot.study_fields(study)
+                                       if key not in {"Minimum age", "Maximum age", "Sex", "Healthy volunteers"}))
+    expected = decision.get("source_text_sha256")
+    if expected:
+        versions = [(pilot.render(study), "structured-eligibility-v2"), (original, "original-v1")]
+        found = next(((text, version) for text, version in versions if sha256(text.encode("utf-8")) == expected), None)
+        if found is None:
+            raise ValueError("Screened source hash no longer matches a supported rendering; do not export")
+        text, version = found
+    else:
+        text, version = original, "original-v1"
+    quotes, spans = decision["decision"].get("quotes", []), decision.get("span") or []
+    if len(quotes) != len(spans):
+        raise ValueError("Candidate quote/span count mismatch")
+    for quote, (start, end) in zip(quotes, spans):
+        if not 0 <= start < end <= len(text) or canonical_quote(text[start:end]) != canonical_quote(quote["text"]):
+            raise ValueError("Candidate quote no longer matches its screened source offsets")
+    return text, version
+
+
 def export():
     db = connect()
     sources, candidates, decisions = {}, [], []
@@ -355,11 +383,17 @@ def export():
         d = json.loads(row[0])
         if d["candidate"]:
             study = json.loads(db.execute("SELECT body FROM studies WHERE nct=?", (d["nct_id"],)).fetchone()[0])
-            source = sources.get(d["nct_id"])
+            text, version = decision_text(d, study)
+            d["source_rendering"] = version
+            eligibility = study.get("protocolSection", {}).get("eligibilityModule", {})
+            d["structured_eligibility_incomplete"] = not all(k in eligibility for k in ("minimumAge", "maximumAge", "sex", "healthyVolunteers"))
+            # One NCT can have decisions from before and after a renderer change.
+            source_key = sha256(text.encode("utf-8"))
+            source = sources.get(source_key)
             if source is None:
-                source = archive(pilot.render(study).encode(), f"https://clinicaltrials.gov/study/{d['nct_id']}", "text", "ClinicalTrials.gov (public domain)", True, root=OUT / "archive").to_dict()
+                source = archive(text.encode("utf-8"), f"https://clinicaltrials.gov/study/{d['nct_id']}", "text", "ClinicalTrials.gov (public domain)", True, root=OUT / "archive").to_dict()
                 source["retrieved"] = json.loads(db.execute("SELECT source FROM studies WHERE nct=?", (d["nct_id"],)).fetchone()[0])["retrieved"]
-                sources[d["nct_id"]] = source
+                sources[source_key] = source
                 pilot.write_json(OUT / "studies" / f"{d['nct_id']}.json", study)
             d["source_id"] = source["source_id"]
             claim = pilot.candidate_for(d)

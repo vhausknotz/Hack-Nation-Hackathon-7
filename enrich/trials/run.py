@@ -448,6 +448,8 @@ def screen(args):
 
 def candidate_for(d):
     restriction = d["decision"]["restriction"]
+    if d.get("source_rendering") == "original-v1" or d.get("structured_eligibility_incomplete"):
+        restriction = ((restriction + "; ") if restriction else "") + "Eligibility excerpt incomplete; structured age, sex or healthy-volunteer fields are missing from this collected source. Verify the full registry record."
     if any(field in d.get("truncated_fields", []) for field in ("Eligibility", "Study population")):
         restriction = ((restriction + "; ") if restriction else "") + "Eligibility excerpt incomplete; verify the full archived record."
     evidence = [{"type": "trial_record", "source_id": d["source_id"], "quote": q["text"], "start": span[0], "end": span[1],
