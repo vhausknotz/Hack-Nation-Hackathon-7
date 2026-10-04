@@ -1,4 +1,4 @@
-# Lead handoff — 2026-10-04, 04:00 UTC
+# Lead handoff — 2026-10-04, 04:11 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
@@ -24,7 +24,7 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Cloud snapshot: `published/661ccc94192247418bf3d4a2dc82eebd`.
 - Runner: `tools/run_contribution_cycle.py --plan data/campaigns/mcp-study-cycle-plan.json --state data/contributions/shared-study-cycle` (invoke with repo Python).
 - **The pinned two-attempt lifetime allowance is exhausted. Do not reset state or clone a plan to obtain more calls.** Missing Sol dollar pricing is not zero cost.
-- One OS writer lease covers review and publication; a separate cycle lease prevents duplicate runners. Ambiguous model calls keep reservations; saved judgments resume without repayment. A dirty repo blocks publication. A changed Git revision currently causes publication again, including doc-only commits.
+- One OS writer lease covers review and publication; a separate cycle lease prevents duplicate runners. Ambiguous model calls keep reservations; saved judgments resume without repayment. A dirty repo blocks publication. Publication now fingerprints tracked runtime/configuration and generated build inputs (fabcefa). Documentation-only edits do not repeat publication; ignored graph rebuilds do invalidate it. The first invocation after this revision-format change will require a fresh checked publication; do not rewrite the prior receipt to skip it.
 - This is a proven bounded, explicitly started local cycle, not continuous autonomous discovery or a cloud ledger. The computer and preview on port 4173 must remain running for its browser checks.
 - The canonical CTG renderer now preserves structured age/sex/healthy-volunteer fields. Hosted MCP cache is versioned accordingly. Old source archives and the already-running Luna process retain their earlier rendering; do not call their eligibility complete retroactively.
 
@@ -33,8 +33,8 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Luna screening is running with `--budget 30 --workers 96 --max-workers 384 --continuous`. Last observed 03:35 UTC: about **$21.25 actual**, plus retained/reserved amounts, ~555k actual TPM / 397 RPM, no errors in the measured minute. Inspect `data/enrichment/trials/full/throughput.json` and `screening-continuous.log` for current facts. It does not write the ledger or publish findings.
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
-- Latest full backend suite: **154 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 50% used / 50% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Latest full backend suite: **158 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
+- Codex account usage at checkpoint: 59% used / 41% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 
