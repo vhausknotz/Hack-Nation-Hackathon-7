@@ -8,6 +8,7 @@ import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
 import { collaborationQuestions } from "./SharedResearch";
 import { recordedReview } from "./EvidenceHistory";
+import { copyText } from "../lib/clipboard";
 import type { ConditionBundle, Neighbor } from "../lib/types";
 import { ASSET_TYPE, gaps, groupStudies, orgKindLabel, orgNotes, orgScope, questions, researchQuestions, reviewLabel, statusLabel, studyFit, studyNotes } from "./familyJourney";
 
@@ -158,24 +159,6 @@ export function briefText(b: Brief): string {
   }
   out.push("", "--", ...b.footer);
   return out.join("\n");
-}
-
-async function copyText(text: string) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const area = document.createElement("textarea");
-    area.value = text;
-    area.setAttribute("readonly", "");
-    area.style.position = "fixed";
-    area.style.opacity = "0";
-    document.body.appendChild(area);
-    area.select();
-    const ok = document.execCommand("copy");
-    area.remove();
-    return ok;
-  }
 }
 
 export function FamilyBrief({ c, neighbors, onClose }: { c: ConditionBundle; neighbors: Neighbor[]; onClose: () => void }) {

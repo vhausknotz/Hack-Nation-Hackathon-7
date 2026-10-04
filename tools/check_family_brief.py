@@ -12,6 +12,7 @@ Screenshots and a printed PDF go to the output directory. Reads app/public/data;
 import json
 import re
 import sys
+from urllib.parse import quote
 from pathlib import Path
 
 from playwright.sync_api import Page, sync_playwright
@@ -98,6 +99,26 @@ def check_text(text: str, c: dict) -> int:
     return len(orgs) + len(assets)
 
 
+def check_shared_question(page: Page, c: dict):
+    route = c["shared_research"][0]
+    own = next(a for a in c["assets"] if a["id"] == route["asset_id"])
+    card = page.locator("[data-research-bridge]").first
+    card.get_by_role("button", name="Copy question + sources", exact=True).click()
+    card.get_by_role("button", name="Question copied", exact=True).wait_for()
+    copied = page.evaluate("navigator.clipboard.readText()").replace("\r\n", "\n")
+    for a in (own, route["partner_asset"]):
+        assert a["claim_id"] in copied and a["url"] in copied
+        assert a["source_date"] in copied and a["review"]["reason"] in copied
+        if a["restriction"]:
+            assert f"Restriction, as recorded: {a['restriction']}" in copied
+    assert c["name"] in copied and route["partner"]["name"] in copied
+    assert f"/c/{quote(c['id'], safe='')}?brief=1" in copied
+    assert "not recommendations or an independently reviewed partnership proposal" in copied
+    assert "Nothing was sent" in card.text_content()
+    forbidden(copied, "focused question")
+    no_overflow(page, "focused question copy")
+
+
 def check_history(page: Page, c: dict):
     region = page.get_by_role("region", name="Recent evidence checks")
     assert region.is_visible()
@@ -161,6 +182,7 @@ def main(base: str, output: str):
                             assert c["shared_research"][0]["partner"]["name"] in text
                             stop.locator("[data-research-bridge]").first.locator("summary").click()
                             assert stop.locator("[data-research-bridge]").first.get_by_text("Evidence ID:", exact=False).count() == 2
+                            check_shared_question(page, c)
                     if step == 5:
                         check_history(page, c)
                     stop.scroll_into_view_if_needed()
