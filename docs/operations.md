@@ -47,9 +47,9 @@ Dedicated MCP status/off: `powershell -File tools/azure_mcp.ps1 status` and `pow
 cd app; npm run build
 # then deploy dist/ with the SWA CLI using the deployment token from Azure
 ```
-# Ledger content redaction
+
+## Ledger content redaction
 
 `Ledger.redact` is an operator action for the exceptional categories in PLAN, never a way to hide scientific disagreement. It clears the event payload, removes the corresponding claim/review/challenge projection and preserves the original leaf hash plus a tombstone. Review/challenge readers also suppress legacy projection rows whose event was already redacted; a removed review no longer counts toward trust. This behavior is covered by synthetic regression tests. The production ledger had no redacted events when checked on 2026-10-04.
 
 This is logical removal from active ledger reads, not a claim of complete physical erasure. Previously published immutable cloud snapshots, website bundles, backups and SQLite free pages may retain earlier copies. An actual privacy incident requires stopping affected publication/access, identifying and removing those copies under the applicable retention obligations, then rebuilding the active view. Do not treat another publish alone as removal of old blobs, or put the sensitive content in an incident report. No such deletion or production redaction was performed during this repair.
-

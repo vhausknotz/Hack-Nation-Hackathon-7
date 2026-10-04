@@ -46,7 +46,7 @@ Do not claim a measured 10× acceleration, a treatment recommendation, universal
 
 ## One-minute recording script
 
-Use the real site and keep the source/restriction panels visible while narrating. Record the team introduction separately as required by the submission. This script is prepared, not a recorded or submitted video.
+Use the real site and keep the source/restriction panels visible while narrating. Record the team introduction separately as required by the submission. This narration is not yet recorded; a silent walkthrough draft is available below. Nothing has been submitted.
 
 > Imagine leading a patient group for SNAP25, unsure where to start. The atlas places your diagnosis among conditions that share recorded biology. These connections are research leads, not treatment advice.
 >
@@ -71,3 +71,17 @@ The current prototype supports the discovery and evidence-brief portion. To test
 5. Follow whether a study team actually confirms a reusable element and whether that reduces protocol-development work. Report this separately from discovery speed. No discovery-time ratio establishes faster treatment development or better clinical outcomes.
 
 For this submission, demonstrate the sourced question and the working contribution loop. State that the comparative study and expert reuse decision have not yet happened.
+
+## Silent recording draft
+
+Recorded from the live site on 2026-10-04: **55.48 seconds, 1440×900**, nine scenes, no browser errors. The saved WebM was decoded in Chromium and its middle/end sampled. It shows SNAP25's diagnosis, community, computed connections, shared registry, both diagnoses' restrictions, copying the sourced question, the full brief, and the real STXBP1/SYNGAP1 review history. It does not simulate agent work or submit anything.
+
+Local output: `data/build/demo/20261004-050141/atlas-walkthrough-silent.webm`. The same directory contains scene screenshots, `recording.json` with timestamps, and `preview.html`. These large generated artifacts are intentionally not committed; preserve the video separately when preparing the submission. Add narration and the required team introduction, then review the final cut. This is a draft, not a submitted entry.
+
+To make a fresh recording using the installed Playwright browser:
+
+```powershell
+./.venv/Scripts/python tools/record_demo.py
+```
+
+The script reads the website, clicks through the existing UI, copies a question only inside its temporary browser context, and writes local artifacts. It makes no model calls or evidence contributions. Its output directory must be new to prevent accidental overwrite. `--base http://localhost:4173` records a local preview instead.

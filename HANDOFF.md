@@ -1,4 +1,4 @@
-# Lead handoff — 2026-10-04, 04:47 UTC
+# Lead handoff — 2026-10-04, 05:05 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
@@ -6,9 +6,11 @@ This file supersedes the contradictory historical checkpoints preserved in [the 
 
 ## Working and live
 
+**Silent demo draft saved:** `data/build/demo/20261004-050141/atlas-walkthrough-silent.webm` is a 55.48-second, 1440×900 recording of nine real live-site scenes, ending on the STXBP1/SYNGAP1 review history. No page errors; saved file decoded in Chromium. Scene screenshots, playback samples, preview HTML and timestamp receipt are alongside it. Generated video is local-only/ignored, not pushed. `tools/record_demo.py` reproduces the recording without paid calls or submissions. Narration and team introduction remain to be recorded; nothing was submitted. See docs/demo_walkthrough.md.
+
 **Ledger redaction repair verified:** redacting a review/challenge now removes its duplicate reason from the projection table as well as the event. All review/challenge readers exclude redacted events, including legacy leftover rows. This prevents re-export and avoids counting a removed review toward trust. Synthetic regressions verify reason removal, trust reduction, legacy suppression and preserved inclusion proofs. Production was checked read-only: zero redacted events or orphaned review rows; no production data was changed and no cloud re-publication is needed for this fix. Retired cloud snapshots/backups still require separate operator deletion if a real privacy incident occurs; see operations notes.
 
-**Latest website release 280649f is live and verified**, JS `index-Co_GzGZD.js`. Both map modes respect reduced motion, including preference changes while open. Flat-map zoom/inertia and selection pulses follow the preference; camera positions remain normalized after settings updates. New desktop/phone motion checks and ordinary Directions checks pass. Live reduced-motion checks plus STXBP1/SNAP25/SYNGAP1 source-preserving brief/history checks passed. The demo document now includes a recording script and an explicit, unmeasured 10× validation plan; no video has been recorded or submitted.
+**Latest website release 280649f is live and verified**, JS `index-Co_GzGZD.js`. Both map modes respect reduced motion, including preference changes while open. Flat-map zoom/inertia and selection pulses follow the preference; camera positions remain normalized after settings updates. New desktop/phone motion checks and ordinary Directions checks pass. Live reduced-motion checks plus STXBP1/SNAP25/SYNGAP1 source-preserving brief/history checks passed. The demo document includes narration, the silent draft and an explicit, unmeasured 10× validation plan.
 
 **Focused-copy feature (introduced in df95ff4):** Shared-research cards copy a focused study-team question with both diagnoses' exact restrictions, review labels/reasons, source dates, evidence IDs and a full-brief link. It sends nothing. A denied clipboard exposes selectable text; the existing brief copy also handles both clipboard failures safely and restores focus. Four-condition 1440/390 px checks and the denied-clipboard phone check passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks passed again in the current release, including the exact copied sources/restrictions and evidence histories.
 
@@ -38,7 +40,7 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
 - Latest full backend suite: **161 passed** (156 ordinary tests plus all five opt-in Azurite integration tests). Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 75% used / 25% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Codex account usage at checkpoint: 80% used / 20% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 
