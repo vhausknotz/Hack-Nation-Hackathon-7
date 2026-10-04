@@ -43,3 +43,6 @@ data/contributions/
 # live engine state, staging export and spend records (local only)
 data/engine/
 data/engine-vm/
+
+# Luna scouts state (budget, log)
+data/scouts/

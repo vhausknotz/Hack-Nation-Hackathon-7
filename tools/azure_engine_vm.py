@@ -210,14 +210,48 @@ echo setup-done
                                                             + ". Do not start tools/atlas_engine.py on this PC unless the VM is stopped and its state copied back.\n", encoding="utf-8")
         return out
 
+    def scouts(self):
+        """Install and start the Luna scouts service; set the referee's monthly cap to the owner's budget."""
+        script = r"""set -e
+cat > /etc/systemd/system/atlas-scouts.service <<'UNIT'
+[Unit]
+Description=Rare Disease Atlas Luna scouts (slow, budget-capped contributors)
+After=network-online.target atlas-engine.service
+[Service]
+User=atlas
+WorkingDirectory=/opt/atlas/repo
+EnvironmentFile=/etc/atlas/engine.env
+ExecStart=/opt/atlas/venv/bin/python tools/luna_scout.py
+Restart=always
+RestartSec=60
+[Install]
+WantedBy=multi-user.target
+UNIT
+sudo -u atlas /opt/atlas/venv/bin/python - <<'PY'
+import json, pathlib
+p = pathlib.Path('/opt/atlas/repo/data/engine/config.json')
+c = json.loads(p.read_text())
+c.update(daily_usd_cap=1.0, monthly_usd_cap=12.0)
+p.write_text(json.dumps(c, indent=1))
+print('referee caps', c['daily_usd_cap'], c['monthly_usd_cap'])
+PY
+systemctl daemon-reload
+systemctl restart atlas-engine
+systemctl enable --now atlas-scouts
+sleep 30
+systemctl is-active atlas-scouts
+journalctl -u atlas-scouts -n 6 --no-pager
+"""
+        return self.run(script)
+
     def update(self):
         out = self.ship(with_state=False)
-        return out + self.run("systemctl restart atlas-engine && sleep 15 && systemctl is-active atlas-engine && journalctl -u atlas-engine -n 8 --no-pager")
+        return out + self.run("systemctl restart atlas-engine && (systemctl is-enabled atlas-scouts >/dev/null 2>&1 && systemctl restart atlas-scouts || true) && sleep 15 && systemctl is-active atlas-engine && journalctl -u atlas-engine -n 8 --no-pager")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "status", "stop", "start", "logs"))
+    parser.add_argument("command", choices=("create", "setup", "migrate", "update", "scouts", "status", "stop", "start", "logs"))
     args = parser.parse_args()
     vm = EngineVM()
     if args.command == "create":
@@ -228,6 +262,8 @@ def main():
         print(vm.migrate())
     elif args.command == "update":
         print(vm.update())
+    elif args.command == "scouts":
+        print(vm.scouts())
     elif args.command == "status":
         print(json.dumps({"vm": VM, "power": vm.power()}, indent=1))
     elif args.command == "stop":

@@ -46,7 +46,7 @@ MODEL, FAMILY = "gpt-6-sol", "openai-gpt6"
 MAX_OUTPUT_TOKENS = 4000
 DEFAULT_CONFIG = {
     "daily_usd_cap": 1.0,
-    "monthly_usd_cap": 6.0,  # the owner's total Azure ceiling is $45/month; reviews get this share
+    "monthly_usd_cap": 12.0,  # owner's total project ceiling is $60/month: ~37 hosting + 12 reviews + 5 Luna scouts
     # Assumed list prices (USD per million tokens) until real Sol pricing is configured. Conservative on purpose.
     "prices": {"gpt-6-sol": [5.0, 30.0]},
     "peer_review_grace_seconds": 180,
