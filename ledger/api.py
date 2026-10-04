@@ -8,6 +8,7 @@
 """
 
 import json
+import weakref
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +19,7 @@ from .kernel import KERNEL_VERSION, Kernel, passed
 from .schema import REVIEW_VERDICTS, assertion_id, claim_id
 from .sources import Source
 from .store import Store
+from .locking import WriterLease
 
 REDACTION_CATEGORIES = {"personal_data", "secret", "illegal_content", "legal_obligation"}
 
@@ -35,16 +37,22 @@ class ProposalResult:
 
 
 class Ledger:
-    def __init__(self, path: Path = LEDGER_DIR / "ledger.db", registry_=None, keys_dir: Path = identity.KEYS_DIR):
+    def __init__(self, path: Path = LEDGER_DIR / "ledger.db", registry_=None, keys_dir: Path = identity.KEYS_DIR, source_root=None):
+        lease = WriterLease(path.with_suffix(".writer.lock"))
         self.store = Store(path)
+        self.store.on_close = lease.close
+        weakref.finalize(self.store, lease.close)
         self.registry = registry_ or registry.default()
-        self.kernel = Kernel(self.registry, self.store)
+        self.kernel = Kernel(self.registry, self.store, source_root)
         self.keys_dir = keys_dir
         self.kernel_signer = self._system("kernel", "Mechanical checks: schema, identifiers, sources, quotes, datasets, signatures")
         self.log_signer = self._system("log", "Signs Merkle tree heads over the event log")
 
     def _system(self, kind: str, purpose: str) -> identity.Signer:
         signer = identity.load_or_create(f"system:{kind}", self.keys_dir)
+        existing = self.store.contributor(signer.contributor)
+        if existing is not None and existing["public_key"] != signer.public_key:
+            raise ValueError("System signing key does not match the ledger; restore the original keys")
         if self.store.contributor(signer.contributor) is None:
             self.register(signer, kind=kind, manifest={"purpose": purpose, "version": KERNEL_VERSION if kind == "kernel" else "log@1"})
         return signer
@@ -97,7 +105,7 @@ class Ledger:
         return ProposalResult(cid, aid, ok, [c.to_dict() for c in checks])
 
     def review(self, claim_id_: str, verdict: str, reason: str, signer: identity.Signer, model_family: str | None = None, model: str | None = None,
-               prompt: str | None = None) -> str:
+               prompt: str | None = None, submission_id: str | None = None) -> str:
         if verdict not in REVIEW_VERDICTS:
             raise ValueError(f"verdict must be one of {sorted(REVIEW_VERDICTS)}")
         claim = self.store.claim(claim_id_)
@@ -110,16 +118,18 @@ class Ledger:
         if kind == "model" and not model_family:
             raise ValueError("model reviews must declare their model family")
         event_id, seq = self._append(signer, "review.attested", claim_id_, {"verdict": verdict, "reason": reason, "model_family": model_family, "model": model,
-                                                                          **({"prompt": prompt} if prompt else {})})
+                                                                          **({"prompt": prompt} if prompt else {}),
+                                                                          **({"submission_id": submission_id} if submission_id else {})})
         self.store.add_review((event_id, claim_id_, signer.contributor, kind, model_family, model, verdict, reason, seq))
         self.store.commit()
         return event_id
 
-    def challenge(self, target: str, reason: str, signer: identity.Signer, counter_claim: str | None = None) -> str:
+    def challenge(self, target: str, reason: str, signer: identity.Signer, counter_claim: str | None = None, submission_id: str | None = None) -> str:
         """Challenge a claim (misreads its source) or an assertion (counter-evidence, cited as a counter-claim)."""
         if counter_claim and self.store.claim(counter_claim) is None:
             raise ValueError("counter-claim must be proposed first")
-        event_id, seq = self._append(signer, "claim.challenged", target, {"reason": reason, "counter_claim": counter_claim})
+        event_id, seq = self._append(signer, "claim.challenged", target, {"reason": reason, "counter_claim": counter_claim,
+                                                                      **({"submission_id": submission_id} if submission_id else {})})
         self.store.add_challenge((event_id, target, counter_claim, signer.contributor, reason, seq))
         self.store.commit()
         return event_id

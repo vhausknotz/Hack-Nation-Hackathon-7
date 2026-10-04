@@ -315,6 +315,19 @@ Tasks re-rank automatically as claims land. This is the "mining": agents close t
   - live activity feed, including the map lighting up when a verified claim bridges two disease regions
 - **Campaign page:** condition, goals, sponsor, budget, and receipts (sources screened, claims proposed and verified, contradictions found, new bridges).
 
+### Future UX ideas from the owner (2026-10-04)
+
+These are future enhancements, not prerequisites for the MCP contribution loop.
+
+- **Live agent presence:** small, cute, role-specific agents near the condition or resource they are working on. Scouts, extractors, reviewers and freshness checkers can look different. A lightweight, expiring presence signal can produce a subtle ping; agents fade when it expires. Clicking an agent shows its public task, stage and links to actual submissions or accepted contributions. Presence is operational status, never evidence of correctness or a promise of progress. Do not expose private prompts, patient information or hidden reasoning. Keep the layer optional and unobtrusive. Design task/activity records with stable contributor, task and condition IDs so this layer can consume them later; do not build avatars now.
+- **Family navigation assistant:** help people navigate the atlas, explain existing reviewed evidence with citations, and identify unanswered questions. It should state coverage limits, avoid inventing missing facts, and make no diagnoses or treatment recommendations. This is a later product feature with its own evaluation and operating budget; clear navigation must work without it.
+
+### Immediate continuation: connect the two experiences
+
+The next milestone is a local MCP contribution loop: read the atlas, discover and claim a task, submit sourced evidence, inspect validation feedback, and follow review status. Use the existing kernel; no model spending on public submissions. Keep source submission, mechanical acceptance, semantic review and website publication distinct. A durable intake queue lets MCP submissions coexist with the current single ledger writer. Then connect accepted work to publication and visible history, and deepen useful family collaboration leads. Remote hosting, independent-review operation, freshness, campaigns and open-contributor governance remain explicit follow-on work, not completed features.
+
+Local MCP intake and explicit kernel/review processing are now implemented in `atlas_mcp/`, with a real stdio client integration test. Remote deployment remains unimplemented. Low-cost Azure hosting recommendation: Functions Flex Consumption plus durable Storage, subject to authentication/state migration and a concrete cost check; see `docs/mcp_hosting.md`.
+
 ## 10. Campaign funding and governance
 
 - **A campaign** = a condition + goals (e.g. "map every model and outcome measure relevant to SNAP25") + a budget. Funding buys agent time and expert review, and the receipts are public.

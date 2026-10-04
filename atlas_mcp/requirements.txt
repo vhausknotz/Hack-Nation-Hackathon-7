@@ -1,0 +1,2 @@
+# Official SDK maintenance line; upgrade deliberately with protocol integration tests.
+mcp==1.30.0

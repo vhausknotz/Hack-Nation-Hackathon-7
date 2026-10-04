@@ -47,7 +47,8 @@ ledger/           claims ledger (reference imports and contributed claims are ro
 agents/           campaign.py (literature), communities.py (patient-group scout), trials_import.py (trial import + Sol review)
 pipeline/project_actions.py  read-only family projection of reviewed organizations and studies
 pipeline/plain_summaries.py  cached, AI-labeled everyday descriptions
-api/              (planned) live API + MCP server
+atlas_mcp/        local stdio MCP, task leases, signed intake queue and explicit ledger worker; README has setup
+api/              (planned) hosted API; remote MCP/storage/auth remain planned (docs/mcp_hosting.md)
 enrich/trials/    reviewed v2 screener and budget-capped, resumable bulk registry job (see its README)
 app/              web app (Vite + React + TypeScript + Tailwind, canvas globe and sigma.js flat map); reads app/public/data/
                     routes: /  map · /c/:id  condition on the map · /explore/:kind/:id  gene/symptom/group/mechanism
@@ -75,8 +76,9 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Visual check:** `MSYS_NO_PATHCONV=1 ./.venv/Scripts/python tools/screenshot.py <out_dir> http://localhost:4173 / "/c/MONDO:0014590" --width 390` (after `npx vite preview` in app/). Check both desktop and phone widths before deploying.
 
 **Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
-Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials`.
+Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests` (MCP dependencies: `atlas_mcp/requirements.txt`).
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
+New Ledger instances enforce an OS writer lease. Processes already running when the lease was introduced do not; let the current community scout exit before draining the MCP inbox. MCP intake itself never writes the evidence ledger or spends on models.
 
 ## Azure OpenAI (Foundry)
 

@@ -105,6 +105,8 @@ class Store:
 
     def close(self) -> None:
         self.db.close()
+        if callback := getattr(self, "on_close", None):
+            callback()
 
     # ---- events -------------------------------------------------------------------------------------
     def append_event(self, event: dict, leaf_hash: bytes) -> int:

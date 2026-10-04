@@ -34,9 +34,10 @@ def passed(checks: list[Check]) -> bool:
 
 
 class Kernel:
-    def __init__(self, registry, store):
+    def __init__(self, registry, store, archive_root=None):
         self.registry = registry
         self.store = store
+        self.archive_root = archive_root
 
     # ---- schema ---------------------------------------------------------------------------------------
     def check_schema(self, claim: dict) -> Check:
@@ -98,7 +99,10 @@ class Kernel:
                 source = self.store.source(item["source_id"])
                 if source is None:
                     return Check("evidence", False, f"evidence {i}: source {item['source_id']} is not archived")
-                text, raw = read_text(source), read_raw(source)
+                if self.archive_root is None:
+                    text, raw = read_text(source), read_raw(source)
+                else:
+                    text, raw = read_text(source, root=self.archive_root), read_raw(source, root=self.archive_root)
                 if text is None or raw is None:
                     return Check("evidence", False, f"evidence {i}: archived files for {item['source_id']} are missing")
                 if sha256(text.encode("utf-8")) != source["text_hash"] or sha256(raw) != source["raw_hash"]:

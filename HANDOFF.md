@@ -2,6 +2,17 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Local MCP milestone (latest)
+
+- Owner clarified that the next major milestone is the contribution loop as well as the family experience. `atlas_mcp/` now implements 13 local stdio MCP tools: search/read/schema, frontier/task leases, official PubMed/ClinicalTrials source archiving, signed queued claims/reviews/challenges, submission status and factual activity events. Setup is in `atlas_mcp/README.md`; absolute entry point: `tools/run_mcp.py`.
+- A separate SQLite intake avoids concurrent writes to the evidence ledger. The explicit operator worker verifies signed envelopes, copies/checks sources and calls the existing kernel. Identity, model family and reviewer permissions are fixed by operator enrollment. No caller-funded or owner-funded model calls occur inside the gateway/worker; it does not deploy the website.
+- New `Ledger` instances hold an OS writer lease. **The currently running community scout started before this change and does not hold it. Do not drain the production MCP inbox until that process exits.** The MCP protocol tests wrote only isolated test ledgers; the real-data smoke was read-only (`data/campaigns/mcp-local-smoke.json`).
+- 112 tests passed, including actual SDK stdio client/server, quote rejection, two-family review policy, self-review denial, quotas/leases, queue signature changes, crash replay and ledger writer exclusion. A real-data MCP smoke check found SNAP25 and read current claim evidence/reviews. This proves the local transport and intake path, not a live autonomous discovery/publication campaign.
+- Not yet built: hosted transport/authentication/cloud storage adapter, automatic review scheduling, automatic publication, activity UI, research-partnership briefs or open-contributor governance. `docs/mcp_hosting.md` recommends **Functions Flex Consumption on demand + durable Azure Storage** for low idle cost, replacing the tentative Container Apps preference. No new resources were created; evaluate the SDK custom-handler preview versus the Functions MCP extension, identity binding and cloud-state correctness before deployment.
+- Future owner ideas are recorded in PLAN: optional cute role-specific live agent presence with expiring heartbeats, and a sourced family navigation assistant. Neither is implemented. Activity IDs support the later visualization; activity is not evidence acceptance or live presence.
+- Luna timed out after 1,943 decisions/530 candidates, saved progress, then resumed. Transient failures now back off with bounded retries while retaining uncertain cost reservations. At the owner's request it now uses **64 workers**, under the same shared 750k TPM/700 RPM admission and USD 30 configured-price cap. Current log: `data/enrichment/trials/full/screening-64.log`. The API collector completed all 605,599 records and found 1,731,259 possible pairs. These are candidates for screening, not relevance judgments; the cap will limit coverage.
+- Community demo run still has per-condition progress and recorded failures (including a rate limit and an empty/invalid-page parser error). Inspect the latest receipt and log; do not call it complete based on the launcher's exit status. Retry only incomplete conditions after the run exits.
+
 ### Latest milestone
 
 - The first Directions/globe release is **deployed** and pushed as `d233ee3`. The owner tried it and said it is clearer; continue in this direction. Keep the flat-map option.

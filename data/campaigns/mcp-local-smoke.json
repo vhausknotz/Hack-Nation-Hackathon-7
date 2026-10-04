@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-04T00:15:15.891125+00:00",
+  "server": "Rare Disease Atlas",
+  "protocol": "2025-11-25",
+  "tools": [
+    "search_atlas",
+    "get_condition",
+    "get_claim",
+    "get_contribution_schema",
+    "list_frontier",
+    "claim_task",
+    "fetch_source",
+    "get_source",
+    "submit_claim",
+    "submit_review",
+    "submit_challenge",
+    "get_submission",
+    "get_activity"
+  ],
+  "real_condition_search": "passed",
+  "real_claim_evidence_and_reviews": "passed",
+  "read_only_mutation_denied": "passed",
+  "ledger_writes": 0,
+  "model_calls": 0,
+  "transport": "stdio",
+  "hosted": false
+}
