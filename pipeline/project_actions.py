@@ -80,10 +80,18 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     except ImportError:  # export_app.py is also run directly
         from family_disputes import dispute_index
     disputes = dispute_index(store)  # objections and reviewed counter-evidence, shown with the listing
+    try:
+        from .freshness import latest_rechecks, page_state
+    except ImportError:
+        from freshness import latest_rechecks, page_state
+    rechecks = latest_rechecks(store)  # signed source rechecks (pipeline/freshness.py)
+    retracted = {cid for cid, c in rechecks.items() if c.get("retraction", {}).get("result") == "retracted"}
     aliases = organization_aliases(store, disputes)
     rows = []
     asset_latest = {}
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1 AND predicate IN ('represented_by', 'has_asset')"):
+        if row["claim_id"] in retracted:
+            continue
         reviews = [dict(r) for r in store.reviews_for(row["claim_id"])]
         status = pol.claim_review_status(reviews)
         if row["predicate"] == "has_asset" and reviews:
@@ -178,6 +186,8 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         if cid not in histories:
             histories[cid] = listing_history(store, cid, bodies[cid])
         entry["history"] = histories[cid]
+        if fresh := page_state(rechecks.get(cid)):
+            entry["freshness"] = fresh
         from ledger.schema import assertion_id
         dispute = disputes.get(assertion_id(bodies[cid]))
         if dispute:

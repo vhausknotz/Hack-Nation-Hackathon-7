@@ -687,6 +687,19 @@ class Engine:
                     force = True
             except RuntimeError as error:
                 log(f"freshness check skipped: {error}")
+            try:  # retractions of cited papers, organization pages still saying what was quoted (signed ledger events)
+                import freshness
+                from ledger.api import Ledger
+                ledger = Ledger(LEDGER, keys_dir=LEDGER.parent / "keys", source_root=LEDGER.parent / "sources")
+                try:
+                    counts = freshness.recheck(ledger)
+                finally:
+                    ledger.store.close()
+                if counts:
+                    log(f"evidence rechecked: {counts}")
+                    force = True
+            except Exception as error:
+                log(f"evidence recheck skipped: {type(error).__name__}: {error}")
         receipt = pull_and_drain(self.intake, ROOT / "data/contributions/cloud-bridge", LEDGER, limit=50)
         processed = receipt.get("processed", [])
         if processed:

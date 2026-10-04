@@ -27,4 +27,7 @@ def listing_history(store, claim_id: str, claim: dict) -> dict:
         if source:
             sources.append({"id": source_id, "archived_at": source.get("retrieved"),
                             "url": source.get("url", "")})
-    return {"submitted_at": proposed, "kernel_checked_at": checked, "sources": sources, "reviews": reviews}
+    rechecks = [{"at": e["ts"], **{k: v for k, v in json.loads(e["payload"]).items() if k in ("check", "result", "checked", "detail")}}
+                for e in events if e["type"] == "evidence.rechecked" and e["payload"]]
+    return {"submitted_at": proposed, "kernel_checked_at": checked, "sources": sources, "reviews": reviews,
+            **({"rechecks": rechecks[-5:]} if rechecks else {})}

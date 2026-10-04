@@ -24,6 +24,9 @@ export function recordedReview(history?: ListingHistory): string[] {
   return r ? [`Latest recorded review: ${r.at} · ${reviewer(r)}. This is not a new check of current availability.`] : [];
 }
 
+const RECHECK: Record<string, string> = { reaffirmed: "Rechecked: still on the page", quote_missing: "Rechecked: quote no longer on the page",
+  unreachable: "Rechecked: page could not be reached", retracted: "Rechecked: the cited paper was retracted" };
+
 function Trail({ listing }: { listing: Listing }) {
   const h = listing.history;
   if (!h) return null;
@@ -41,6 +44,7 @@ function Trail({ listing }: { listing: Listing }) {
         {h.submitted_at && <li><b className="block text-ink">Claim submitted · {dateLabel(h.submitted_at)}</b><span>A proposed listing entered the evidence log.</span></li>}
         {h.kernel_checked_at && <li><b className="block text-ink">Source checks passed · {dateLabel(h.kernel_checked_at)}</b><span>Quoted text, source hashes, identifiers and signatures passed automated checks. These checks do not decide whether the claim is true.</span></li>}
         {h.reviews.map((r, i) => <li key={i}><b className="block text-ink">{verdicts[r.verdict] || r.verdict} · {dateLabel(r.at)}</b><span className="block">{reviewer(r)}</span><p className="mt-1">{r.reason}</p></li>)}
+        {(h.rechecks ?? []).map((r, i) => <li key={`r${i}`}><b className="block text-ink">{RECHECK[r.result] ?? r.result} · {dateLabel(r.checked)}</b><span>{r.check === "retraction" ? "The atlas checks cited papers against PubMed's retraction notices." : "The atlas rereads the organization's page about monthly."}{r.detail ? ` ${r.detail.charAt(0).toUpperCase()}${r.detail.slice(1)}.` : ""}</span></li>)}
       </ol>
       <a href={url} target="_blank" rel="noreferrer" className="mt-3 inline-block font-medium text-machinery underline">Read the listing's source ↗</a>
       {"page_read" in listing && listing.page_read === "archived_snapshot" && <p className="mt-2 text-caution">Historical page from {listing.page_date}; the archive date above does not confirm today's activity.</p>}

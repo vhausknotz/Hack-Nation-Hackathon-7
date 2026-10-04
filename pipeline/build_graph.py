@@ -72,8 +72,15 @@ def ledger_overlay(policy: str = "family") -> dict[str, list[tuple[dict, str, st
     from ledger.store import Store
 
     store = Store()
+    try:
+        from freshness import superseded
+    except ImportError:
+        from pipeline.freshness import superseded
+    gone = superseded(store)  # findings whose cited paper was retracted (pipeline/freshness.py)
     out: dict[str, list] = defaultdict(list)
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1"):
+        if row["claim_id"] in gone:
+            continue
         status = pol.claim_review_status([dict(r) for r in store.reviews_for(row["claim_id"])])
         if pol.visible(policy, "contributed", status, {}, row["predicate"]):
             out[row["predicate"]].append((json.loads(row["body"]), status, row["claim_id"]))

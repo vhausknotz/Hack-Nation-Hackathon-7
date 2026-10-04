@@ -128,7 +128,12 @@ export interface ListingHistory {
   kernel_checked_at: string | null;
   sources: { id: string; archived_at: string | null; url: string }[];
   reviews: { at: string; kind: string; model: string | null; family: string | null; verdict: string; reason: string }[];
+  /** signed source rechecks (pipeline/freshness.py) */
+  rechecks?: { at: string; check: "retraction" | "page"; result: string; checked: string; detail?: string }[];
 }
+
+/** Latest page recheck of a listing: is the quoted text still on the organization's page? */
+export interface Freshness { result: "reaffirmed" | "quote_missing" | "unreachable"; checked: string }
 
 export interface Dispute {
   status: "pending_review" | "contested";
@@ -137,6 +142,7 @@ export interface Dispute {
 }
 
 export interface Community {
+  freshness?: Freshness;
   dispute?: Dispute;
   history?: ListingHistory;
   kind_source?: { quote: string; url: string; page_date: string } | null;
