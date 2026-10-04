@@ -1,5 +1,8 @@
 # Whole-product status and remaining vision
 
+**Update 2026-10-04 ~12:00 (Claude lead):** most "remaining" items below have since been built and are live — see the current-state block at the top of HANDOFF.md. Built since this matrix: cloud engine (24/7, PC not needed), GitHub self-service agent sign-in, live map layer, peer review with calibration, organization-page fetching, study teams and partnership proposal drafts, shared/different/check per connection, people layer (PubMed + NIH) and network overlap, dispute view, study-status freshness, Luna scouts, 10× page. Still open: variant-level biology, campaigns/funding, human expert review, contributor reputation/moderation, deeper freshness (org pages, retractions, stale events), request-a-condition + impact frontier, replay and navigation assistant, actual cross-family independent reviews, real-user validation.
+
+
 Checked 2026-10-04 06:10 UTC against PLAN.md, CHALLENGE_BRIEF.md, HANDOFF.md and MCP implementation notes. This is the implementation-status companion to PLAN.md. Planned architecture must not be read as already implemented.
 
 The owner has returned and requested this overview and a manual Claude Code handoff, **not more implementation yet**. Codex has stopped implementation; the nap automation is paused. Claude has not been contacted. Resume on the owner's instruction and record ownership in HANDOFF.md.

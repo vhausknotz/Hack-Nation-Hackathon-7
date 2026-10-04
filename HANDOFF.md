@@ -1,4 +1,28 @@
-# Lead handoff — 2026-10-04, 06:10 UTC
+# Lead handoff (current state, 2026-10-04 ~12:00 local) — READ THIS BLOCK FIRST
+
+**Owner:** valentin (vhausknotz). **Lead:** Claude Code. Older sections further down are historical.
+
+## What runs, where (PC can be off)
+- **Website** (Azure Static Web Apps, free, 250 MB cap, now 160 MB): https://salmon-island-04aa8f603.1.azurestaticapps.net
+- **MCP service** (Azure Functions Flex, `rare-atlas-mcp-1180fc`): `/mcp` (17 tools), GitHub OAuth sign-in for any agent (ChatGPT, Claude, Gemini CLI, Codex), public `/live/feed` (activity, presence, engine heartbeat, overlay pointer) and `/live/data/...` overlay shards. Deploy: `python tools/azure_mcp_operator.py deploy`. GitHub creds: `.env` → `set-github`.
+- **Engine VM** `atlas-engine` (B2als_v2, Sweden Central, no inbound): systemd `atlas-engine` (drain → kernel → peer window 3 min → Sol referee → rebuild → live overlay → MCP snapshot; 6-hourly study-status freshness; base sync after any website deploy), `atlas-scouts` (3 Luna scouts), `atlas-backup.timer` (nightly ledger backup, 14 days). One-off transient unit `atlas-people` (PubMed/NIH people collection, ~5k genes, started 09:47 local, takes a few hours; engine republishes when people.json grows).
+- Operate: `python tools/azure_engine_vm.py status|stop|start|logs|update|scouts|site`. `update` = ship committed code (git archive HEAD) + restart engine & scouts. `site` = full website release from the VM's current export (VM exports, PC downloads, `npm run build`, deploy). **Use `site` for releases, not a local export** — the PC's data/ledger/build are a stale snapshot from the 10:45 migration (see data/engine/MOVED_TO_CLOUD.txt; never run tools/atlas_engine.py locally).
+- Bash heredocs on this Windows box mangle backslashes (`\n`, `\b`): write patch scripts to files or use the Edit tool.
+
+## Money (owner ceiling: $60/month whole project)
+Hosting ~$37 (VM 28.4 + IP 3.65 + disk 2.4 + MCP/storage); Sol referee hard caps $1/day, $12/month (`data/engine/config.json` on the VM); Luna scouts $0.30/day, $5/month, 50 claims/day (`data/scouts/config.json` on the VM). Azure budget alert `mcp-monthly-allowance` $39 + forecast alert (emails, not a hard stop). Check: `powershell -File tools/azure_status.ps1`. Pause engine: `azure_engine_vm.py stop`.
+
+## Product state (all live)
+Map: globe/flat, idle drift + twinkle + echoes of real recent connections, live agent avatars, ripples per workflow step, connections drawing themselves, toasts, Live panel with engine status. Home: three journeys + "growing right now" strip. Directions per condition: plain summary (auto-refreshed), broader-diagnosis signs for empty conditions, patient groups (diagnosis-specific vs "broader support"), connections with Shared/Different/Check (+ researchers publishing on both genes), studies with "who runs it" (official CT.gov officials/sponsor/contacts) and registry status rechecks, people working on the gene (PubMed + NIH RePORTER), questions, partnership proposal draft in the printable brief (`?brief=1`), dispute view (pending vs contested, both sides). Mechanism view ranks conditions with groups/studies first and shows people across the machinery. Pages: /agents (connect + prompt + become a reviewer), /impact (10× case, honest), /about.
+Contribution: agents sign in with GitHub, claim tasks, fetch PubMed/CT.gov/organization pages, submit quoted claims; kernel checks quotes; peers qualify via 5 calibration cases (4 right) and review across people; Sol referees after 3 min or on peer rejection; contested/objection handling; everything published to the live overlay within minutes.
+Tests: 195 backend (run with ATLAS_TEST_AZURITE=1, Azurite on :10000-10002) + tools/check_directions.py, check_family_brief.py, check_reduced_motion.py against `npx vite preview` on :4173.
+
+## Still missing (owner-agreed priorities)
+1. Variant-level biology (ClinVar, variant-specific effects). 2. Campaigns & funding. 3. Human expert review path (needed for therapeutic claims / "established"). 4. Contributor track-record page, reputation, moderation tools. 5. Organization-page rechecks, retraction checks, stale/superseded ledger events. 6. "Request this condition" tool + impact-based frontier. 7. Live replay/time-lapse, family navigation assistant. 8. Real independent review actually happening (needs non-OpenAI agents to qualify). 9. App-directory listings (owner decision). 10. Validation with real patient leaders. Submission video etc. deferred by owner.
+
+---
+
+# Historical handoff — 2026-10-04, 06:10 UTC
 
 **OWNERSHIP (2026-10-04 ~06:45 UTC): Claude Code (Opus) accepted lead from the owner's manual handoff.** Verified at takeover: clean tree at 023c8db, ledger/keys/intake/cycle state present, no Python jobs (no ledger writer, Luna stopped), preview :4173 and Azurite running. Owner-agreed direction (supersedes the "next work" lists below):
 1. Always-running engine: immediate kernel checks, incremental publication of affected conditions, public activity feed.
