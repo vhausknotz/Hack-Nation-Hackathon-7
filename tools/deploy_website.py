@@ -16,6 +16,9 @@ from tools.azure_mcp_operator import Operator
 def deploy():
     if not (ROOT / "app/dist/index.html").is_file():
         raise ValueError("Build the app before deploying")
+    size = sum(p.stat().st_size for p in (ROOT / "app/dist").rglob("*") if p.is_file())
+    if size > 245_000_000:  # the free Static Web Apps plan rejects deployments above 250 MB
+        raise ValueError(f"Build is {size / 1e6:.0f} MB; the free hosting plan allows 250 MB. Trim the export first.")
     operator = Operator()
     site = (f'/subscriptions/{operator.config["subscriptionId"]}/resourceGroups/rare-disease-atlas'
             '/providers/Microsoft.Web/staticSites/rare-disease-atlas')
