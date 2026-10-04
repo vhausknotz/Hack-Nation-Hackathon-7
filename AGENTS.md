@@ -13,6 +13,7 @@ One developer working with AI agents. The aim is a genuinely ambitious, meaningf
 ## Read first
 
 0. [HANDOFF.md](HANDOFF.md): the current state, work in progress and the next steps. Start here.
+   Then [docs/vision_status.md](docs/vision_status.md): the full built/missing matrix, product completion criteria and manual Claude handoff. The owner returned; Codex implementation is stopped and the nap automation is paused. Historical automatic Cursor transfer instructions no longer apply.
 1. [PLAN.md](PLAN.md): architecture, principles and build order. This is the source of truth for decisions.
 2. [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md): the challenge brief, transcribed. Use it instead of the PDF.
 3. [docs/buffalo_initiative.md](docs/buffalo_initiative.md): who the sponsor is and what they care about.
@@ -125,7 +126,7 @@ New Ledger instances enforce an OS writer lease. The community scout is complete
 
 ## Working preferences
 
-**Current coordination:** Codex is lead. Both external-agent packages (family UI 2b2f5b3 and community coverage f382cf4) are integrated and reviewed; their assignments are complete. No external agent owns active files. See HANDOFF.md and docs/agent_tasks/nap_continuation.md for current work, budgets and ownership. Do not start a second ledger writer.
+**Current coordination:** Codex implementation is stopped pending the owner's manual Claude Code handoff. Both external-agent packages (family UI 2b2f5b3 and community coverage f382cf4) are integrated and reviewed; their assignments are complete. No external agent owns active files. See HANDOFF.md and docs/vision_status.md for current work, budgets and ownership. Do not start a second ledger writer.
 
 - Don't put time estimates on tasks or plans. Describe steps by what they produce.
 - Clarity beats feature count. Every screen should make sense at a glance; depth goes behind a click.

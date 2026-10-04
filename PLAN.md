@@ -2,6 +2,8 @@
 
 Living document and the source of truth for decisions. Brief: [CHALLENGE_BRIEF.md](CHALLENGE_BRIEF.md). Sponsor: [docs/buffalo_initiative.md](docs/buffalo_initiative.md). Data check: [docs/recon_stxbp1_neighborhood.md](docs/recon_stxbp1_neighborhood.md).
 
+**Implementation status, 2026-10-04:** [docs/vision_status.md](docs/vision_status.md) distinguishes built features from every remaining product area and defines the manual handoff priorities. This document describes the target architecture as well as current decisions: future-tense/design sections are not proof of implementation. Current hosted transport uses Entra authentication and private Azure storage; the ledger worker remains local SQLite. PostgreSQL, continuous discovery, full reputation/campaigns/freshness and independent reviewer operation are not deployed. The installed non-OpenAI candidate is **Phi-4-mini-instruct**, not full Phi-4; it has not been evaluated.
+
 ## TL;DR
 
 - **What families see:** type a rare diagnosis and get three answers:
@@ -442,7 +444,7 @@ Phases are defined by what they produce.
 
 - **Running cost:** agents and a live database cost money continuously. Budgets are a setting, and paid Azure resources need the owner's approval first.
 - **Human reviewers:** who are the expert and patient-group reviewers, and how are they recruited?
-- **Model independence:** GPT-6 Luna and Sol share a family. Choose a second, non-OpenAI model family for independent review: Microsoft Phi-4 is already deployed, or another family can be deployed in Foundry. Until then, independence comes only from humans.
+- **Model independence:** GPT-6 Luna and Sol share a family. The deployed non-OpenAI candidate is Microsoft Phi-4-mini-instruct, not full Phi-4. It needs a bounded quality evaluation before reviewer enrollment; see docs/independent_review_readiness.md. Another deployment requires owner approval. Until a qualified second family is operational, independence comes only from humans.
 - **Quote licensing:** keep quotes short, and respect PMC licenses (CC BY vs. non-commercial).
 - **Adoption:** outside contributors aren't guaranteed. Without them, the system is still self-improving with our own agents.
 - **Patient-facing safety:** contested or preclinical claims must never read as advice.

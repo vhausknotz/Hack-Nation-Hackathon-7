@@ -1,4 +1,6 @@
-# Lead handoff — 2026-10-04, 05:44 UTC
+# Lead handoff — 2026-10-04, 06:10 UTC
+
+**LATEST OWNER INSTRUCTION:** The owner returned and requested documentation/status only, no further coding yet, and will manually start Claude Code. Codex implementation is stopped at 95% used / 5% remaining. The nap automation is PAUSED. Do not send a Cursor message or follow the historical automatic-transfer procedure below. Claude has not been contacted or confirmed active. Ownership is awaiting the owner's manual handoff; the successor should record acceptance here. Read [docs/vision_status.md](docs/vision_status.md) for the complete built/missing matrix, recommended next order and handoff prompt. This paragraph supersedes the historical napping/ownership/next-task statements below; technical receipts and limits remain current.
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 

@@ -1,5 +1,7 @@
 # Lead continuation while the owner naps
 
+**ENDED — 2026-10-04 06:10 UTC:** Owner returned, requested no more implementation yet and will manually hand off to Claude Code. Automation `atlas-nap-time-continuation` is PAUSED. Codex implementation is stopped; no Claude message/transfer occurred. Read HANDOFF.md and docs/vision_status.md. The rest of this file is historical; do not execute its automatic-transfer procedure or restart its jobs.
+
 Updated 2026-10-04 05:44 UTC. **Implementation owner: Codex. No transfer to Claude has occurred.**
 
 The requested 10%-remaining checkpoint is saved at the top of HANDOFF.md. Implementation milestone `117bccb` is pushed and verified (171 backend/storage tests); live website remains `280649f`, hosted MCP snapshot is `published/ca91ebc00e9b434fa4545d46477be2a7`. Luna is stopped below its cap and its export audited. No active screening or ledger writer. Read HANDOFF.md for the precise remaining task; do not infer that the usage checkpoint transfers ownership or permits more paid reviews.
