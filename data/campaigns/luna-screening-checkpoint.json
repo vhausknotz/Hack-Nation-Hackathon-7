@@ -1,0 +1,38 @@
+{
+  "checked_at_utc": "2026-10-04T04:41:25+00:00",
+  "status": "stopped_on_non_transient_request_error",
+  "error_type": "BadRequestError",
+  "failed_pair": {
+    "condition": "MONDO:0023693",
+    "study": "NCT03853382"
+  },
+  "error_detail": "The old runner recorded the exception class only; exact server reason is unavailable. No blind retry performed.",
+  "screened_pairs": 93203,
+  "indexed_pairs": 1731259,
+  "conditions_with_screening_decisions": 3871,
+  "candidates": 11926,
+  "unique_candidate_conditions": 1800,
+  "unique_candidate_studies": 8525,
+  "archived_sources_checked": 8525,
+  "quote_spans_checked": 23624,
+  "all_restrictions_flag_incomplete_eligibility": true,
+  "asset_types": {
+    "trial": 7741,
+    "registry": 821,
+    "natural_history_study": 1543,
+    "biomarker": 1475,
+    "outcome_measure": 294,
+    "biorepository": 52
+  },
+  "measured_usage": {
+    "calls": 97810,
+    "usd": 26.77608700000016,
+    "input_tokens": 107461247,
+    "output_tokens": 32057742
+  },
+  "retained_uncertain_usd": 0.710696600000011,
+  "budget_usd": 30,
+  "candidates_sha256": "sha256:e72ced8b855b3684f669cc189fd8b9fc81fa03055b1409f44558ea2d5fbc20c4",
+  "sources_sha256": "sha256:444a4aee0fc400dd604aeef93efff25ba63ca883a6a208d68e01eca4a6a99220",
+  "review_status": "Unreviewed. Not imported or published. Mechanical integrity does not establish relevance."
+}

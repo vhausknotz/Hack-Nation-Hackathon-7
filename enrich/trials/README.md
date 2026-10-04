@@ -2,7 +2,13 @@
 
 The owner authorized a background Luna run on 2026-10-04 with a **USD 30 screening cap**. Family-journey quality takes priority for the October 4, 15:00 Europe/Berlin submission. The old pilot remains intact in `../atlas-trials`; `run.py` and its tests here are a copy of the reviewed v2 implementation.
 
-## Running jobs
+## Current checkpoint — 2026-10-04 04:34 UTC
+
+Screening stopped after one non-transient `BadRequestError` for MONDO:0023693 / NCT03853382 and drained all requests. It saved **93,203 decisions / 11,926 unreviewed candidates**, with **$26.776087 measured usage + $0.7106966 retained uncertain reservation**, under the $30 configured-price cap. The exact server error detail was not recorded; do not repeatedly restart the same failing pair or clear its reservation. No screening process remains active.
+
+The updated offline export completed after stopping, preserving original source hashes/offsets and adding incomplete-eligibility warnings. The audit receipt is `data/campaigns/luna-screening-checkpoint.json`. Nothing from this full run was imported into the claims ledger or published. The old `throughput.json` retains a pre-stop sample; the final manifest and receipt are authoritative. The updated runner writes a terminal snapshot on subsequent stops, including errors.
+
+## Commands (resume only after diagnosing the stop)
 
 ```powershell
 ./.venv/Scripts/python -u -B -m enrich.trials.full_run collect
@@ -13,7 +19,7 @@ These can run together. They use their own SQLite job database, **never the clai
 
 The current continuous scheduler replaces wave barriers. It refills as requests finish, adapts workers to measured latency/errors, and targets 950,000 estimated tokens / 950 requests per rolling minute against the ARM-verified 1M TPM / 1,000 RPM deployment quota. Prompt estimates learn from actual usage; output allowances remain part of rate admission. `throughput.json` reports both actual and admission rates. Budget reservation still uses the conservative worst-case bound, independently of throughput tuning. Each completed job releases its own reservation atomically with its checkpoint; uncertain calls retain theirs. Export runs every 1,000 new decisions and at clean stop. Create `stop-screening` in the output directory to stop dispatch and drain in-flight work, then remove that marker before resuming. Current log: `screening-continuous.log`. The older wave-mode notes below are historical.
 
-Artifacts and logs live in `data/enrichment/trials/full/` (gitignored): `jobs.db`, `collection.log`, `screening.log`, `manifest.json`, `candidates.jsonl`, source archives and decisions. Screening exports every 240 newly completed pairs and on a clean stop. For an explicit export when screening is stopped:
+Artifacts and logs live in `data/enrichment/trials/full/` (gitignored): `jobs.db`, `collection.log`, `screening.log`, `manifest.json`, `candidates.jsonl`, source archives and decisions. Continuous screening exports every 1,000 newly completed pairs and after draining. For an explicit export when screening is stopped:
 
 ```powershell
 ./.venv/Scripts/python -m enrich.trials.full_run export

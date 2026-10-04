@@ -234,7 +234,18 @@ def run(budget=30, initial=96, maximum=384, max_pairs=0):
         base.set_meta(db, "stop_reason", reason)
         base.set_meta(db, "screening_complete", reason == "complete")
         base.set_meta(db, "screening_usage", measured)
+        # The periodic snapshot may still show active requests after draining.
+        # Persist a terminal snapshot before export, including on a request stop.
+        report = {"phase": "screening_stopped", "stop_reason": reason,
+                  "processed_this_run": completed, "in_flight": 0,
+                  "retained_uncertain_usd": retained,
+                  "reserved_including_in_flight_usd": reserved,
+                  **measured, **gate.snapshot(False)}
+        base.set_meta(db, "throughput", report)
+        base.set_meta(db, "screening_updated", base.pilot.now())
         db.commit()
+        (base.OUT / "throughput.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+        print(json.dumps(report), flush=True)
     finally:
         # Worker threads have ended before restoring the shared observer.
         base.llm.log_usage = original_log

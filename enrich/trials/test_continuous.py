@@ -25,7 +25,8 @@ def test_adaptive_gate_learns_actual_prompt_size_and_backs_off_on_429():
     assert gate.snapshot(False)["rolling_actual_tpm"] == 0
 
 
-def test_continuous_refills_before_slowest_request_and_keeps_budget(monkeypatch, tmp_path):
+@pytest.mark.parametrize("request_fails", [False, True])
+def test_continuous_refills_before_slowest_request_and_keeps_budget(monkeypatch, tmp_path, request_fails):
     import azure.identity
     from enrich.trials import full_run as f, continuous
     monkeypatch.setattr(f, "OUT", tmp_path)
@@ -56,6 +57,8 @@ def test_continuous_refills_before_slowest_request_and_keeps_budget(monkeypatch,
             assert released.wait(5), "Slow request blocked all subsequent work"
         elif cid == "C2":
             released.set()
+        if cid == "C3" and request_fails:
+            raise ValueError("Non-transient request failure")
         f.llm.log_usage({"usd": .0001, "input_tokens": 100, "output_tokens": 100, "seconds": .01})
         return {"condition_id": cid, "nct_id": nct}
     monkeypatch.setattr(f, "screen_one", work)
@@ -66,10 +69,23 @@ def test_continuous_refills_before_slowest_request_and_keeps_budget(monkeypatch,
         db.execute("INSERT INTO pairs(cid,nct,priority) VALUES (?,?,0)", (cid, nct))
     f.set_meta(db, "collection_complete", True)
     db.commit(); db.close()
-    continuous.run(.1, initial=2, maximum=2)
+    if request_fails:
+        with pytest.raises(RuntimeError, match="Screening stopped"):
+            continuous.run(.1, initial=2, maximum=2)
+    else:
+        continuous.run(.1, initial=2, maximum=2)
     assert len(started) == 4
     db = f.connect()
-    assert f.meta(db, "uncertain_reserved_usd") == pytest.approx(0)
-    assert f.meta(db, "screening_usage")["usd"] == pytest.approx(.0004)
-    assert f.meta(db, "screening_complete") is True
+    if request_fails:
+        assert f.meta(db, "uncertain_reserved_usd") > 0
+    else:
+        assert f.meta(db, "uncertain_reserved_usd") == pytest.approx(0)
+    assert f.meta(db, "screening_usage")["usd"] == pytest.approx(.0003 if request_fails else .0004)
+    assert f.meta(db, "screening_complete") is (not request_fails)
+    report = json.loads((tmp_path / "throughput.json").read_text())
+    assert report == f.meta(db, "throughput")
+    assert report["phase"] == "screening_stopped" and report["in_flight"] == 0
+    assert report["stop_reason"] == ("request_error_reserved_for_review" if request_fails else "complete")
+    assert report["usd"] == f.meta(db, "screening_usage")["usd"]
+    assert report["reserved_including_in_flight_usd"] == pytest.approx(f.meta(db, "uncertain_reserved_usd"))
     db.close()

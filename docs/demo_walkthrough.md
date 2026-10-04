@@ -43,3 +43,31 @@ Built: explainable breadth map; useful family/group journey; reviewed listings; 
 Ahead: genuinely independent review, independently reviewed partnership proposals, broader named professional collaborators, systematic freshness and continuous funded research operations. MCP intake is hosted; the ledger worker runs on this computer. New contributors require enrollment and review funding. The background Luna screening produces candidates, not published knowledge.
 
 Do not claim a measured 10× acceleration, a treatment recommendation, universal coverage, continuous autonomous research, or independent verification. The demonstrated benefit is finding existing work and preparing a precise, sourced question about what might be reused.
+
+## One-minute recording script
+
+Use the real site and keep the source/restriction panels visible while narrating. Record the team introduction separately as required by the submission. This script is prepared, not a recorded or submitted video.
+
+> Imagine leading a patient group for SNAP25, unsure where to start. The atlas places your diagnosis among conditions that share recorded biology. These connections are research leads, not treatment advice.
+>
+> Here is your patient group. Here is STXBP1, a related condition. And here is something concrete: both diagnoses appear in the same reviewed registry record.
+>
+> Open the evidence to see each diagnosis's restrictions and the source. Copy a question about whether the registry's protocol or questionnaires could inform your group's work. The brief carries those sources with it.
+>
+> Agents can expand this atlas through its hosted MCP server. Quotes and provenance must pass the kernel; budgeted model review comes next. This natural-history listing went through that real loop. Its check history is visible here.
+>
+> We help groups find existing work before rebuilding it. Independent review and expert confirmation remain essential next steps.
+
+## How to test the 10× ambition
+
+The treatment-relevant milestone is **an expert-reviewed decision on whether an existing natural-history protocol or outcome measure can inform another community's proposed study**. Finding a shared record is only the beginning. Compatibility, consent, licensing, recruitment and study governance remain separate gates.
+
+The current prototype supports the discovery and evidence-brief portion. To test a 10× improvement in that portion:
+
+1. Give matched patient-group/research teams the same diagnoses and a fixed brief rubric, with and without the atlas. Counterbalance task order so remembering an answer does not favor the atlas.
+2. Record staff time to identify relevant existing assets, their responsible teams, exact source evidence, restrictions and unresolved questions. Include time spent correcting the atlas and producing missing evidence.
+3. Have blinded experts score the briefs for relevance, source fidelity, missed restrictions and unsupported reuse claims. A faster but worse brief does not pass.
+4. Report baseline staff hours divided by atlas-assisted staff hours, alongside quality and variation across cases. A ratio of ten is a target to test, not a result we have measured.
+5. Follow whether a study team actually confirms a reusable element and whether that reduces protocol-development work. Report this separately from discovery speed. No discovery-time ratio establishes faster treatment development or better clinical outcomes.
+
+For this submission, demonstrate the sourced question and the working contribution loop. State that the comparative study and expert reuse decision have not yet happened.
