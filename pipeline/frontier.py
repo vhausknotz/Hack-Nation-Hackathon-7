@@ -12,9 +12,9 @@ the website's "what needs work" list both read it. The score is a transparent su
 import math
 
 PREVALENCE = {"<1 / 1 000 000": 0.5, "1-9 / 1 000 000": 1.0, "1-9 / 100 000": 2.0, "1-5 / 10 000": 3.0, "6-9 / 10 000": 3.5, ">1 / 1000": 4.0}
-PREVALENCE_WORDS = {"<1 / 1 000 000": "fewer than 1 in a million people", "1-9 / 1 000 000": "1–9 in a million people",
-                    "1-9 / 100 000": "1–9 in 100,000 people", "1-5 / 10 000": "1–5 in 10,000 people",
-                    "6-9 / 10 000": "6–9 in 10,000 people", ">1 / 1000": "more than 1 in 1,000 people"}
+PREVALENCE_WORDS = {"<1 / 1 000 000": "fewer than 1 in a million people", "1-9 / 1 000 000": "about 1–9 in a million people",
+                    "1-9 / 100 000": "about 1–9 in 100,000 people", "1-5 / 10 000": "about 1–5 in 10,000 people",
+                    "6-9 / 10 000": "about 6–9 in 10,000 people", ">1 / 1000": "more than 1 in 1,000 people"}
 GOALS = {
     "symptoms": "Find published patient reports (PubMed) that describe this condition's clinical features. Submit has_symptom "
                 "claims with exact quotes; use search_terms for the HPO term. Prefer case series over single reports.",
@@ -48,10 +48,14 @@ def score(c, actions=None, variants=None, requests=0, recent=False):
     if not studies:
         total += 1
         why.append("no studies listed yet")
-    klass = (c.get("prevalence") or {}).get("class")
+    # Orphanet's figure is for the whole disease; a gene-specific form of a disease with many genes is far rarer.
+    gene = (c.get("gene") or {}).get("symbol", "")
+    form_of_broader = c["name"].startswith(f"{gene}-related") and gene.lower() not in (c.get("disease_name") or "").lower()
+    whole_disease = not c.get("other_genes_for_this_disease") and not c.get("synthetic") and not form_of_broader
+    klass = (c.get("prevalence") or {}).get("class") if whole_disease else None
     if klass in PREVALENCE:
         total += PREVALENCE[klass]
-        why.append(f"affects about {PREVALENCE_WORDS[klass]}")
+        why.append(f"affects {PREVALENCE_WORDS[klass]}")
     strength = (c.get("gene") or {}).get("strength")
     total += {"definitive": 1.0, "strong": 1.0, "moderate": 0.5, "limited": -1.0}.get(strength, 0)
     plp = (variants or {}).get("plp", 0)

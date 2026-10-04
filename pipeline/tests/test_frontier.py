@@ -25,6 +25,9 @@ def test_focus_follows_the_biggest_gap():
 def test_prevalence_genetic_certainty_and_recent_work():
     common, rare = score(condition("a", prevalence="1-5 / 10 000")), score(condition("a", prevalence="<1 / 1 000 000"))
     assert common[0] > rare[0] and "affects about 1–5 in 10,000 people" in common[1]
+    shared = condition("a", prevalence="1-5 / 10 000")
+    shared["other_genes_for_this_disease"] = ["HGNC:1"]
+    assert score(shared)[0] == score(condition("a"))[0]
     assert score(condition("a", strength="limited"))[0] < score(condition("a"))[0]
     assert score(condition("a"), recent=True)[0] == score(condition("a"))[0] - 3
 
