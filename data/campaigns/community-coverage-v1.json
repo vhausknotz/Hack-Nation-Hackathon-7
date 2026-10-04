@@ -1,0 +1,303 @@
+{
+ "campaign": "community-coverage-v1",
+ "started": "2026-10-04T01:45:05+00:00",
+ "candidates": {
+  "MONDO:0010726|org:rettsyndrome-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:9ca0ad0f768bdde71f38170258705735efe345af27a85ccfa616308bfecbdcb6",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote identifies IRSF as a family-support and advocacy organization for Rett syndrome and states that Rett is caused by a pathogenic MECP2 variant.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page describes Rett syndrome as a MECP2 disorder; it does not discuss the MECP2-related variants of Rett separately."
+   ]
+  },
+  "MONDO:0018461|org:angelman-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:67fd344104de9eedb76499b583e41cc8778d50b013eeff6871988497186aed96",
+     "judgment": {
+      "verdict": "does_not_support",
+      "reason": "The quote shows ASF supports families affected by Angelman syndrome generally, but it does not establish a focus on the point-mutation subtype claimed.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "rejected"
+    },
+    {
+     "claim_id": "claim:sha256:a4b4dd2646c69f0e06c90f439459325829f5d4b687e690844dbdf5d2641e504c",
+     "judgment": {
+      "verdict": "does_not_support",
+      "reason": "The quote shows ASF supports Angelman syndrome families, but it does not show that ASF serves a broader group of conditions.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "rejected"
+    }
+   ],
+   "caveats": [
+    "This atlas condition is the UBE3A point-mutation form. The page speaks of Angelman syndrome as a whole and never names UBE3A or the molecular subtype, so a reviewer should decide whether the scope fits or should be broader_group."
+   ]
+  },
+  "MONDO:0010679|org:parentprojectmd-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:4846840e79017e9dbd855187e8fac9f68cf4de98aa0da8734884f77a29ee0169",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote says PPMD fights to end Duchenne and advocates for care and therapy access for affected families.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The Duchenne Registry is a separate research program that families can join; it should be a distinct listing, not folded into this one."
+   ]
+  },
+  "MONDO:0010383|org:fragilex-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:e41728bc8ac4c05ce8812d942dbc083523702ecab52a237d67b6c377d0b48586",
+     "judgment": {
+      "verdict": "does_not_support",
+      "reason": "The foundation supports families living with Fragile X, which the page describes as a group of conditions that includes fragile X syndrome, rather than serving only this condition.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "rejected"
+    },
+    {
+     "claim_id": "claim:sha256:665b5f57d60375af4681c05b59b3893e06faceff40f707283355849587fe14e0",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The foundation says it empowers families living with Fragile X, which the page defines as a group of conditions that includes fragile X syndrome.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page title also covers the premutation conditions FXTAS and FXPOI; the quote is about Fragile X families generally."
+   ]
+  },
+  "MONDO:0008612|org:tscalliance-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:42a3c1d8810a9816b5553b68d4a82d69f2c17ad1e6a362bc795580b1a389ae1b",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The TSC Alliance says it supports everyone affected by tuberous sclerosis complex, which includes people with TSC1-related tuberous sclerosis.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page names tuberous sclerosis complex, not TSC1 specifically; TSC2-related disease is the same organization's remit (not staged separately here)."
+   ]
+  },
+  "MONDO:0018208|org:ctf-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:25dc4596cabe04db1ec30bb56531bd56e99142c1419461c0ff0e5f4a8379017e",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote identifies NF1 as part of the NF group and says the foundation connects patients with education and information.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "Its remit is all forms of NF (NF1, NF2-related schwannomatosis, schwannomatosis), hence broader_group. It describes itself as a drug-discovery engine as well as a patient group; a reviewer may prefer a mixed classification.",
+    "The NF Registry it runs is a separate research listing."
+   ]
+  },
+  "MONDO:0971069|org:pmsf-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:8c95eea3de04a3c58c1398133834454eef69bf3715d0b06fc01521891ab83066",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quoted mission says the foundation serves everyone living with Phelan-McDermid syndrome, and the quoted family-support statement establishes it as a patient organization.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page names Phelan-McDermid syndrome, not the SHANK3-mutation subtype specifically."
+   ]
+  },
+  "MONDO:0100340|org:curefa-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:1751df637bfeaa57182b0ef9b1f832ac73254406017533a4649826ebf9dd648b",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "Addressing FA families, FARA describes a supportive Friedreich’s ataxia community that works together to fund and facilitate research into the condition.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The organization frames itself as a research funder; it also runs community events. A reviewer may classify it as a research alliance rather than a patient group."
+   ]
+  },
+  "MONDO:0010651|org:themenkesfoundation-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:5a3a43ef6ee5c41913ce5c8f251f855b4f31b8e86c3d7d41f9b5fa5158f94d0c",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The foundation says it supports families with a child who has Menkes disease.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The mission page is undated and lists a postal address only; current activity is unconfirmed. Treat as a small family foundation."
+   ]
+  },
+  "MONDO:0014512|org:purasyndrome-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:85ccbe28bf960d8e14a846d6559d3fad2a6aa7cd12b7e73f378f5dea67a3b23a",
+     "judgment": {
+      "verdict": "does_not_support",
+      "reason": "The quote shows that the foundation supports families impacted by PURA Syndrome, but it does not establish support for everyone with a condition caused by PURA variants.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "rejected"
+    },
+    {
+     "claim_id": "claim:sha256:19a00a7cfe151e5a5d675ad7704ecab28cf089d7d41acca3298a345a71a7addd",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The foundation says its mission is to connect, serve, and empower families impacted by PURA Syndrome.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "this_condition"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "PURA syndrome in the page covers all PURA-gene variants; the atlas also lists a separate PURA-related neonatal hypotonia condition (MONDO:0017811)."
+   ]
+  },
+  "MONDO:0017892|org:amcsupport-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:78b795ebf015c25f3fbf96d49fd7495d849e1319e54e1db6f026452693a5d20e",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote says AMC Strong supports families affected by AMC, which it defines as a group of conditions that includes SYNE1-related AMC.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page never names SYNE1; its remit is AMC as a whole (over 500 variations). Scope is broader_group, and the connection to this genetic form rests on the condition being AMC."
+   ]
+  },
+  "MONDO:0033371|org:dee-p-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:f405e267df598559d6276633b43d3b3552821176641b25a82aa58bf8ab6a8b23",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote identifies DEEP as a developmental epileptic encephalopathies patient advocacy group serving families, a broader group that includes this condition.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page never names SCN3A. The remit is DEEs as a class; it is a legitimate broader community, not a group for SCN3A families specifically.",
+    "The page also mentions 'SNIs' (severe neurological impairments), which are outside this condition."
+   ]
+  },
+  "MONDO:0030957|org:dee-p-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:b67c578afff4de50189e36b53358b0cb3d2622025ad95e6919a53b614cd9f86d",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quote identifies DEEP as a developmental epileptic encephalopathies patient advocacy organization serving families, a broader group that includes the named condition.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page never names KCNC2. The remit is DEEs as a class."
+   ]
+  },
+  "MONDO:0033372|org:dee-p-org": {
+   "attempts": [
+    {
+     "claim_id": "claim:sha256:ce93aca2d72595a83e0362103c333960a9a40725fc772c320bbef35c61661754",
+     "judgment": {
+      "verdict": "supports",
+      "reason": "The quoted title identifies DEEP as a developmental epileptic encephalopathies patient advocacy group, and the quote says it serves families, supporting the claim for the broader group that includes DEE63.",
+      "serves": true,
+      "org_type": "patient_organization",
+      "scope": "broader_group"
+     },
+     "status": "reviewed"
+    }
+   ],
+   "caveats": [
+    "The page never names CPLX1. The remit is DEEs as a class. CPLX1 DEE is autosomal recessive and described in very few families, so a gene-specific group may not exist."
+   ]
+  }
+ },
+ "errors": {},
+ "finished": "2026-10-04T01:45:54+00:00",
+ "ledger_tree_head": {
+  "size": 1689,
+  "root": "571b3c1c28ac80bf82535b3b6c8772b68fa4221befc67fb56064f2d3b81fe341",
+  "ts": "2026-10-04T01:45:54+00:00",
+  "signature": "ed25519:jMjWZqV896UIeGgfRSUrdusoWHzLrRdiVSBlytIfTlxFnMqb2_0ZjaWHWJ2Big-RfZHJu-kqJ-91bpZ-LHPvCw",
+  "log_key": "ed25519:SqJsN6AYUmYupalFI8NqXI1TJF_AfxKCLEjHmSAB1fk"
+ },
+ "log_verified": true
+}

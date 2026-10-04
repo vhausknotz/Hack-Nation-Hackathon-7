@@ -77,7 +77,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 
 **Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
 **Family brief check:** `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa` (desktop/phone, source fidelity, print/copy and closing).
-Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests` (MCP dependencies: `atlas_mcp/requirements.txt`).
+Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (cloud/HTTP dependencies: `atlas_mcp/requirements-cloud.txt`; Azurite instructions in `atlas_mcp/CLOUD.md`). `agents/community_coverage/` stages offline research; its explicitly invoked `import_reviewed` command writes the ledger and calls Sol.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 New Ledger instances enforce an OS writer lease. Processes already running when the lease was introduced do not; let the current community scout exit before draining the MCP inbox. MCP intake itself never writes the evidence ledger or spends on models.
 

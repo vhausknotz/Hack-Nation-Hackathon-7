@@ -186,7 +186,9 @@ def term_patterns(condition: dict) -> list[re.Pattern]:
 
 def find_quote(text: str, patterns: list[re.Pattern]) -> tuple[int, int] | None:
     """Offsets of a verbatim sentence that names the condition or gene; prefers sentences about the organization."""
-    best, best_score = None, -1
+    # Negative scores are still candidates. Semantic review, not this ranking
+    # threshold, decides whether a passage establishes whom a group serves.
+    best, best_score = None, float("-inf")
     pos = 0
     for line in text.split("\n"):
         start, end = pos, pos + len(line)

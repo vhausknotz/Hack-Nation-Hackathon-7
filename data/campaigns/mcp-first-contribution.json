@@ -5,7 +5,7 @@
   "record": "NCT01238250",
   "source_id": "src:sha256:20a531023312a19ac2743d62647d6a3baa8e51addd18c9a0d824ee956fddaf8b",
   "submission_id": "submission:sha256:a0f05a6b2ef32e7bae212f24944f78a28dd55b0ef1a20a3b2f772c60ac2e3155",
-  "cloud_state": "queued",
+  "cloud_state": "kernel_accepted",
   "gateway_model_calls": 0,
   "claim_id": "claim:sha256:fbf5aac09715b8da0257111218e6a4e5c89184c9b6f1aad5182ac476f2774d4c",
   "review": {
@@ -20,5 +20,35 @@
     "ts": "2026-10-04T01:38:39+00:00",
     "signature": "ed25519:luP6geavrMvkGSdCtZ6pazRcWZMuqvufF4flCI4bcLQV2EKB_1KCPxZ5jlM1eXnHda4wa0vJh1dQIZoZChReDg",
     "log_key": "ed25519:SqJsN6AYUmYupalFI8NqXI1TJF_AfxKCLEjHmSAB1fk"
-  }
+  },
+  "kernel_result": {
+    "state": "kernel_accepted",
+    "claim_id": "claim:sha256:fbf5aac09715b8da0257111218e6a4e5c89184c9b6f1aad5182ac476f2774d4c",
+    "assertion_id": "assertion:sha256:0f80f77f6938c2fd7aa8ffa10c2c0d3209dcb95b69efaf41e3208b33202d23f8",
+    "checks": [
+      {
+        "name": "schema",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "name": "identifiers",
+        "passed": true,
+        "detail": "registry:d7e689d0ef9cab38"
+      },
+      {
+        "name": "evidence",
+        "passed": true,
+        "detail": ""
+      },
+      {
+        "name": "signature",
+        "passed": true,
+        "detail": ""
+      }
+    ],
+    "review_status": "unreviewed",
+    "published": false
+  },
+  "published_review_status": "reviewed"
 }

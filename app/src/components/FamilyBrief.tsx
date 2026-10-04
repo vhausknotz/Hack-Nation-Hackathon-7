@@ -209,7 +209,7 @@ export function FamilyBrief({ c, neighbors, onClose }: { c: ConditionBundle; nei
             <h4 className="font-semibold leading-snug">{it.title}</h4>
             {it.subtitle && <p className="text-xs text-ink-faint">{it.subtitle}</p>}
             {it.url && <a href={it.url} target="_blank" rel="noreferrer" className="mt-1 block font-mono text-[11px] text-machinery underline">{it.url}</a>}
-            {it.facts.map((f, i) => <p key={i} className="mt-1.5 text-xs text-ink-soft">{f}</p>)}
+            {it.facts.map((f, i) => <p key={i} className="mt-1.5 whitespace-pre-wrap text-xs text-ink-soft">{f}</p>)}
             {it.cautions.map((x, i) => <p key={i} className="mt-1.5 text-xs text-caution">{x}</p>)}
           </div>)}
           {b.bullets && <ul className="list-disc space-y-1.5 pl-5 text-xs text-ink-soft">{b.bullets.map((x, i) => <li key={i}>{x}</li>)}</ul>}

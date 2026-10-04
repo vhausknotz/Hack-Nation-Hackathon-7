@@ -47,6 +47,9 @@ def forbidden(text: str, where: str):
 
 def check_text(text: str, c: dict) -> int:
     """The copied brief against the bundle. Returns the number of listings verified."""
+    # Windows clipboard APIs convert LF to CRLF. Normalize only that platform
+    # encoding; every source character and internal line break must still match.
+    text = text.replace("\r\n", "\n")
     orgs = [o for o in c.get("communities") or [] if o["kind"] in ("patient_organization", "research_program")]
     assets = c.get("assets") or []
     assert "It is not a recommendation" in text

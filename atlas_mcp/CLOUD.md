@@ -54,7 +54,7 @@ $env:ATLAS_TEST_AZURITE='1'
 ./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests
 ```
 
-122 tests passed, including real SDK HTTP authentication/caller isolation, real Azure Storage SDK transactions against Azurite, quota/task races, immutable source/payload storage and kernel commit followed by lost-acknowledgement recovery. No public source fetch, paid model call or Azure cloud resource was needed for those integration tests. Tool calls are limited to 1,000 globally and 250 per contributor per UTC day. These are application limits, not a dollar cap on Azure charges.
+134 tests passed across ledger, pipeline, agents, community staging and MCP, including real SDK HTTP authentication/caller isolation, real Azure Storage SDK transactions against Azurite, quota/task races, immutable source/payload storage and kernel commit followed by lost-acknowledgement recovery. No public source fetch, paid model call or Azure cloud resource was needed for those integration tests. Separate live checks verified the hosted source/contribution path. Tool calls are limited to 1,000 globally and 250 per contributor per UTC day. These are application limits, not a dollar cap on Azure charges. MCP stop/start was tested and the app left running; FTP/SCM basic-password publishing is disabled, with Entra deployment retained.
 
 ## Provisioning and onboarding checklist
 

@@ -32,7 +32,7 @@ The atlas is becoming a self-improving evidence network (see [PLAN.md](PLAN.md))
 - **Log:** everything is recorded in a signed, append-only Merkle log, and the map is a projection of accepted claims.
 - **Campaigns:** patient communities can direct and fund agent work on their disease.
 
-The kernel, log, reference imports, literature campaign, trial importer and patient-group scout are built ([ledger/](ledger/), [agents/](agents/)). A [local MCP contribution server](atlas_mcp/README.md) now supports task discovery, sourced claims, reviews, challenges and status tracking through a durable inbox. Remote hosting, automatic publication and open-contributor onboarding remain planned; see the [Azure hosting decision](docs/mcp_hosting.md).
+The kernel, log, reference imports, literature campaign, trial importer and patient-group scout are built ([ledger/](ledger/), [agents/](agents/)). The [MCP contribution server](atlas_mcp/CLOUD.md) is hosted on Azure with authenticated task discovery, sourced claims, reviews, challenges and durable submission tracking. A real hosted contribution has passed the local kernel and a separate Sol review. The worker stays on the operator's computer; review and publication are explicit. Continuous worker hosting, automatic publication and open-contributor onboarding remain planned.
 
 ## Architecture
 
@@ -58,7 +58,7 @@ python -m venv .venv && ./.venv/Scripts/python -m pip install -r pipeline/requir
 cd app && npm install && npm run dev
 ```
 
-Tests: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests enrich/trials atlas_mcp/tests` (install `atlas_mcp/requirements.txt` for MCP tests).
+Tests: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (install `atlas_mcp/requirements-cloud.txt` for the cloud/HTTP tests; the cloud runbook explains optional Azurite integration).
 Interactive desktop/phone check: `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
 Family brief, copy/print and source fidelity: `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa`.
 

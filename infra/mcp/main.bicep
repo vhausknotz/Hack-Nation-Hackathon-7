@@ -100,6 +100,16 @@ resource app 'Microsoft.Web/sites@2024-04-01' = {
     }
   }
 }
+resource scmBasicAuth 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2024-04-01' = {
+  parent: app
+  name: 'scm'
+  properties: { allow: false }
+}
+resource ftpBasicAuth 'Microsoft.Web/sites/basicPublishingCredentialsPolicies@2024-04-01' = {
+  parent: app
+  name: 'ftp'
+  properties: { allow: false }
+}
 var dataRoles = [
   'ba92f5b4-2d11-453d-a403-e96b0029c9fe' // Storage Blob Data Contributor
   '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3' // Storage Table Data Contributor

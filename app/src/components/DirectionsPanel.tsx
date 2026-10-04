@@ -152,7 +152,7 @@ function Study({ asset: a }: { asset: ResearchAsset }) {
     <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-faint">{ASSET_TYPE[a.type] || "Research study"}</span>
     <h3 className="mt-1 font-semibold leading-snug text-ink">{a.title}</h3>
     <div className="mt-2 flex flex-wrap gap-1.5 text-[10px]"><span className="rounded-full bg-ink-wash px-2 py-0.5">{statusLabel(a)} · as recorded</span><span className={`rounded-full px-2 py-0.5 ${fit.limited ? "bg-caution-soft text-caution" : "bg-machinery-soft text-machinery"}`}>{fit.label}</span></div>
-    {a.restriction && <p className="mt-2 text-xs"><b className="font-semibold text-ink">Restriction:</b> {a.restriction}</p>}
+    {a.restriction && <p className="mt-2 whitespace-pre-wrap text-xs"><b className="font-semibold text-ink">Restriction:</b> {a.restriction}</p>}
     <p className="mt-2 text-xs">{a.review.reason}</p>
     {studyNotes(a).slice(0, -1).map((n, k) => <p key={k} className="mt-2 text-xs text-caution">{n}</p>)}
     <a className="mt-3 inline-block text-xs font-semibold text-machinery underline" href={a.url} target="_blank" rel="noreferrer">Check study and eligibility ↗</a>

@@ -1,6 +1,6 @@
 # MCP hosting decision — 2026-10-04
 
-Status: **implemented and tested against local Azure Storage emulation; not deployed**. The owner requested Azure suitability and low ongoing cost. The HTTP/authentication, cloud intake, local ledger bridge and read projection are now implemented. See [the cloud runbook](../atlas_mcp/CLOUD.md) for verified tests, deployment package/template, price example and remaining Entra/client/platform validation.
+Status: **deployed and verified on Azure**, including authenticated SDK calls and a real sourced contribution through the kernel and separate Sol review. The owner approved Functions/storage and the dedicated server-side storage-key fallback after managed-identity role assignment was denied. No administrator is available. See [the cloud runbook](../atlas_mcp/CLOUD.md) for connection, credential scope, costs and tested stop/start controls. The ledger worker remains local; publication is explicit.
 
 ## Recommendation
 
@@ -29,6 +29,6 @@ This is not a lift-and-shift deployment of `atlas_mcp.server`. The same schema, 
 - Avoid storing full source bodies or credentials in telemetry; use short status/correlation records and sampling.
 - Static website hosting stays free. Database hosting is deferred until its workload justifies it; cloud storage still incurs charges.
 - Azure lists a shared monthly Flex on-demand grant of 250,000 executions and 100,000 GB-s on eligible paid consumption subscriptions. Eligibility and other workloads on this subscription must be checked; this is **not a promise of a free bill**. Storage/networking are charged separately. [Functions pricing](https://azure.microsoft.com/en-us/pricing/details/functions/).
-- No dollar estimate has been verified against this subscription/region yet. Prepare the concrete resource template, regional quote, expected storage/traffic and shutdown procedure before provisioning. Cost alerts report spending; they are not hard spend caps.
+- Regional Functions/Blob rates and a light-use example are in the cloud runbook. A monthly allowance alert of 5 in billing currency is created for the MCP resource group; current spend has not yet returned a currency. Application quotas are enforced. Neither is a hard dollar cap.
 
-No new Azure resources were created for the local MCP milestone. Update `docs/operations.md` when anything is provisioned.
+The dedicated Function App, plan, storage and budget are registered in `docs/operations.md`. The website and shared model resource are separate.

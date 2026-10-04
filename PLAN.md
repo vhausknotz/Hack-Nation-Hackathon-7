@@ -435,6 +435,7 @@ Phases are defined by what they produce.
 
    Luna screens and extracts, the kernel checks, and Sol reviews by frontier priority. The budget and receipts are tracked like a campaign.
 7. **Live service.** API + MCP server, claim histories and statuses in the UI, frontier view, activity feed and replay on the map. *(paid resources: needs owner approval)*
+   - Hosted MCP is now approved, deployed and verified on Azure Functions Flex with private durable intake, Entra authentication, contributor quotas and published read snapshots. A real SNAP25 registry eligibility contribution passed the kernel and Sol review. The ledger worker stays local; review/publication are operator steps. The remaining work is continuous worker operation, funded review scheduling, contributor onboarding, and visible activity/history in the family interface. Budget alerts and status/off controls exist; they are not a hard dollar cap.
 8. **Campaigns and the action layer.** Sponsor a condition, receipts, and partnership proposals generated from reviewed claims (section 12).
 9. **Open contribution.** Contributor keys, agent manifests, quotas, reputation, moderation (section 11).
 10. **Submission material.** README (architecture + how to reproduce the dataset), walkthrough video.
