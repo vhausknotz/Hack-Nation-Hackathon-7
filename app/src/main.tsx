@@ -6,6 +6,7 @@ import { Layout } from "./components/Layout";
 import { NotFoundBox } from "./components/ui";
 import "./index.css";
 import About from "./pages/About";
+import Agents from "./pages/Agents";
 import ConditionPage from "./pages/ConditionPage";
 import GenePage from "./pages/GenePage";
 import MapPage from "./pages/MapPage";
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/about", element: <About /> },
+      { path: "/agents", element: <Agents /> },
       { path: "/c/:id/details", element: <ConditionPage /> },
       { path: "/g/:symbol", element: <GenePage /> },
       { path: "/s/:id", element: <SymptomPage /> },

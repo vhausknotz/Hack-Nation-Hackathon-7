@@ -191,3 +191,20 @@ export function LiveConditionBanner({ conditionId }: { conditionId: string }) {
     </div>
   );
 }
+
+/** Nearly empty condition: invite people to point an agent at it. */
+export function SparseInvite({ id, name, symptoms, connections }: { id: string; name: string; symptoms: number; connections: number }) {
+  if (symptoms >= 3 && connections > 0) return null;
+  return (
+    <Link
+      to={`/agents?condition=${encodeURIComponent(id)}&name=${encodeURIComponent(name)}`}
+      className="mx-5 mt-4 flex items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50/70 p-3 text-[12.5px] text-indigo-950 transition hover:border-indigo-300 sm:mx-6"
+    >
+      <AgentAvatar color="#818cf8" role="scout" size={26} />
+      <span className="min-w-0 flex-1">
+        <b>This condition has {symptoms ? `only ${symptoms} recorded symptom${symptoms === 1 ? "" : "s"}` : "no recorded symptoms"}.</b> Ask an AI agent to expand it from published research, and watch it here.
+      </span>
+      <span aria-hidden>→</span>
+    </Link>
+  );
+}

@@ -119,7 +119,7 @@ class CloudIntake:
     def __init__(self, store):
         self.store = store
 
-    def enroll(self, name, model, family, principal, allow_review=False, quota=100):
+    def enroll(self, name, model, family, principal, allow_review=False, quota=100, display=None):
         """Operator-only. Principal must be verified issuer + subject, not display name."""
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,60}", name):
             raise ValueError("Use a lowercase contributor slug")
@@ -134,7 +134,7 @@ class CloudIntake:
         self.store.immutable(key_path, key_bytes)
         profile = {"id": actor, "public_key": signer.public_key, "kind": "agent", "model": model,
                    "model_family": family, "allow_review": bool(allow_review), "daily_quota": quota,
-                   "key_path": key_path, "principal": principal,
+                   "key_path": key_path, "principal": principal, **({"display": display} if display else {}),
                    "manifest": {"role": "mcp-contributor", "model": model, "model_family": family,
                                 "transport": "authenticated-http", "version": "atlas-mcp@1"}}
         def decide(seq):

@@ -65,6 +65,20 @@ class Operator:
             raise RuntimeError(f"Package deployment returned HTTP {response.status_code}; inspect sanitized deployment status")
         return {"package_deployment": "accepted", "endpoint": f"https://{host}/mcp"}
 
+    def set_github(self):
+        """Copy GITHUB_CLIENT_ID/SECRET from the ignored .env into protected app settings. Never printed."""
+        values = {}
+        for line in (ROOT / ".env").read_text(encoding="utf-8-sig").splitlines():
+            key, _, value = line.partition("=")
+            if key.strip() in ("GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET") and value.strip():
+                values[key.strip()] = value.strip().strip('"').strip("'")
+        if len(values) != 2:
+            raise ValueError("Add GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET to .env first")
+        current = self.arm("POST", self.site + "/config/appsettings/list?api-version=2024-04-01")
+        props = {**current.get("properties", {}), **values}
+        self.arm("PUT", self.site + "/config/appsettings?api-version=2024-04-01", json={"properties": props})
+        return {"github_sign_in": "configured", "settings_updated": sorted(values)}
+
     def deployment_status(self):
         host = self.host().replace(".azurewebsites.net", ".scm.azurewebsites.net")
         response = requests.get(f"https://{host}/api/deployments/latest", headers=self.headers(), timeout=30, allow_redirects=False)
@@ -76,13 +90,15 @@ class Operator:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("deploy", "deployment-status", "initialize", "publish", "enroll", "drain"))
+    parser.add_argument("command", choices=("deploy", "deployment-status", "set-github", "initialize", "publish", "enroll", "drain"))
     args = parser.parse_args()
     operator = Operator()
     if args.command == "deploy":
         result = operator.deploy()
     elif args.command == "deployment-status":
         result = operator.deployment_status()
+    elif args.command == "set-github":
+        result = operator.set_github()
     else:
         from atlas_mcp.cloud_store import CloudIntake
         store = operator.store()

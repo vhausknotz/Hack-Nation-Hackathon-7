@@ -44,8 +44,11 @@ def serve(store):
                 refreshed = time.monotonic()
             projection = current
         return Presence(CloudAtlas(intake, projection, actor), store, actor)
-    server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"], loopback_proxy=True)
+    from .oauth import AtlasOAuth, add_routes as add_oauth_routes
+    oauth = AtlasOAuth(intake, os.environ["ATLAS_PUBLIC_URL"], entra=verifier)
+    server = build_http_server(factory, verifier, os.environ["ATLAS_PUBLIC_URL"], loopback_proxy=True, oauth=oauth)
     add_routes(server, Feed(store))
+    add_oauth_routes(server, oauth, os.getenv("ATLAS_SITE_URL", "https://salmon-island-04aa8f603.1.azurestaticapps.net"))
     server.run(transport="streamable-http")
 
 

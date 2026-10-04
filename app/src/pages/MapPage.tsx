@@ -6,7 +6,7 @@ import { Logo } from "../components/Layout";
 import { SearchBox } from "../components/SearchBox";
 import { StarMap, type Related } from "../components/StarMap";
 import { GlobeMap } from "../components/GlobeMap";
-import { LiveConditionBanner, LivePanel, useLiveLayers } from "../components/LiveActivity";
+import { LiveConditionBanner, LivePanel, SparseInvite, useLiveLayers } from "../components/LiveActivity";
 import { conditionRevision, getCondition, getGene, getGroup, getMechanism, getSymptom, onDataChange } from "../lib/data";
 import { useLive } from "../lib/live";
 import { routes } from "../lib/links";
@@ -120,6 +120,7 @@ export default function MapPage() {
         {conditionId && condition && map ? (
           <>
           <LiveConditionBanner conditionId={condition.id} />
+          <SparseInvite id={condition.id} name={condition.name} symptoms={condition.phenotype_count} connections={neighbors.length} />
           <DirectionsPanel key={condition.id} c={condition} neighbors={neighbors} step={step} onStep={selectStep} emphasized={emphasized} onEmphasize={setEmphasized} onClose={() => navigate("/")} />
           </>
         ) : conditionId ? (

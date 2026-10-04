@@ -63,7 +63,9 @@ class RequestAtlas:
         return getattr(self.factory(token.client_id), name)
 
 
-def build_http_server(factory, verifier, public_url, *, loopback_proxy=False):
+def build_http_server(factory, verifier, public_url, *, loopback_proxy=False, oauth=None):
+    """With `oauth`, the server is also an OAuth authorization server (GitHub sign-in) and
+    still accepts operator Entra tokens through the provider's fallback."""
     url = urlsplit(public_url)
     if url.scheme != "https" or not url.hostname or url.path != "/mcp" or url.query or url.fragment or url.username:
         raise ValueError("Use the canonical HTTPS /mcp endpoint")
@@ -71,6 +73,15 @@ def build_http_server(factory, verifier, public_url, *, loopback_proxy=False):
     # Functions' host forwards to the custom handler on a fixed loopback port.
     # Keep DNS-rebinding checks enabled, adding only those exact internal hosts.
     hosts = [url.netloc] + (["127.0.0.1:8000", "localhost:8000"] if loopback_proxy else [])
+    security = TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts, allowed_origins=[origin])
+    if oauth is not None:
+        from mcp.server.auth.settings import ClientRegistrationOptions, RevocationOptions
+        return build_server(RequestAtlas(factory), stateless_http=True, json_response=True,
+            max_request_body_size=65536, host="0.0.0.0", auth_server_provider=oauth,
+            auth=AuthSettings(issuer_url=origin, resource_server_url=public_url, required_scopes=[verifier.scope], validate_token_resource=False,
+                              client_registration_options=ClientRegistrationOptions(enabled=True, valid_scopes=[verifier.scope], default_scopes=[verifier.scope]),
+                              revocation_options=RevocationOptions(enabled=True)),
+            transport_security=security)
     return build_server(RequestAtlas(factory), stateless_http=True, json_response=True,
         max_request_body_size=65536, host="0.0.0.0", token_verifier=verifier,
         auth=AuthSettings(issuer_url=verifier.issuer, resource_server_url=public_url,
