@@ -62,7 +62,8 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
           </>}
           {i === 1 && <>
             {people.length ? <>
-              <p className="mb-3">{focused ? "A group focused on this diagnosis is listed. Visit its website to check whom it serves and how to get in touch." : `No group focused on this exact diagnosis has been found in the atlas yet. These groups serve people with ${c.gene.symbol} changes or a broader community. Check whether they include your diagnosis.`}</p>
+              {!focused && <h3 className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">Broader support you can contact</h3>}
+              <p className="mb-3">{focused ? "A group focused on this diagnosis is listed. Visit its website to check whom it serves and how to get in touch." : `No group focused on this exact diagnosis has been found in the atlas yet. These groups serve people with ${c.gene.symbol} changes or a broader community, and often offer peer support. Check whether they include your diagnosis.`}</p>
               {people.map(o => <Organization key={o.id} org={o} c={c} />)}
               {singleReview && <p className="text-xs">These are listings, not recommendations. Each was checked against its own page by one AI reviewer.</p>}
             </> : <>
