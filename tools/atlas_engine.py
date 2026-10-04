@@ -318,6 +318,10 @@ def publish(engine, subjects):
     run([py, "pipeline/build_graph.py"])
     after_c = read_jsonl(ROOT / "data/build/conditions.jsonl")
     refresh_plain(subjects, before_c, after_c)
+    try:
+        run([py, "pipeline/study_contacts.py"])  # who runs any newly listed study (official records)
+    except RuntimeError as error:
+        log(f"study teams not refreshed: {error}")
     run([py, "pipeline/export_app.py"], env={"ATLAS_EXPORT_OUT": str(EXPORT)})
     after_n = read_jsonl(ROOT / "data/build/neighbors.jsonl")
 

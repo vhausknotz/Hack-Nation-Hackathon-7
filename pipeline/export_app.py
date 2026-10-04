@@ -54,6 +54,12 @@ def main() -> None:
     report = json.loads((BUILD / "report.json").read_text())
     gene_by_symbol = {g["symbol"]: g for g in genes.values()}
     actions = load_actions(conditions)  # reviewed patient organizations and studies, from the ledger
+    teams_path = BUILD / "study_contacts.json"  # who runs each study, from its official record (study_contacts.py)
+    teams = json.loads(teams_path.read_text(encoding="utf-8")) if teams_path.exists() else {}
+    for entry in actions.values():
+        for asset in entry.get("assets", []):
+            if asset["id"] in teams:
+                asset["team"] = teams[asset["id"]]
     collaboration = shared_research(conditions, actions, neighbors)
     plain = {p["id"]: p for p in load("plain.jsonl")} if (BUILD / "plain.jsonl").exists() else {}
 

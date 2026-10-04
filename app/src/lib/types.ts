@@ -150,7 +150,20 @@ export interface SharedResearch {
   is_computed_neighbor: boolean;
 }
 
+export interface StudyTeam {
+  sponsor: string | null;
+  collaborators: string[];
+  officials: { name: string; affiliation: string | null; role: string }[];
+  contacts: { name: string | null; role: string; email: string | null }[];
+  sites: number;
+  countries: string[];
+  updated: string | null;
+  retrieved: string;
+  url: string;
+}
+
 export interface ResearchAsset {
+  team?: StudyTeam;
   history?: ListingHistory;
   id: string;
   title: string;

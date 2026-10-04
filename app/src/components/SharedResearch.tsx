@@ -4,6 +4,7 @@ import { copyText } from "../lib/clipboard";
 import type { ConditionBundle, ResearchAsset, SharedResearch } from "../lib/types";
 import { routes } from "../lib/links";
 import { ASSET_TYPE, reviewLabel, statusLabel, studyNotes } from "./familyJourney";
+import { StudyTeamCard, teamAddress } from "./StudyTeam";
 
 export function collaborationQuestions(c: ConditionBundle) {
   return (c.shared_research ?? []).flatMap(route => {
@@ -36,7 +37,8 @@ export function collaborationText(condition: ConditionBundle, route: SharedResea
     `Review qualification: ${a.review.reason}`,
     `Restriction, as recorded: ${a.restriction || "No restriction was extracted; this does not mean eligibility is unrestricted."}`,
     ...studyNotes(a), `Evidence ID: ${a.claim_id}`].join("\n");
-  return ["Question for the study team", question,
+  const address = teamAddress(asset.team);
+  return [...(address ? ["To", address.to, `${address.greeting},`] : ["Question for the study team"]), question,
     "Context from the Rare Disease Atlas — listings to verify, not recommendations or an independently reviewed partnership proposal.",
     notes(condition.name, asset), notes(route.partner.name, route.partner_asset),
     `Full question brief: ${origin}${routes.condition(condition.id)}?brief=1`,
@@ -53,7 +55,8 @@ function ResearchBridge({ route, asset, question, condition }: { route: SharedRe
     <p className="mt-2 text-xs">Also listed for <Link className="font-medium text-machinery underline" to={routes.condition(route.partner.id)}>{route.partner.name}</Link>.</p>
     <p className="mt-2 text-xs">{route.is_computed_neighbor ? "This condition is also a computed neighbor on the map. The shared research record is a separate, documented connection." : "Connected by this research record; this does not imply matching biology."}</p>
     <div className="mt-3 border-t border-machinery/15 pt-3">
-      <h5 className="text-xs font-semibold text-ink">A question for the study team</h5>
+      {asset.team && <StudyTeamCard team={asset.team} />}
+      <h5 className="mt-3 text-xs font-semibold text-ink">{teamAddress(asset.team) ? `A question for ${asset.team!.officials[0]?.name.split(",")[0] ?? "the study team"}` : "A question for the study team"}</h5>
       <p className="mt-1 text-xs">“{question}”</p>
       <button onClick={async () => setCopied(await copyText(text) ? "done" : "failed")} className="mt-3 block rounded-lg border border-machinery/30 bg-white px-3 py-2 text-xs font-semibold text-machinery">{copied === "done" ? "Question copied" : "Copy question + sources"}</button>
       <p className="mt-1 text-[10px] text-ink-faint" aria-live="polite">{copied === "done" ? "Copied with both diagnoses' restrictions and review labels. Nothing was sent." : copied === "failed" ? "Copy is unavailable. Select the prepared text below to copy it manually." : "Includes both diagnoses' restrictions and review labels. Review the text before sharing."}</p>

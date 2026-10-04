@@ -9,6 +9,7 @@ import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
 import { connectionPanel } from "../lib/reasons";
 import type { Community, ConditionBundle, Neighbor, ResearchAsset } from "../lib/types";
+import { StudyTeamCard } from "./StudyTeam";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -158,6 +159,7 @@ function Study({ asset: a }: { asset: ResearchAsset }) {
     {a.restriction && <p className="mt-2 whitespace-pre-wrap text-xs"><b className="font-semibold text-ink">Restriction:</b> {a.restriction}</p>}
     <p className="mt-2 text-xs">{a.review.reason}</p>
     {studyNotes(a).slice(0, -1).map((n, k) => <p key={k} className="mt-2 text-xs text-caution">{n}</p>)}
+    {a.team && <StudyTeamCard team={a.team} />}
     <a className="mt-3 inline-block text-xs font-semibold text-machinery underline" href={a.url} target="_blank" rel="noreferrer">Check study and eligibility ↗</a>
     <details className="mt-2 text-xs"><summary className="cursor-pointer text-ink-faint">Source and review</summary>{a.quotes.map((q, i) => <blockquote className="mt-2 border-l-2 border-ink-line pl-2" key={i}>“{q}”</blockquote>)}<p className="mt-2">{reviewLabel(a.review)} · record read {a.source_date || "on the archived source date"}. Recruitment may have changed.</p></details>
   </article>;
