@@ -165,6 +165,42 @@ def test_redaction_removes_content_but_keeps_proofs(ledger, tmp_path, archive_ro
     assert ledger.verify_log()["ok"]
 
 
+@pytest.mark.parametrize("kind", ["review", "challenge"])
+def test_redacted_reason_leaves_projections_and_legacy_rows_are_hidden(ledger, tmp_path, archive_root, kind):
+    extractor = agent(ledger, tmp_path, "agent:extractor")
+    src = make_source(ledger, extractor, archive_root)
+    cid = ledger.propose(seizure_claim(src, extractor), extractor).claim_id
+    human = agent(ledger, tmp_path, "human:moderator", kind="human")
+    reason = "Synthetic private detail that must disappear"
+    if kind == "review":
+        event_id = ledger.review(cid, "supports", reason, human)
+        table, read, read_all = "reviews", ledger.store.reviews_for, ledger.store.all_reviews
+        assert ledger.claim_status(cid) == "human_reviewed"
+    else:
+        event_id = ledger.challenge(cid, reason, human)
+        table, read, read_all = "challenges", ledger.store.challenges_for, ledger.store.all_challenges
+    projected = tuple(read(cid)[0])
+    head = ledger.publish_tree_head()
+    ledger.redact(event_id, "personal_data", human)
+    assert ledger.store.db.execute(f"SELECT COUNT(*) FROM {table} WHERE event_id=?", (event_id,)).fetchone()[0] == 0
+    assert not read(cid) and not read_all()
+    assert reason not in json.dumps(ledger.history(cid))
+    if kind == "review":
+        assert ledger.claim_status(cid) == "unreviewed"
+    proof = ledger.inclusion_proof(event_id, size=head["size"])
+    assert merkle.verify_inclusion(bytes.fromhex(proof["leaf"]), proof["index"], proof["size"],
+                                   [bytes.fromhex(p) for p in proof["proof"]], bytes.fromhex(head["root"]))
+    assert ledger.verify_log()["ok"]
+
+    # A ledger redacted by the old implementation can still have the duplicate
+    # reason. Public read paths must suppress it without a destructive migration.
+    placeholders = ",".join("?" for _ in projected)
+    ledger.store.db.execute(f"INSERT INTO {table} VALUES ({placeholders})", projected)
+    assert not read(cid) and not read_all()
+    if kind == "review":
+        assert ledger.claim_status(cid) == "unreviewed"
+
+
 def test_reference_import_commits_to_all_claims(ledger, tmp_path):
     importer = agent(ledger, tmp_path, "importer:hpo", kind="importer")
     claims = [

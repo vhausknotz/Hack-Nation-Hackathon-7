@@ -1,10 +1,12 @@
-# Lead handoff — 2026-10-04, 04:42 UTC
+# Lead handoff — 2026-10-04, 04:47 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
 This file supersedes the contradictory historical checkpoints preserved in [the archive](docs/history/HANDOFF-before-bounded-cycle.md). Read AGENTS.md and PLAN.md as well.
 
 ## Working and live
+
+**Ledger redaction repair verified:** redacting a review/challenge now removes its duplicate reason from the projection table as well as the event. All review/challenge readers exclude redacted events, including legacy leftover rows. This prevents re-export and avoids counting a removed review toward trust. Synthetic regressions verify reason removal, trust reduction, legacy suppression and preserved inclusion proofs. Production was checked read-only: zero redacted events or orphaned review rows; no production data was changed and no cloud re-publication is needed for this fix. Retired cloud snapshots/backups still require separate operator deletion if a real privacy incident occurs; see operations notes.
 
 **Latest website release 280649f is live and verified**, JS `index-Co_GzGZD.js`. Both map modes respect reduced motion, including preference changes while open. Flat-map zoom/inertia and selection pulses follow the preference; camera positions remain normalized after settings updates. New desktop/phone motion checks and ordinary Directions checks pass. Live reduced-motion checks plus STXBP1/SNAP25/SYNGAP1 source-preserving brief/history checks passed. The demo document now includes a recording script and an explicit, unmeasured 10× validation plan; no video has been recorded or submitted.
 
@@ -35,8 +37,8 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - **Luna stopped and drained all requests at 04:34 UTC.** One non-transient `BadRequestError` for MONDO:0023693 / NCT03853382 triggered its stop policy. Session 3010 exited 1. The old runner logged only the exception class, so the server's exact reason is unknown. Final measured usage: **$26.776087**, retained uncertain reservation **$0.7106966**, within the $30 configured-price cap. 93,203 completed screening decisions and 11,926 unreviewed candidates were preserved. No blind retry or new paid call was made. The old `throughput.json` is a stale periodic sample with 27 requests; use the final manifest/receipt, not that sample, to determine completion. The scheduler now writes a terminal zero-in-flight snapshot for future stops; success/error regression tests pass.
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
-- Latest full backend suite: **158 passed**, including Azurite tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 71% used / 29% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Latest full backend suite: **161 passed** (156 ordinary tests plus all five opt-in Azurite integration tests). Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
+- Codex account usage at checkpoint: 75% used / 25% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 

@@ -155,19 +155,19 @@ class Store:
         self.db.execute("INSERT INTO reviews VALUES (?,?,?,?,?,?,?,?,?)", row)
 
     def reviews_for(self, claim_id: str) -> list[sqlite3.Row]:
-        return self.db.execute("SELECT * FROM reviews WHERE claim_id = ? ORDER BY seq", (claim_id,)).fetchall()
+        return self.db.execute("SELECT r.* FROM reviews r JOIN events e ON e.id=r.event_id WHERE r.claim_id=? AND e.redacted=0 ORDER BY r.seq", (claim_id,)).fetchall()
 
     def all_reviews(self) -> list[sqlite3.Row]:
-        return self.db.execute("SELECT * FROM reviews ORDER BY seq").fetchall()
+        return self.db.execute("SELECT r.* FROM reviews r JOIN events e ON e.id=r.event_id WHERE e.redacted=0 ORDER BY r.seq").fetchall()
 
     def add_challenge(self, row: tuple) -> None:
         self.db.execute("INSERT INTO challenges VALUES (?,?,?,?,?,?)", row)
 
     def challenges_for(self, target: str) -> list[sqlite3.Row]:
-        return self.db.execute("SELECT * FROM challenges WHERE target = ? ORDER BY seq", (target,)).fetchall()
+        return self.db.execute("SELECT c.* FROM challenges c JOIN events e ON e.id=c.event_id WHERE c.target=? AND e.redacted=0 ORDER BY c.seq", (target,)).fetchall()
 
     def all_challenges(self) -> list[sqlite3.Row]:
-        return self.db.execute("SELECT * FROM challenges ORDER BY seq").fetchall()
+        return self.db.execute("SELECT c.* FROM challenges c JOIN events e ON e.id=c.event_id WHERE e.redacted=0 ORDER BY c.seq").fetchall()
 
     def add_source(self, source_id: str, body: dict) -> None:
         self.db.execute("INSERT OR IGNORE INTO sources VALUES (?,?)", (source_id, json.dumps(body, sort_keys=True)))

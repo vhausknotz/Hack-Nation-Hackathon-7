@@ -176,6 +176,10 @@ class Ledger:
         tombstone, _ = self._append(signer, "content.redacted", event_id, {"category": category})
         self.store.redact(event_id)
         self.store.db.execute("DELETE FROM claims WHERE claim_id = (SELECT target FROM events WHERE id = ? AND type = 'claim.proposed')", (event_id,))
+        # These projections duplicate event reasons. Removing only the event
+        # payload would otherwise leak the redacted content through exports.
+        self.store.db.execute("DELETE FROM reviews WHERE event_id = ?", (event_id,))
+        self.store.db.execute("DELETE FROM challenges WHERE event_id = ?", (event_id,))
         self.store.commit()
         return tombstone
 
