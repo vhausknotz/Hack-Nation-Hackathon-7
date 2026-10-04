@@ -1,4 +1,4 @@
-# Lead handoff — 2026-10-04, 03:41 UTC
+# Lead handoff — 2026-10-04, 04:00 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
@@ -6,11 +6,11 @@ This file supersedes the contradictory historical checkpoints preserved in [the 
 
 ## Working and live
 
-**Prepared next interface release:** Shared-research cards now copy a focused study-team question with both diagnoses' exact restrictions, review labels/reasons, source dates, evidence IDs and a full-brief link. It sends nothing. A denied clipboard exposes selectable text; the existing brief copy also handles both clipboard failures safely and restores focus. Build `index-BGIIQd2o.js`; four-condition 1440/390 px checks and the denied-clipboard phone check passed. Deployment/live verification is next.
+**Focused-copy release df95ff4 is live and verified:** Shared-research cards now copy a focused study-team question with both diagnoses' exact restrictions, review labels/reasons, source dates, evidence IDs and a full-brief link. It sends nothing. A denied clipboard exposes selectable text; the existing brief copy also handles both clipboard failures safely and restores focus. Build `index-BGIIQd2o.js`; four-condition 1440/390 px checks and the denied-clipboard phone check passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks passed, including the exact copied sources/restrictions and evidence histories.
 
 - Website: https://salmon-island-04aa8f603.1.azurestaticapps.net. Globe/flat map, search, 7,328 conditions, plain descriptions, six-stop Directions, reviewed groups/studies, restrictions and printable/copyable question brief (`?brief=1`). Sparse data says not found, never nonexistent.
 - Shared research in step 5 connects identical reviewed non-treatment records across different genes. SNAP25 → STXBP1 through NCT01238250; STXBP1 → SYNGAP1 through NCT06555965. Both diagnoses' evidence and restrictions stay attached. Questions about protocols, questionnaires and data definitions are descriptive leads, not independently reviewed partnership recommendations.
-- **Website release 5e8d4f7 is live and verified**, JS `index-C2PuUDQP.js`. Step 6 shows actual listing-check history; the brief includes recorded review dates/models; About correctly explains the single-family review boundary. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched data and expanded history.
+- **Website release df95ff4 is live and verified**, JS `index-BGIIQd2o.js`. Step 6 shows actual listing-check history; the brief includes recorded review dates/models; About correctly explains the single-family review boundary. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched data and expanded history.
 - Family agent commit 2b2f5b3 and community agent f382cf4 are integrated. Community candidates: 13 Sol-supported, Angelman unresolved. 57 conditions have patient groups and 77 have any listing. STXBP1 organization alias and Simons profile/source issues were corrected through reviewed claims.
 - MCP: https://rare-atlas-mcp-1180fc.azurewebsites.net/mcp. All 13 authenticated tools verified with the official SDK. Entra-enrolled contributors, fixed official sources, durable private storage, quotas, signed submissions, explicit local ledger worker. `tools/run_cloud_mcp.py` is the tested stdio bridge. Gateway intake never invokes paid models.
 
