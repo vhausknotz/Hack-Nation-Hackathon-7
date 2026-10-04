@@ -1,6 +1,8 @@
 # Lead continuation while the owner naps
 
-Updated 2026-10-04 03:15 UTC. **Implementation owner: Codex. No transfer to Claude has occurred.**
+Updated 2026-10-04 05:44 UTC. **Implementation owner: Codex. No transfer to Claude has occurred.**
+
+The requested 10%-remaining checkpoint is saved at the top of HANDOFF.md. Implementation milestone `117bccb` is pushed and verified (171 backend/storage tests); live website remains `280649f`, hosted MCP snapshot is `published/ca91ebc00e9b434fa4545d46477be2a7`. Luna is stopped below its cap and its export audited. No active screening or ledger writer. Read HANDOFF.md for the precise remaining task; do not infer that the usage checkpoint transfers ownership or permits more paid reviews.
 
 The owner authorized continuing the agreed work while away, testing, commits/pushes and existing deployments. They requested Codex usage monitoring and a possible handoff to the existing Claude Code chat in Cursor if only 5% remains. This does not increase any model budget, authorize new paid resources, or bypass permissions.
 
@@ -12,7 +14,7 @@ The newest conversation supersedes the older breadth-first next-priority paragra
 2. Finish a bounded, resumable contribution cycle: useful missing-evidence task, sourced proposal, deterministic validation, explicitly budgeted semantic review, approved projection and publication. Test rejection, duplicate/retry and interruption paths, single-ledger-writer behavior, and spending limits. Hosted MCP intake and the bounded operator-triggered review/publication cycle now work end to end; continuous autonomous discovery remains unfinished. The two-attempt pilot allowance is exhausted.
 3. Verify the combined journey on desktop and phone, deploy tested milestones, and document one genuine before/after contribution for the demo. Preserve the currently working family brief. Cute agent presence, chatbot and broad new discovery campaigns remain later priorities.
 
-Read AGENTS.md, CHALLENGE_BRIEF.md, PLAN.md and the newest HANDOFF.md checkpoint before implementation. Main repo was clean at e4c8307; live release was 3d000e7. Recheck actual state instead of assuming these remain current.
+Read AGENTS.md, CHALLENGE_BRIEF.md, PLAN.md and the newest HANDOFF.md checkpoint before implementation. Recheck actual repository, live-release and ownership state instead of relying on older checkpoints.
 
 ## Limits and existing jobs
 

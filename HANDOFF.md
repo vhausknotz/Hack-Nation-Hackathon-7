@@ -1,8 +1,18 @@
-# Lead handoff — 2026-10-04, 05:32 UTC
+# Lead handoff — 2026-10-04, 05:44 UTC
 
 **Owner: Codex. No transfer to Claude.** The user is napping and authorized continued work, tests, commits, pushes and existing deployments. Read [nap continuation](docs/agent_tasks/nap_continuation.md) for the temporary heartbeat, usage thresholds and conditional Claude handoff. Deadline: **2026-10-04 15:00 Europe/Berlin**. The challenge's primary persona is a patient-group organizer; caregiver usefulness also matters. Broad coverage is secondary to one useful journey and a real evidence contribution loop.
 
 This file supersedes the contradictory historical checkpoints preserved in [the archive](docs/history/HANDOFF-before-bounded-cycle.md). Read AGENTS.md and PLAN.md as well.
+
+## Low-usage checkpoint — ready to resume
+
+Codex reached **90% used / 10% remaining** at 05:42 UTC. This is the requested early checkpoint, **not a transfer**. Implementation milestone `117bccb` is pushed, and no implementation edits remain in progress. The ledger-writer and Luna-screening leases were both available when checked; neither job is running. Preserve the ignored ledger, keys, receipts, source archives and demo video when continuing on this computer. Do not start fresh state directories to get another spending allowance.
+
+The immediate useful next task is a **synthetic-data-tested family dispute view**: show the original and reviewed counter-evidence together, distinguish pending objections from reviewed disputes, and keep disputed listings out of ordinary shared-research questions. Preserve the existing export guard until the complete display/projection path is verified. Do not create a fake dispute in production to demonstrate it. Production currently has zero challenges.
+
+After that, review the actual live patient-leader journey and the silent demo with the owner, record narration/team introduction, and prepare the submission. Independent-review evaluation, broader professional contacts and additional paid review need their own bounded approval; the exhausted two-call pilot is not authorization for them. Do not restart Luna just to use the remainder of the cap: its non-transient error has no saved server detail and the existing candidate export is already audited.
+
+At 5% remaining, use the owner's conditional Cursor/Claude handoff procedure in nap_continuation.md only if the correct chat is observable. Never claim transfer without verifying submission/continuation. If unavailable, this checkpoint is sufficient for a manual resume; retain Codex ownership rather than creating two leads.
 
 ## Working and live
 
@@ -44,7 +54,7 @@ The official STXBP1/SYNGAP1 natural-history record NCT06555965 was fetched throu
 - Quota verified: 1M TPM / 1,000 RPM. Admission targets 950k; actual billing tokens are lower because of output reservations. Do not casually restart, duplicate or raise the $30 cap. To drain safely, create `data/enrichment/trials/full/stop-screening`.
 - Community scout finished all 62 requested conditions. No production ledger writer remains active after the cycle. Preview port 4173 and local Azurite ports 10000–10002 were running at checkpoint.
 - Latest full backend suite: **171 passed**, including all five opt-in Azurite integration tests. Four-condition desktop/phone brief checks and both map modes passed. Live STXBP1 desktop and SNAP25/SYNGAP1 phone checks matched exact exported evidence/restrictions. The new history and brief passed all four conditions at 1440/390 px, including archive labels, event-backed review reasons, source links and empty states.
-- Codex account usage at checkpoint: 88% used / 12% remaining in reported weekly window. Check with the app usage tool at milestones. At 10% checkpoint; at 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
+- Codex account usage at checkpoint: 90% used / 10% remaining in reported weekly window. The requested early checkpoint is saved above. At 5% attempt the already-authorized Claude transfer, then stop Codex implementation only after verified transfer (or leave a recoverable handoff if access fails).
 
 ## Azure status, cost and shutdown
 
