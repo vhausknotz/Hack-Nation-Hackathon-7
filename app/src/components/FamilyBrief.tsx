@@ -9,6 +9,7 @@ import { plainReason } from "../lib/plain";
 import { collaborationQuestions } from "./SharedResearch";
 import { checks } from "./Contrast";
 import { teamAddress } from "./StudyTeam";
+import { disputeLines } from "./Dispute";
 import { recordedReview } from "./EvidenceHistory";
 import { copyText } from "../lib/clipboard";
 import type { ConditionBundle, Neighbor } from "../lib/types";
@@ -49,7 +50,7 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
       `${reviewLabel(o.review)}. Listed, not recommended.`,
       ...recordedReview(o.history),
     ],
-    cautions: orgNotes(o, c),
+    cautions: [...disputeLines(o.dispute), ...orgNotes(o, c)],
   });
 
   const studyBlocks: BriefBlock[] = [];
@@ -66,7 +67,7 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
           `${reviewLabel(a.review)}. Listed, not recommended.`,
           ...recordedReview(a.history),
         ],
-        cautions: studyNotes(a),
+        cautions: [...disputeLines(a.dispute), ...studyNotes(a)],
       })),
     });
   if (!studyBlocks.length) studyBlocks.push({ bullets: [

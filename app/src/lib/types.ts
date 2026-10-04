@@ -126,7 +126,14 @@ export interface ListingHistory {
   reviews: { at: string; kind: string; model: string | null; family: string | null; verdict: string; reason: string }[];
 }
 
+export interface Dispute {
+  status: "pending_review" | "contested";
+  objections: { at: string; reason: string; reviewed: boolean;
+    counter: { claim_id: string; quote: string; source: string; review_status: string; review_reason: string | null } | null }[];
+}
+
 export interface Community {
+  dispute?: Dispute;
   history?: ListingHistory;
   kind_source?: { quote: string; url: string; page_date: string } | null;
   id: string;
@@ -165,6 +172,7 @@ export interface StudyTeam {
 }
 
 export interface ResearchAsset {
+  dispute?: Dispute;
   team?: StudyTeam;
   history?: ListingHistory;
   id: string;

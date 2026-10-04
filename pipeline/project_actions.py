@@ -27,7 +27,7 @@ def asset_rank(status: str, review_seq: int, claim: dict) -> tuple:
     return (STATUS_RANK.get(status, 0), review_seq, claim["provenance"]["created"])
 
 
-def organization_aliases(store) -> dict[str, tuple[str, list[str]]]:
+def organization_aliases(store, disputes=None) -> dict[str, tuple[str, list[str]]]:
     """Resolve only reviewed, unambiguous identity claims. Cycles remain separate.
 
     A later rejection of the same assertion disables its older support. Original
@@ -41,6 +41,8 @@ def organization_aliases(store) -> dict[str, tuple[str, list[str]]]:
         reviews = [dict(r) for r in store.reviews_for(row["claim_id"])]
         if not reviews:
             continue
+        if disputes and disputes.get(row["assertion_id"], {}).get("status") == "contested":
+            continue  # a contested identity merge is not applied: both organizations stay separate
         claim = json.loads(row["body"])
         a = claim["assertion"]
         key = (a["subject"], a["object"])
@@ -73,13 +75,12 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     from ledger.store import Store
 
     store = Store(readonly=True)
-    from pipeline.family_disputes import check_family_disputes
     try:
-        check_family_disputes(store)
-    except Exception:
-        store.close()
-        raise
-    aliases = organization_aliases(store)
+        from .family_disputes import dispute_index
+    except ImportError:  # export_app.py is also run directly
+        from family_disputes import dispute_index
+    disputes = dispute_index(store)  # objections and reviewed counter-evidence, shown with the listing
+    aliases = organization_aliases(store, disputes)
     rows = []
     asset_latest = {}
     for row in store.claims_where("origin = 'contributed' AND kernel_ok = 1 AND predicate IN ('represented_by', 'has_asset')"):
@@ -177,6 +178,10 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
         if cid not in histories:
             histories[cid] = listing_history(store, cid, bodies[cid])
         entry["history"] = histories[cid]
+        from ledger.schema import assertion_id
+        dispute = disputes.get(assertion_id(bodies[cid]))
+        if dispute:
+            entry["dispute"] = dispute
     store.close()
 
     out: dict[str, dict] = defaultdict(lambda: {"communities": [], "assets": []})

@@ -114,10 +114,11 @@ const OPEN: StudyGroupKey[] = ["recruiting", "soon", "unknown"];
  * report it closed gets one. The care-team question always comes first and needs no listing.
  */
 export function questions(c: ConditionBundle): Question[] {
-  const orgs = c.communities ?? [];
+  // Contested listings are shown with both sides, but never turned into a suggested question.
+  const orgs = (c.communities ?? []).filter((o) => o.dispute?.status !== "contested");
   const people = orgs.filter((o) => o.kind === "patient_organization");
   const programs = orgs.filter((o) => o.kind === "research_program");
-  const assets = (c.assets ?? []).filter((a) => OPEN.includes(studyGroup(a)));
+  const assets = (c.assets ?? []).filter((a) => OPEN.includes(studyGroup(a)) && a.dispute?.status !== "contested");
   const out: Question[] = [{
     to: "your care team",
     text: `My diagnosis is ${c.name}, linked to ${c.gene.symbol}. Which patient group or research registry should I ask about?`,

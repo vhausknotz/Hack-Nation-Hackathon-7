@@ -11,6 +11,7 @@ import { connectionPanel } from "../lib/reasons";
 import type { Community, ConditionBundle, Neighbor, ResearchAsset } from "../lib/types";
 import { StudyTeamCard } from "./StudyTeam";
 import { Contrast } from "./Contrast";
+import { DisputeNote } from "./Dispute";
 
 export const STOPS = ["You are here", "Find your people", "You're not alone", "What already exists", "Prepare your questions", "What we don't know yet"];
 const SHOWN_QUESTIONS = 3;
@@ -125,6 +126,7 @@ function Organization({ org, c }: { org: Community; c: ConditionBundle }) {
     <span className="text-[10px] font-semibold uppercase tracking-wide text-machinery">{orgKindLabel(org)} · {orgScope(org, c)}</span>
     <h3 className="mt-1 font-semibold text-ink">{org.name}</h3>
     {orgNotes(org, c).map((n, k) => <p key={k} className={`mt-2 text-xs ${org.page_read === "archived_snapshot" && k === 0 ? "text-caution" : ""}`}>{n}</p>)}
+    <DisputeNote dispute={org.dispute} quote={org.quote} review={org.review.reason} />
     <a className="mt-2 inline-block text-xs font-semibold text-machinery underline" href={org.homepage} target="_blank" rel="noreferrer">Visit website ↗</a>
     <details className="mt-2 text-xs"><summary className="cursor-pointer text-ink-faint">Why it is listed · source and review</summary><p className="mt-2">{org.review.reason}</p><blockquote className="mt-2 border-l-2 border-ink-line pl-2">“{org.quote}”</blockquote><a href={org.page || org.homepage} target="_blank" rel="noreferrer" className="mt-2 block underline">{org.page_read === "archived_snapshot" ? `Read archived source from ${org.page_date}` : `Source read ${org.page_date}`} ↗</a><p className="mt-2">{reviewLabel(org.review)}</p>{org.kind_source && <div className="mt-3 border-t border-ink-line pt-2"><p>How the organization describes its work:</p><blockquote className="mt-1">“{org.kind_source.quote}”</blockquote><a className="mt-2 block underline" href={org.kind_source.url} target="_blank" rel="noreferrer">Organization profile · read {org.kind_source.page_date} ↗</a></div>}</details>
   </article>;
@@ -162,6 +164,7 @@ function Study({ asset: a }: { asset: ResearchAsset }) {
     {a.restriction && <p className="mt-2 whitespace-pre-wrap text-xs"><b className="font-semibold text-ink">Restriction:</b> {a.restriction}</p>}
     <p className="mt-2 text-xs">{a.review.reason}</p>
     {studyNotes(a).slice(0, -1).map((n, k) => <p key={k} className="mt-2 text-xs text-caution">{n}</p>)}
+    <DisputeNote dispute={a.dispute} quote={a.quotes[0]} review={a.review.reason} />
     {a.team && <StudyTeamCard team={a.team} />}
     <a className="mt-3 inline-block text-xs font-semibold text-machinery underline" href={a.url} target="_blank" rel="noreferrer">Check study and eligibility ↗</a>
     <details className="mt-2 text-xs"><summary className="cursor-pointer text-ink-faint">Source and review</summary>{a.quotes.map((q, i) => <blockquote className="mt-2 border-l-2 border-ink-line pl-2" key={i}>“{q}”</blockquote>)}<p className="mt-2">{reviewLabel(a.review)} · record read {a.source_date || "on the archived source date"}. Recruitment may have changed.</p></details>

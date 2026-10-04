@@ -14,7 +14,8 @@ VISIBLE = {"reviewed", "independently_reviewed", "human_reviewed"}
 def eligible(asset):
     review = asset.get("review", {})
     return (asset.get("type") in TYPES and review.get("status") in VISIBLE
-            and review.get("verdict") in {"supports", "supports_with_qualification"})
+            and review.get("verdict") in {"supports", "supports_with_qualification"}
+            and asset.get("dispute", {}).get("status") != "contested")  # contested listings are not proposal material
 
 
 def shared_research(conditions, actions, neighbors, limit=3):
@@ -43,6 +44,7 @@ def shared_research(conditions, actions, neighbors, limit=3):
                     continue  # don't imply a cross-community bridge from a split label
                 people = [o for o in actions[other_id].get("communities", [])
                           if o["kind"] == "patient_organization" and o["review"]["status"] in VISIBLE
+                          and o.get("dispute", {}).get("status") != "contested"
                           and o["review"]["verdict"] in {"supports", "supports_with_qualification"}]
                 route = {"asset_id": own["id"], "partner": {"id": other_id, "name": condition["name"],
                          "gene": condition["gene"]["symbol"]}, "partner_asset": other,

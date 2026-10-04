@@ -1,37 +1,58 @@
-"""Stop family publication rather than silently flatten a reviewed dispute.
+"""Disputes in the family view: show both sides instead of silently flattening them.
 
-The contributor-facing MCP preserves both sides. Until family listings have an
-explicit dispute view, do not export contested listings as ordinary leads.
+A challenge is an objection to a claim (or to its assertion), optionally backed by a counter-claim.
+- pending_review: an objection exists, but no counter-evidence has passed independent or human review.
+  The listing stays visible with the objection shown.
+- contested: kernel-accepted counter-evidence is independently or human reviewed. The listing is shown as
+  "Contested: see both sides", and is excluded from shared-research proposals and suggested questions.
+The atlas never decides which side is right. Redacted objections are excluded by the store.
 """
-from ledger.policy import claim_review_status, visible
+import json
+
+from ledger.policy import claim_review_status
+
+FAMILY_PREDICATES = {"has_asset", "represented_by", "same_organization_as"}
+STRONG = {"independently_reviewed", "human_reviewed"}
 
 
-class ContestedFamilyEvidence(ValueError):
-    pass
-
-
-def check_family_disputes(store):
-    assertions = set()
+def dispute_index(store) -> dict[str, dict]:
+    """assertion_id -> {"status": "pending_review" | "contested", "objections": [...]} for family listings."""
+    out: dict[str, dict] = {}
+    if not hasattr(store, "all_challenges"):  # minimal stores (tests, old snapshots) have no challenges
+        return out
     for challenge in store.all_challenges():
-        counter = store.claim(challenge["counter_claim"]) if challenge["counter_claim"] else None
-        if not counter or not counter["kernel_ok"]:
-            continue
-        status = claim_review_status([dict(r) for r in store.reviews_for(counter["claim_id"])])
-        if status not in {"independently_reviewed", "human_reviewed"}:
-            continue
         target = challenge["target"]
         if target.startswith("assertion:"):
-            assertions.add(target)
+            assertion = target
+            rows = store.claims_where("assertion_id=? AND kernel_ok=1", (assertion,))
+            predicate = rows[0]["predicate"] if rows else None
         else:
-            claim = store.claim(target)
-            if claim and claim["kernel_ok"]:
-                assertions.add(claim["assertion_id"])
-    for assertion in sorted(assertions):
-        for row in store.claims_where("assertion_id=? AND kernel_ok=1 AND origin='contributed'", (assertion,)):
-            if row["predicate"] not in {"has_asset", "represented_by", "same_organization_as"}:
+            row = store.claim(target)
+            if not row or not row["kernel_ok"]:
                 continue
-            status = claim_review_status([dict(r) for r in store.reviews_for(row["claim_id"])])
-            if visible("family", "contributed", status, {}, row["predicate"]):
-                raise ContestedFamilyEvidence(
-                    f"Family export stopped: contested listing {row['claim_id']} ({assertion}). "
-                    "Inspect both sides through MCP and implement explicit family dispute handling before publication.")
+            assertion, predicate = row["assertion_id"], row["predicate"]
+        if predicate not in FAMILY_PREDICATES:
+            continue
+        counter, reviewed = None, False
+        if challenge["counter_claim"]:
+            c = store.claim(challenge["counter_claim"])
+            if c and c["kernel_ok"]:
+                reviews = [dict(r) for r in store.reviews_for(c["claim_id"])]
+                status = claim_review_status(reviews)
+                body = json.loads(c["body"])
+                ev = body["evidence"][0] if body.get("evidence") else {}
+                src = store.source(ev.get("source_id", "")) if ev.get("source_id") else None
+                reviewed = status in STRONG
+                counter = {"claim_id": c["claim_id"], "quote": ev.get("quote", "")[:600], "source": (src or {}).get("url", ""),
+                           "review_status": status, "review_reason": reviews[-1]["reason"] if reviews else None}
+        event = store.event(challenge["event_id"])
+        entry = out.setdefault(assertion, {"status": "pending_review", "objections": []})
+        entry["objections"].append({"at": (event["ts"] if event else "")[:10], "reason": challenge["reason"][:600],
+                                    "counter": counter, "reviewed": reviewed})
+        if reviewed:
+            entry["status"] = "contested"
+    return out
+
+
+def contested(disputes: dict, assertion_id: str) -> bool:
+    return disputes.get(assertion_id, {}).get("status") == "contested"
