@@ -6,10 +6,12 @@ The owner authorized a background Luna run on 2026-10-04 with a **USD 30 screeni
 
 ```powershell
 ./.venv/Scripts/python -u -B -m enrich.trials.full_run collect
-./.venv/Scripts/python -u -B -m enrich.trials.full_run screen --budget 30 --workers 64
+./.venv/Scripts/python -u -B -m enrich.trials.full_run screen --budget 30 --workers 96 --max-workers 384 --continuous
 ```
 
 These can run together. They use their own SQLite job database, **never the claims ledger**. They are resumable. OS file locks prevent a second collector or screener from duplicating work or sharing the same spending cap.
+
+The current continuous scheduler replaces wave barriers. It refills as requests finish, adapts workers to measured latency/errors, and targets 950,000 estimated tokens / 950 requests per rolling minute against the ARM-verified 1M TPM / 1,000 RPM deployment quota. Prompt estimates learn from actual usage; output allowances remain part of rate admission. `throughput.json` reports both actual and admission rates. Budget reservation still uses the conservative worst-case bound, independently of throughput tuning. Each completed job releases its own reservation atomically with its checkpoint; uncertain calls retain theirs. Export runs every 1,000 new decisions and at clean stop. Create `stop-screening` in the output directory to stop dispatch and drain in-flight work, then remove that marker before resuming. Current log: `screening-continuous.log`. The older wave-mode notes below are historical.
 
 Artifacts and logs live in `data/enrichment/trials/full/` (gitignored): `jobs.db`, `collection.log`, `screening.log`, `manifest.json`, `candidates.jsonl`, source archives and decisions. Screening exports every 240 newly completed pairs and on a clean stop. For an explicit export when screening is stopped:
 

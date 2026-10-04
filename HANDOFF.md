@@ -2,6 +2,13 @@
 
 ## Lead-agent continuation (2026-10-04)
 
+### Continuous screening and completed community scout (latest)
+
+- Luna now runs `screen --budget 30 --workers 96 --max-workers 384 --continuous`. It continuously refills requests, adapts concurrency, and measures rolling actual and estimated admission TPM/RPM. Azure deployment quota was verified through ARM: 1,000,000 TPM / 1,000 RPM. Admission targets 950k/950; worst-case cost reservations remain separate. `throughput.json` and `screening-continuous.log` under `data/enrichment/trials/full/` are current. Early sustained measurements: approximately 550k actual TPM / 360 RPM, versus 147k / 94 before this change, with no recent 429s. Requested output allowances make admission and billed tokens different.
+- Create `data/enrichment/trials/full/stop-screening` for a graceful drain/checkpoint; remove it before restarting. Do not kill and restart to change settings casually: uncertain paid requests retain their reservations.
+- The community scout is now **complete for all 62 requested conditions**, with a verified ledger log. Empty HTML pages are skipped and counted, allowing alternative pages to be considered. Receipt: `data/campaigns/first-campaign-communities.json`; final retry log: `data/build/community-final-retry.log`. The old scout has exited; the production ledger is no longer occupied by it. These new results have not yet been exported/deployed.
+- Regression suite: **114 passed**. Second-agent assignment: `docs/agent_tasks/family_journey_parallel.md`. Lead owns infrastructure/MCP/data; the user-launched second agent owns its scoped family UI changes in a separate worktree.
+
 ### Local MCP milestone (latest)
 
 - Owner clarified that the next major milestone is the contribution loop as well as the family experience. `atlas_mcp/` now implements 13 local stdio MCP tools: search/read/schema, frontier/task leases, official PubMed/ClinicalTrials source archiving, signed queued claims/reviews/challenges, submission status and factual activity events. Setup is in `atlas_mcp/README.md`; absolute entry point: `tools/run_mcp.py`.

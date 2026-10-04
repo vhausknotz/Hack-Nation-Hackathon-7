@@ -121,6 +121,8 @@ New Ledger instances enforce an OS writer lease. Processes already running when 
 
 ## Working preferences
 
+**Current parallel coordination:** Codex lead owns `atlas_mcp/`, ledger/pipeline/agent code, Luna runs, infrastructure and deployment. The owner's second coding agent should read `docs/agent_tasks/family_journey_parallel.md`, use a separate worktree and own only its scoped family UI files. Record cross-agent requests in the task report; the owner can relay its path/commit. Historical trials-agent instructions are superseded by this assignment for new parallel work.
+
 - Don't put time estimates on tasks or plans. Describe steps by what they produce.
 - Clarity beats feature count. Every screen should make sense at a glance; depth goes behind a click.
 - Respect data licenses and site terms. OMIM restricts redistribution, so reference OMIM IDs through HPO and MONDO crosswalks.

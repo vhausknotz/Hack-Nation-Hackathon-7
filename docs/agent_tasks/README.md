@@ -2,6 +2,8 @@
 
 Some tasks are handed to a second coding agent working in parallel. These rules keep its work from colliding with the main line of work.
 
+**Current assignment (2026-10-04):** [family_journey_parallel.md](family_journey_parallel.md). Its explicit frontend ownership overrides the historical read-only `app/` rule below. Codex lead owns the backend, data jobs, deployment and main integration. The trials pilot assignment is historical and must not be restarted.
+
 1. **Work in your own git worktree and branch.** Never commit to `main`, and never force-push. Set up with:
 
    ```

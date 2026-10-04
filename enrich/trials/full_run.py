@@ -212,11 +212,16 @@ def screen_one(job, gate):
     for cap in (1200, 4096):
         from openai import RateLimitError
         for throttle_attempt in range(8):
-            gate.acquire(token_bound(messages) + cap)
+            if hasattr(gate, "acquire_request"):
+                gate.acquire_request(messages, cap)
+            else:
+                gate.acquire(token_bound(messages) + cap)
             try:
                 raw = llm.chat(pilot.MODEL, messages, task="trials-full-v2", json_mode=True, max_completion_tokens=cap)
                 break
-            except RateLimitError:
+            except RateLimitError as exc:
+                if hasattr(gate, "failed"):
+                    gate.failed(exc)
                 if throttle_attempt == 7:
                     raise
                 time.sleep(min(45, 5 * (throttle_attempt + 1)))
@@ -382,14 +387,20 @@ def main():
     parser.add_argument("--workers", type=int, default=24)
     parser.add_argument("--max-pages", type=int, default=0)
     parser.add_argument("--max-pairs", type=int, default=0)
+    parser.add_argument("--continuous", action="store_true")
+    parser.add_argument("--max-workers", type=int, default=384)
     args = parser.parse_args()
-    if not 0 < args.budget <= 30 or not 1 <= args.workers <= 96:
-        parser.error("Budget must be <=30 USD; concurrency must be 1..96 (shared token/request gates still apply)")
+    if not 0 < args.budget <= 30 or not 1 <= args.workers <= 384 or not args.workers <= args.max_workers <= 512:
+        parser.error("Budget must be <=30 USD; initial concurrency 1..384, maximum up to 512")
     with single_run("collect" if args.phase == "collect" else "screen"):
         if args.phase == "collect":
             collect(args.max_pages)
         elif args.phase == "screen":
-            screen(args.budget, args.workers, args.max_pairs)
+            if args.continuous:
+                from .continuous import run
+                run(args.budget, args.workers, args.max_workers, args.max_pairs)
+            else:
+                screen(args.budget, args.workers, args.max_pairs)
         else:
             export()
 

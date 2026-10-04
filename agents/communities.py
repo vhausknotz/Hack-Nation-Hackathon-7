@@ -26,6 +26,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
+from lxml.etree import ParserError
 
 from . import ROOT
 import llm  # noqa: E402
@@ -320,7 +321,13 @@ def scout_condition(c, name, ledger, scout, verifier, pages):
                 if got is None:
                     pages[url] = None
                 else:
-                    src = sources.archive(got[0], got[1], "html", "organization website, quoted for citation", False)
+                    try:
+                        src = sources.archive(got[0], got[1], "html", "organization website, quoted for citation", False)
+                    except ParserError:
+                        # Empty/broken pages are missing evidence, not a failure of all remaining organizations.
+                        pages[url] = None
+                        r["dropped_unreadable_page"] += 1
+                        continue
                     ledger.add_source(src, scout)
                     pages[url] = (src, sources.read_text(src) or "", got[2], got[3])
             if pages[url] is None:

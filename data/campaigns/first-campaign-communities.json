@@ -1,0 +1,1101 @@
+{
+ "campaign": "first-campaign-communities",
+ "kind": "communities",
+ "started": "2026-10-03T23:18:36+00:00",
+ "conditions": {
+  "MONDO:0007163": {
+   "name": "Episodic ataxia type 2",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 8,
+   "claims_kernel_accepted": 8,
+   "review_supports": 3,
+   "review_supports_with_qualification": 2,
+   "dropped_page_does_not_name_condition": 1,
+   "review_does_not_support": 3,
+   "corrected_kind_or_scope": 1,
+   "found": [
+    "CACNA1A Foundation (patient_organization, this_gene, live) [supports]",
+    "National Ataxia Foundation (patient_organization, broader_group, live) [supports_with_qualification]",
+    "Child Neurology Foundation (information_service, broader_group, live) [supports]",
+    "Epilepsy Foundation of Australia (patient_organization, broader_group, live) [does_not_support]",
+    "Rare Epilepsy Network (patient_organization, broader_group, live) [supports_with_qualification]",
+    "Ataxia UK (patient_organization, broader_group, live) [supports]",
+    "International registry of CACNA1A variants for genetic modifiers identification (research_program, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0008457": {
+   "name": "Spinocerebellar ataxia type 6",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 4,
+   "claims_proposed": 4,
+   "claims_kernel_accepted": 4,
+   "review_supports": 4,
+   "dropped_page_does_not_name_condition": 2,
+   "skipped_directory_or_platform": 2,
+   "found": [
+    "CACNA1A Foundation (patient_organization, this_gene, live) [supports]",
+    "National Ataxia Foundation (patient_organization, broader_group, live) [supports]",
+    "Ataxia UK (patient_organization, broader_group, live) [supports]",
+    "RARE-X CACNA1A Data Collection Program (research_program, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0011891": {
+   "name": "GABRG2-related epilepsy, generalized, with febrile seizures plus",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 3,
+   "claims_proposed": 4,
+   "claims_kernel_accepted": 4,
+   "review_supports": 1,
+   "review_supports_with_qualification": 1,
+   "page_archived_snapshot": 1,
+   "review_does_not_support": 2,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]",
+    "GABA-A Alliance (patient_organization, broader_group, live) [supports_with_qualification]",
+    "Epilepsy Foundation (patient_organization, broader_group, archived_snapshot) [does_not_support]",
+    "CURE Epilepsy (patient_organization, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0012627": {
+   "name": "GABRA1-related juvenile myoclonic epilepsy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 6,
+   "claims_kernel_accepted": 6,
+   "review_supports": 3,
+   "review_does_not_support": 3,
+   "corrected_kind_or_scope": 1,
+   "skipped_directory_or_platform": 3,
+   "found": [
+    "Scarlett’s GABRA1 Village (patient_organization, this_gene, live) [supports]",
+    "GABA-A Alliance (information_service, this_gene, live) [supports]",
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]",
+    "The Defeating Epilepsy Foundation (patient_organization, broader_group, live) [does_not_support]",
+    "Epilepsiome (Beyond the Ion Channel) (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0012812": {
+   "name": "STXBP1-related epileptic encephalopathy early infantile",
+   "status": "complete",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "organizations_named": 5,
+   "page_live": 2,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_supports": 2,
+   "dropped_page_does_not_name_condition": 3,
+   "found": [
+    "STXBP1 Disorders Foundation (patient_organization, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0012843": {
+   "name": "GABRB3-related childhood absence epilepsy",
+   "status": "complete",
+   "organizations_named": 6,
+   "page_live": 4,
+   "claims_proposed": 6,
+   "claims_kernel_accepted": 6,
+   "review_supports": 3,
+   "review_does_not_support": 2,
+   "corrected_kind_or_scope": 2,
+   "review_supports_with_qualification": 1,
+   "dropped_page_does_not_name_condition": 2,
+   "found": [
+    "GABRB3 Life Changes ODV (patient_organization, this_gene, live) [supports]",
+    "GABA-A Receptor Alliance (patient_organization, this_gene, live) [supports]",
+    "CURE GABA-A (patient_organization, broader_group, live) [supports_with_qualification]",
+    "Epilepsiome (International League Against Epilepsy Genetics Commission) (information_service, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0012960": {
+   "name": "SYNGAP1-related intellectual developmental disorder",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 7,
+   "claims_kernel_accepted": 7,
+   "review_supports": 7,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "CURE SYNGAP1 (formerly SynGAP Research Fund) (patient_organization, this_gene, live) [supports]",
+    "SYNGAP1 Foundation (formerly Bridge the Gap – SYNGAP Education and Research Foundation) (patient_organization, this_gene, live) [supports]",
+    "Overcome SynGAP1 (Cômbattre SynGAP1) (patient_organization, this_gene, live) [supports]",
+    "SYNGAP1 France (patient_organization, this_gene, live) [supports]",
+    "SYNGAP Elternhilfe e.V. (patient_organization, this_gene, live) [supports]",
+    "Syngap Research Fund Australia (patient_organization, this_gene, live) [supports]",
+    "SYNGAP1 UK / SynGAP Research Fund UK (patient_organization, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0013135": {
+   "name": "Familial hemophagocytic lymphohistiocytosis 5",
+   "status": "complete",
+   "organizations_named": 6,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "skipped_directory_or_platform": 4,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "Histiocytosis Association (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0013388": {
+   "name": "SCN2A-related infantile epileptic encephalopathy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 8,
+   "claims_kernel_accepted": 8,
+   "review_supports": 7,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "The SCN2A Foundation (patient_organization, this_gene, live) [supports]",
+    "FamilieSCN2A Foundation (patient_organization, this_gene, live) [supports]",
+    "SCN2A Australia (patient_organization, broader_group, live) [supports]",
+    "SCN2A Europe (patient_organization, this_gene, live) [supports]",
+    "SCN2A Germany e.V. (patient_organization, this_gene, live) [supports]",
+    "SCN2A Italia Famiglie in Rete APS (patient_organization, this_gene, live) [supports]",
+    "Cure SCN2A (patient_organization, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0014328": {
+   "name": "GABRA1-related epileptic encephalopathy",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 4,
+   "claims_proposed": 6,
+   "claims_kernel_accepted": 6,
+   "review_supports": 3,
+   "review_does_not_support": 3,
+   "corrected_kind_or_scope": 2,
+   "found": [
+    "Scarlett’s GABRA1 Village (patient_organization, broader_group, live) [supports]",
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]",
+    "GABA-A Alliance (patient_organization, this_gene, live) [does_not_support]",
+    "Defeating Epilepsy Foundation (information_service, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0014517": {
+   "name": "STX1B-related generalized epilepsy with febrile seizures plus",
+   "status": "complete",
+   "organizations_named": 4,
+   "skipped_directory_or_platform": 2,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "found": [
+    "DisMech (Monarch Initiative) (information_service, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0014590": {
+   "name": "SNAP25-related epilepsy and intellectual disability",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 3,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "SNAP25 Foundation (patient_organization, this_gene, live) [supports]",
+    "RARE-X (research_program, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0014633": {
+   "name": "SLC6A1-related epilepsy with myoclonic-atonic seizures",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 9,
+   "claims_kernel_accepted": 9,
+   "review_supports": 8,
+   "page_archived_snapshot": 1,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "found": [
+    "SLC6A1 Connect (patient_organization, this_gene, live) [supports]",
+    "SLC6A1 Kids (patient_organization, this_gene, live) [supports]",
+    "SLC6A1 Switzerland (patient_organization, this_gene, live) [supports]",
+    "SLC6A1 France (patient_organization, this_gene, live) [supports]",
+    "SLC6A1 Deutschland e.V. (patient_organization, this_gene, live) [supports]",
+    "SLC6A1 Europe Alliance (patient_organization, this_gene, archived_snapshot) [supports]",
+    "SLC6A1 Spain (patient_organization, this_gene, live) [supports]",
+    "Arthur’s Quest (SLC6A1 Connect UK-AQ) (patient_organization, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0014917": {
+   "name": "CACNA1A-related epileptic encephalopathy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 6,
+   "claims_proposed": 9,
+   "claims_kernel_accepted": 9,
+   "review_supports": 7,
+   "skipped_directory_or_platform": 1,
+   "review_does_not_support": 2,
+   "corrected_kind_or_scope": 2,
+   "page_archived_snapshot": 1,
+   "found": [
+    "CACNA1A Foundation (patient_organization, this_gene, live) [supports]",
+    "The Bee-lievers (patient_organization, this_gene, live) [supports]",
+    "CACNA1A Global Research Network (professional_network, this_gene, live) [supports]",
+    "CACNA1A Portal (LAL Research Group) (research_program, this_gene, live) [supports]",
+    "RARE-X CACNA1A Data Collection Program (research_program, this_gene, live) [supports]",
+    "Citizen Health CACNA1A AI Advocate (company, this_gene, live) [supports]",
+    "UTHealth Houston Multidisciplinary Center for CACNA1A-Related Disorders (company, this_gene, archived_snapshot) [supports]"
+   ]
+  },
+  "MONDO:0014921": {
+   "name": "Developmental and epileptic encephalopathy, 43",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 3,
+   "claims_proposed": 4,
+   "claims_kernel_accepted": 4,
+   "review_supports": 3,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "GABRB3 Life Changes ODV (patient_organization, this_gene, live) [supports]",
+    "GABA-A Alliance (patient_organization, this_gene, live) [supports]",
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0019113": {
+   "name": "Benign paroxysmal torticollis of infancy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 4,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "skipped_directory_or_platform": 3,
+   "review_does_not_support": 4,
+   "corrected_kind_or_scope": 1,
+   "found": [
+    "CACNA1A Foundation (patient_organization, this_gene, live) [supports]",
+    "Child Neurology Knowledge Environment (Child-Neurology.Org) (professional_network, this_condition, live) [does_not_support]",
+    "Rare Disease Research Atlas (research_program, this_condition, live) [does_not_support]",
+    "UniteRare (information_service, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0020756": {
+   "name": "Migraine, familial hemiplegic, 1",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 7,
+   "claims_kernel_accepted": 7,
+   "review_supports": 4,
+   "dropped_page_does_not_name_condition": 2,
+   "review_does_not_support": 2,
+   "corrected_kind_or_scope": 2,
+   "skipped_directory_or_platform": 1,
+   "review_supports_with_qualification": 1,
+   "found": [
+    "CACNA1A Foundation (patient_organization, this_gene, live) [supports]",
+    "RARE-X CACNA1A Data Collection Program (research_program, this_gene, live) [supports]",
+    "Child Neurology Foundation (information_service, broader_group, live) [supports]",
+    "Association of Migraine Disorders (information_service, broader_group, live) [supports_with_qualification]",
+    "Migraine Science Collaborative (information_service, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0023659": {
+   "name": "Developmental and epileptic encephalopathy 96",
+   "status": "complete",
+   "organizations_named": 3,
+   "skipped_directory_or_platform": 3,
+   "found": []
+  },
+  "MONDO:0030064": {
+   "name": "Episodic ataxia, type 9",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 8,
+   "claims_kernel_accepted": 8,
+   "review_supports": 7,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "FamilieSCN2A Foundation (patient_organization, this_gene, live) [supports]",
+    "The SCN2A Foundation (patient_organization, this_gene, live) [supports]",
+    "SCN2A Australia (patient_organization, this_gene, live) [supports]",
+    "SCN2A Germany e.V. (patient_organization, this_gene, live) [supports]",
+    "SCN2A Italia – Famiglie in Rete APS (patient_organization, this_gene, live) [supports]",
+    "SCN2A Europe (patient_organization, this_gene, live) [supports]",
+    "Cure SCN2A (patient_organization, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0032725": {
+   "name": "Developmental and epileptic encephalopathy, 74",
+   "status": "complete",
+   "organizations_named": 5,
+   "page_live": 2,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports_with_qualification": 1,
+   "review_supports": 1,
+   "skipped_directory_or_platform": 2,
+   "page_archived_snapshot": 1,
+   "review_does_not_support": 1,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports_with_qualification]",
+    "GABA-A Alliance (patient_organization, broader_group, live) [supports]",
+    "Epilepsy Foundation (patient_organization, broader_group, archived_snapshot) [does_not_support]"
+   ]
+  },
+  "MONDO:0032900": {
+   "name": "VAMP2-related intellectual disability",
+   "status": "complete",
+   "organizations_named": 6,
+   "page_live": 3,
+   "claims_proposed": 4,
+   "claims_kernel_accepted": 4,
+   "review_supports": 3,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "dropped_page_does_not_name_condition": 2,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "VAMP2 (patient_organization, this_gene, live) [supports]",
+    "Raging Raymond Foundation (patient_organization, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0033372": {
+   "name": "Developmental and epileptic encephalopathy, 63",
+   "status": "complete",
+   "organizations_named": 4,
+   "skipped_directory_or_platform": 2,
+   "page_live": 2,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_does_not_support": 2,
+   "found": [
+    "DisMech (Monarch Initiative) (research_program, this_gene, live) [does_not_support]",
+    "EDITGENE (EditXor) (company, this_condition, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0033864": {
+   "name": "SYT1-related intellectual disability",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 4,
+   "claims_proposed": 7,
+   "claims_kernel_accepted": 7,
+   "review_supports": 3,
+   "dropped_page_does_not_name_condition": 1,
+   "review_does_not_support": 3,
+   "corrected_kind_or_scope": 3,
+   "review_supports_with_qualification": 1,
+   "skipped_directory_or_platform": 3,
+   "found": [
+    "The Baker-Gordon Syndrome Foundation (patient_organization, this_condition, live) [supports]",
+    "Human Disease Genes website series (information_service, this_gene, live) [supports]",
+    "MRC Cognition and Brain Sciences Unit, University of Cambridge (information_service, this_condition, live) [supports]",
+    "Rare Epilepsy Network (patient_organization, broader_group, live) [supports_with_qualification]"
+   ]
+  },
+  "MONDO:0980940": {
+   "name": "UNC13A-related congenital neurodevelopmental disorder with epilepsy",
+   "status": "complete",
+   "organizations_named": 7,
+   "dropped_page_does_not_name_condition": 4,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_does_not_support": 3,
+   "found": [
+    "My Name’5 Doddie Foundation (patient_organization, broader_group, live) [does_not_support]",
+    "Motor Neurone Disease Foundation (patient_organization, broader_group, live) [does_not_support]",
+    "LifeArc (research_program, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0980941": {
+   "name": "UNC13A-related neurodevelopmental disorder with seizures and movement disorder",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_does_not_support": 3,
+   "dropped_page_does_not_name_condition": 2,
+   "review_out_of_scope": 2,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "ClinGen Gene Curation Coalition (GenCC) (professional_network, this_condition, live) [does_not_support]",
+    "TRICALS (professional_network, broader_group, live) [does_not_support]",
+    "Target ALS (research_program, broader_group, live) [out_of_scope]",
+    "ALS Therapy Development Institute (ALS TDI) (research_program, broader_group, live) [out_of_scope]",
+    "Simons Foundation Autism Research Initiative (SFARI) (research_program, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0008310": {
+   "name": "LMNA-related Hutchinson-Gilford progeria syndrome",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_archived_snapshot": 2,
+   "claims_proposed": 6,
+   "claims_kernel_accepted": 6,
+   "review_supports": 2,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 3,
+   "review_does_not_support": 3,
+   "corrected_kind_or_scope": 1,
+   "review_supports_with_qualification": 1,
+   "skipped_directory_or_platform": 2,
+   "found": [
+    "The Progeria Research Foundation (patient_organization, this_condition, archived_snapshot) [supports]",
+    "Progeria Family Circle (patient_organization, broader_group, live) [supports]",
+    "Laminopathy.org (information_service, this_gene, archived_snapshot) [supports_with_qualification]",
+    "LMNA Cardiac Diseases Network (professional_network, this_gene, live) [does_not_support]",
+    "LMNA-PRIORITY (professional_network, this_gene, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0032788": {
+   "name": "Cerebellar atrophy with seizures and variable developmental delay",
+   "status": "complete",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "found": []
+  },
+  "MONDO:0013464": {
+   "name": "Episodic ataxia type 5",
+   "status": "complete",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "organizations_named": 3,
+   "dropped_page_does_not_name_condition": 1,
+   "skipped_directory_or_platform": 2,
+   "found": []
+  },
+  "MONDO:0032657": {
+   "name": "CACNA1E-related epileptic encephalopathy with contractures, macrocephaly, and dyskinesia",
+   "status": "complete",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "organizations_named": 6,
+   "page_live": 2,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 3,
+   "dropped_unreadable_page": 1,
+   "skipped_directory_or_platform": 1,
+   "review_does_not_support": 1,
+   "found": [
+    "CACNA1E Foundation (patient_organization, this_gene, live) [supports]",
+    "SFARI Gene (research_program, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0013523": {
+   "name": "BANF1-related Nestor-Guillermo progeria syndrome",
+   "status": "complete",
+   "organizations_named": 6,
+   "skipped_directory_or_platform": 4,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 1,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "review_supports": 1,
+   "found": [
+    "Human Disease Genes website series (information_service, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0800042": {
+   "name": "ZMPSTE24-related lethal restrictive dermopathy",
+   "status": "complete",
+   "organizations_named": 4,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports_with_qualification": 1,
+   "skipped_directory_or_platform": 3,
+   "found": [
+    "Genetic Support Network Victoria (GSNV) (patient_organization, broader_group, live) [supports_with_qualification]"
+   ]
+  },
+  "MONDO:0017892": {
+   "name": "SYNE1-related AMC",
+   "status": "complete",
+   "organizations_named": 6,
+   "skipped_directory_or_platform": 4,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "found": [
+    "UniteRare (company, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0032784": {
+   "name": "CACNA1B-related neurodevelopmental disorder with seizures and nonepileptic hyperkinetic movements",
+   "status": "complete",
+   "organizations_named": 7,
+   "skipped_directory_or_platform": 3,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_does_not_support": 3,
+   "found": [
+    "Gene Curation Coalition (GenCC) (professional_network, broader_group, live) [does_not_support]",
+    "Genomics England PanelApp (professional_network, broader_group, live) [does_not_support]",
+    "PanelApp Australia (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0005579": {
+   "name": "Idiopathic generalized epilepsy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_does_not_support": 3,
+   "skipped_directory_or_platform": 4,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "GenCC (Gene Curation Coalition) (professional_network, this_condition, live) [does_not_support]",
+    "Genomics England PanelApp (research_program, broader_group, live) [does_not_support]",
+    "Genomics England PanelApp Australia (research_program, this_condition, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0032812": {
+   "name": "GABRA2-related epileptic encephalopathy",
+   "status": "complete",
+   "organizations_named": 3,
+   "page_live": 2,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "review_supports": 2,
+   "skipped_directory_or_platform": 1,
+   "found": [
+    "GABA-A Receptor Alliance (patient_organization, this_gene, live) [supports]",
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0014942": {
+   "name": "Developmental and epileptic encephalopathy, 45",
+   "status": "complete",
+   "organizations_named": 4,
+   "skipped_directory_or_platform": 2,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0013103": {
+   "name": "Epilepsy, idiopathic generalized, susceptibility to, 10",
+   "status": "complete",
+   "organizations_named": 2,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0014505": {
+   "name": "GRIN2B-related epileptic encelopathy",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_supports": 5,
+   "dropped_page_does_not_name_condition": 3,
+   "found": [
+    "GRIN2B Foundation (patient_organization, this_gene, live) [supports]",
+    "2BCured (patient_organization, this_gene, live) [supports]",
+    "GRIN Variant Patient Registry (research_program, broader_group, live) [supports]",
+    "CureGRIN Foundation (patient_organization, broader_group, live) [supports]",
+    "GRIN Europe (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0013509": {
+   "name": "GRIN2B-related intellectual developmental disorder",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_supports": 5,
+   "dropped_page_does_not_name_condition": 3,
+   "found": [
+    "GRIN2B Foundation (patient_organization, this_gene, live) [supports]",
+    "2BCured / GRIN2B Research Foundation (patient_organization, this_condition, live) [supports]",
+    "GRIN Europe (patient_organization, broader_group, live) [supports]",
+    "GRI-UK (patient_organization, broader_group, live) [supports]",
+    "GRI France (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0010452": {
+   "name": "DLG3-related intellectual developmental disorder",
+   "status": "complete",
+   "organizations_named": 6,
+   "skipped_directory_or_platform": 4,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_does_not_support": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "Gene Curation Coalition (GenCC) (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0011336": {
+   "name": "Familial hemophagocytic lymphohistiocytosis 4",
+   "status": "complete",
+   "organizations_named": 8,
+   "skipped_directory_or_platform": 5,
+   "dropped_page_does_not_name_condition": 2,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "found": [
+    "Histiocytosis Association (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0859170": {
+   "name": "Retinal dystrophy and microvillus inclusion disease",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_archived_snapshot": 1,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 1,
+   "skipped_directory_or_platform": 2,
+   "dropped_page_does_not_name_condition": 3,
+   "page_live": 2,
+   "review_does_not_support": 2,
+   "found": [
+    "International Microvillus Inclusion Disease Patient Registry (MVID Central) (research_program, broader_group, archived_snapshot) [supports]",
+    "Genomics England PanelApp (professional_network, broader_group, live) [does_not_support]",
+    "Sequencing.com (company, this_condition, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0957955": {
+   "name": "Immunodeficiency 114, folate-responsive",
+   "status": "complete",
+   "organizations_named": 7,
+   "skipped_directory_or_platform": 4,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_does_not_support": 1,
+   "dropped_page_does_not_name_condition": 2,
+   "found": [
+    "Genomics England PanelApp (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0100135": {
+   "name": "Dravet syndrome",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 7,
+   "claims_proposed": 7,
+   "claims_kernel_accepted": 7,
+   "review_supports": 5,
+   "review_does_not_support": 2,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "Dravet Syndrome Foundation (patient_organization, this_condition, live) [supports]",
+    "SCN1A Gain of Function Foundation (patient_organization, this_gene, live) [does_not_support]",
+    "Dravet Canada (patient_organization, this_gene, live) [supports]",
+    "Dravet Syndrome European Federation (patient_organization, this_condition, live) [supports]",
+    "Dravet Syndrome Japan (patient_organization, this_condition, live) [supports]",
+    "CHN Dravet Syndrome Patient Support Group (patient_organization, this_condition, live) [supports]",
+    "Síndrome de Dravet Brasil (patient_organization, this_condition, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0013801": {
+   "name": "SCN8A-related epileptic encephalopathy, early infantile",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_archived_snapshot": 1,
+   "claims_proposed": 8,
+   "claims_kernel_accepted": 8,
+   "review_supports": 8,
+   "page_live": 7,
+   "found": [
+    "International SCN8A Alliance (patient_organization, this_gene, archived_snapshot) [supports]",
+    "The Cute Syndrome Foundation (patient_organization, this_gene, live) [supports]",
+    "SCN8A France (patient_organization, this_gene, live) [supports]",
+    "SCN8A España (patient_organization, this_gene, live) [supports]",
+    "SCN8A Netherlands (Stichting SCN8A Nederland) (patient_organization, this_gene, live) [supports]",
+    "SCN8A UK & Ireland (patient_organization, this_gene, live) [supports]",
+    "SCN8A Italia ODV (patient_organization, this_gene, live) [supports]",
+    "SCN8A Germany (patient_organization, this_gene, live) [supports]"
+   ]
+  },
+  "MONDO:0033371": {
+   "name": "Developmental and epileptic encephalopathy, 62",
+   "status": "complete",
+   "scout_fallback": 1,
+   "scout_recall": 1,
+   "organizations_named": 4,
+   "dropped_page_does_not_name_condition": 3,
+   "skipped_directory_or_platform": 1,
+   "found": []
+  },
+  "MONDO:0032675": {
+   "name": "Myasthenic syndrome, congenital, 25, presynaptic",
+   "status": "complete",
+   "organizations_named": 3,
+   "skipped_directory_or_platform": 3,
+   "found": []
+  },
+  "MONDO:0030957": {
+   "name": "Developmental and epileptic encephalopathy 103",
+   "status": "complete",
+   "organizations_named": 4,
+   "skipped_directory_or_platform": 2,
+   "page_live": 2,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_does_not_support": 2,
+   "found": [
+    "Gene Curation Coalition (GenCC) (professional_network, broader_group, live) [does_not_support]",
+    "Genomics England PanelApp (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0030909": {
+   "name": "CNKSR2-related intellectual disability with epilepsy",
+   "status": "complete",
+   "organizations_named": 8,
+   "dropped_page_does_not_name_condition": 4,
+   "skipped_directory_or_platform": 4,
+   "dropped_unreadable_page": 2,
+   "found": []
+  },
+  "MONDO:0013970": {
+   "name": "Branched-chain keto acid dehydrogenase kinase deficiency",
+   "status": "complete",
+   "organizations_named": 7,
+   "page_live": 1,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 2,
+   "skipped_directory_or_platform": 3,
+   "dropped_page_does_not_name_condition": 2,
+   "page_archived_snapshot": 1,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "found": [
+    "Simons Searchlight (research_program, this_gene, live) [supports]",
+    "Baby Detect (information_service, this_condition, archived_snapshot) [supports]"
+   ]
+  },
+  "MONDO:0011892": {
+   "name": "CACNB4-related juvenile myoclonic epilepsy",
+   "status": "complete",
+   "organizations_named": 8,
+   "dropped_page_does_not_name_condition": 5,
+   "page_live": 1,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "review_supports_with_qualification": 1,
+   "skipped_directory_or_platform": 2,
+   "found": [
+    "Child Neurology Foundation (information_service, broader_group, live) [supports_with_qualification]"
+   ]
+  },
+  "MONDO:0031055": {
+   "name": "NAPB-related neurodevelopmental disorder",
+   "status": "complete",
+   "organizations_named": 5,
+   "skipped_directory_or_platform": 3,
+   "dropped_page_does_not_name_condition": 2,
+   "found": []
+  },
+  "MONDO:0700358": {
+   "name": "GABRA4-related neurodevelopmental disorder with seizures",
+   "status": "complete",
+   "organizations_named": 2,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0700359": {
+   "name": "GABRD-related neurodevelopmental disorder with epilepsy",
+   "status": "complete",
+   "organizations_named": 2,
+   "page_live": 1,
+   "claims_proposed": 1,
+   "claims_kernel_accepted": 1,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0030268": {
+   "name": "Developmental and epileptic encephalopathy 6B",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 8,
+   "claims_proposed": 9,
+   "claims_kernel_accepted": 9,
+   "review_supports": 2,
+   "review_does_not_support": 7,
+   "corrected_kind_or_scope": 1,
+   "found": [
+    "Simons Searchlight (research_program, this_gene, live) [supports]",
+    "SCN1A Gain of Function Foundation (patient_organization, this_condition, live) [supports]",
+    "Dravet Canada (patient_organization, broader_group, live) [does_not_support]",
+    "Dravet Syndrome Foundation (patient_organization, broader_group, live) [does_not_support]",
+    "Dravet Syndrome UK (patient_organization, broader_group, live) [does_not_support]",
+    "Alliance Syndrome de Dravet (patient_organization, broader_group, live) [does_not_support]",
+    "Dravet-Syndrom e.V. (patient_organization, broader_group, live) [does_not_support]",
+    "Dravet Danmark (patient_organization, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0011461": {
+   "name": "SCN1A-related seizure disorders",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 5,
+   "claims_proposed": 10,
+   "claims_kernel_accepted": 10,
+   "review_does_not_support": 9,
+   "corrected_kind_or_scope": 5,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 3,
+   "found": [
+    "Simons Searchlight (research_program, broader_group, live) [supports]",
+    "Dravet Syndrome Foundation (patient_organization, this_condition, live) [does_not_support]",
+    "Dravet Syndrome UK (patient_organization, this_condition, live) [does_not_support]",
+    "Dravet Canada (patient_organization, this_condition, live) [does_not_support]",
+    "Dravet-Syndrom e.V. (patient_organization, this_condition, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0020631": {
+   "name": "GABRB2-related epilepsy and intellectual disability",
+   "status": "complete",
+   "organizations_named": 4,
+   "dropped_page_does_not_name_condition": 1,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_supports": 3,
+   "found": [
+    "CURE GABA-A (patient_organization, broader_group, live) [supports]",
+    "GABA-A Alliance (patient_organization, broader_group, live) [supports]",
+    "Rare Epilepsy Network (patient_organization, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0958331": {
+   "name": "SLC32A1-related developmental and epileptic encephalopathy",
+   "status": "complete",
+   "organizations_named": 7,
+   "skipped_directory_or_platform": 3,
+   "page_live": 3,
+   "claims_proposed": 3,
+   "claims_kernel_accepted": 3,
+   "review_does_not_support": 2,
+   "review_supports": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "Genomics England PanelApp (professional_network, broader_group, live) [does_not_support]",
+    "Australian PanelApp (professional_network, broader_group, live) [does_not_support]",
+    "Gene Curation Coalition (GenCC) (professional_network, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0033543": {
+   "name": "RIMS2-related syndromic congenital cone-rod synaptic disease",
+   "status": "complete",
+   "organizations_named": 8,
+   "dropped_page_does_not_name_condition": 4,
+   "page_live": 2,
+   "claims_proposed": 2,
+   "claims_kernel_accepted": 2,
+   "review_does_not_support": 2,
+   "skipped_directory_or_platform": 2,
+   "found": [
+    "Institut Imagine (research_program, broader_group, live) [does_not_support]",
+    "Gene Curation Coalition (GenCC) (professional_network, broader_group, live) [does_not_support]"
+   ]
+  },
+  "MONDO:0010483": {
+   "name": "NEXMIF-related intellectual disability and epilepsy (heterozygous)",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 4,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_supports": 4,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "skipped_directory_or_platform": 3,
+   "found": [
+    "NEXMIF Foundation (patient_organization, this_gene, live) [supports]",
+    "XLID98 Foundation (patient_organization, this_gene, live) [supports]",
+    "NEXMIF ITALIA ODV (patient_organization, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, broader_group, live) [supports]"
+   ]
+  },
+  "MONDO:0010396": {
+   "name": "CDKL5-related epileptic encephalopathy, early infantile",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 8,
+   "claims_proposed": 8,
+   "claims_kernel_accepted": 8,
+   "review_supports": 8,
+   "found": [
+    "International Foundation for CDKL5 Research (IFCR) (patient_organization, this_gene, live) [supports]",
+    "CDKL5 Research Collaborative (Kiera’s Hope Project) (patient_organization, this_gene, live) [supports]",
+    "CURE5 Foundation (patient_organization, this_condition, live) [supports]",
+    "CDKL5 UK (patient_organization, this_gene, live) [supports]",
+    "CDKL5 Canada (patient_organization, this_condition, live) [supports]",
+    "CDKL5 South Asia Foundation (patient_organization, this_condition, live) [supports]",
+    "Love Hands (CDKL5 Deficiency Disorder Patient and Family Association, Japan) (patient_organization, this_condition, live) [supports]",
+    "CDKL5 Australia (patient_organization, this_condition, live) [supports]"
+   ]
+  },
+  "MONDO:0010250": {
+   "name": "CLCN4-related infantile epileptic encephalopathy and/or intellectual disability",
+   "status": "complete",
+   "organizations_named": 8,
+   "page_live": 4,
+   "claims_proposed": 5,
+   "claims_kernel_accepted": 5,
+   "review_supports": 4,
+   "skipped_directory_or_platform": 3,
+   "review_does_not_support": 1,
+   "corrected_kind_or_scope": 1,
+   "dropped_page_does_not_name_condition": 1,
+   "found": [
+    "Cure CLCN4 (patient_organization, this_gene, live) [supports]",
+    "Simons Searchlight (research_program, broader_group, live) [supports]",
+    "Translational Centre for Speech Disorders Centre of Research Excellence (information_service, broader_group, live) [supports]",
+    "Human Disease Genes (information_service, this_gene, live) [supports]"
+   ]
+  }
+ },
+ "runs": [
+  {
+   "finished": "2026-10-04T00:24:53+00:00",
+   "seconds": 3978,
+   "web_searches": 255,
+   "usd_tokens_known_prices": 0.2338
+  },
+  {
+   "finished": "2026-10-04T00:31:33+00:00",
+   "seconds": 80,
+   "web_searches": 0,
+   "usd_tokens_known_prices": 0.0
+  }
+ ],
+ "cost_note": "Run deltas below exclude spending before checkpointing was introduced; token totals exclude Sol pricing and web-search fees.",
+ "complete": true,
+ "requested_conditions": [
+  "MONDO:0007163",
+  "MONDO:0008457",
+  "MONDO:0011891",
+  "MONDO:0012627",
+  "MONDO:0012812",
+  "MONDO:0012843",
+  "MONDO:0012960",
+  "MONDO:0013135",
+  "MONDO:0013388",
+  "MONDO:0014328",
+  "MONDO:0014517",
+  "MONDO:0014590",
+  "MONDO:0014633",
+  "MONDO:0014917",
+  "MONDO:0014921",
+  "MONDO:0019113",
+  "MONDO:0020756",
+  "MONDO:0023659",
+  "MONDO:0030064",
+  "MONDO:0032725",
+  "MONDO:0032900",
+  "MONDO:0033372",
+  "MONDO:0033864",
+  "MONDO:0980940",
+  "MONDO:0980941",
+  "MONDO:0008310",
+  "MONDO:0032788",
+  "MONDO:0013464",
+  "MONDO:0032657",
+  "MONDO:0013523",
+  "MONDO:0800042",
+  "MONDO:0017892",
+  "MONDO:0032784",
+  "MONDO:0005579",
+  "MONDO:0032812",
+  "MONDO:0014942",
+  "MONDO:0013103",
+  "MONDO:0014505",
+  "MONDO:0013509",
+  "MONDO:0010452",
+  "MONDO:0011336",
+  "MONDO:0859170",
+  "MONDO:0957955",
+  "MONDO:0100135",
+  "MONDO:0013801",
+  "MONDO:0033371",
+  "MONDO:0032675",
+  "MONDO:0030957",
+  "MONDO:0030909",
+  "MONDO:0013970",
+  "MONDO:0011892",
+  "MONDO:0031055",
+  "MONDO:0700358",
+  "MONDO:0700359",
+  "MONDO:0030268",
+  "MONDO:0011461",
+  "MONDO:0020631",
+  "MONDO:0958331",
+  "MONDO:0033543",
+  "MONDO:0010483",
+  "MONDO:0010396",
+  "MONDO:0010250"
+ ],
+ "finished": "2026-10-04T00:31:33+00:00",
+ "web_searches": 255,
+ "usd_tokens_known_prices": 0.2338,
+ "ledger_tree_head": {
+  "size": 1607,
+  "root": "3c53efde4d8f9160881c002df05664413af07a5f037664914a27c9fd9d260c96"
+ },
+ "log_verified": true
+}
