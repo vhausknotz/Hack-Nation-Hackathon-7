@@ -2,8 +2,10 @@
 import Graph from "graphology";
 import { useEffect, useRef, useState } from "react";
 import Sigma from "sigma";
+import { DEFAULT_SETTINGS } from "sigma/settings";
 import type { MapArea, StarMapData } from "../lib/map";
 import { regionColor } from "../lib/map";
+import { useReducedMotion } from "../lib/useReducedMotion";
 
 export interface Related {
   id: string;
@@ -40,6 +42,7 @@ interface LabelBox {
 const shorten = (text: string, max: number) => (text.length > max ? text.slice(0, max - 1).trimEnd() + "…" : text);
 
 export function StarMap({ data, focus, related, highlight, emphasized, onSelect, onBackground, route, activeStep, onStop }: MapProps) {
+  const reduceMotion = useReducedMotion();
   const container = useRef<HTMLDivElement>(null);
   const sigma = useRef<Sigma | null>(null);
   const state = useRef({ focus, related, highlight, emphasized });
@@ -180,6 +183,22 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
     renderer.refresh();
   }, [focus, related, highlight, emphasized, route]);
 
+  useEffect(() => {
+    const renderer = sigma.current;
+    if (!renderer) return;
+    // Sigma divides by duration internally: 1 ms avoids a zero-duration NaN
+    // while completing on the next frame without a visible tween.
+    renderer.setSettings({
+      zoomDuration: reduceMotion ? 1 : DEFAULT_SETTINGS.zoomDuration,
+      doubleClickZoomingDuration: reduceMotion ? 1 : DEFAULT_SETTINGS.doubleClickZoomingDuration,
+      inertiaDuration: reduceMotion ? 1 : DEFAULT_SETTINGS.inertiaDuration,
+      inertiaRatio: reduceMotion ? 0 : DEFAULT_SETTINGS.inertiaRatio,
+    });
+    // Updating Sigma settings replaces cached coordinates before its deferred
+    // render normalizes them. Finish that render before the camera reads them.
+    renderer.refresh();
+  }, [data, reduceMotion]);
+
   // ---- fly the camera to the selection ---------------------------------------------------------------------
   useEffect(() => {
     const renderer = sigma.current;
@@ -187,7 +206,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
     const ids = focus ? [focus, ...related.slice(0, 6).map((r) => r.id)] : highlight ? [...highlight] : [];
     const pts = ids.map((id) => renderer.getNodeDisplayData(id)).filter((p): p is NonNullable<typeof p> => !!p);
     if (!pts.length) {
-      renderer.getCamera().animate({ x: 0.5, y: 0.5, ratio: 1 }, { duration: 700 });
+      renderer.getCamera().animate({ x: 0.5, y: 0.5, ratio: 1 }, { duration: reduceMotion ? 1 : 700 });
       return;
     }
     const xs = pts.map((p) => p.x);
@@ -196,12 +215,12 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
     const cy = focus ? pts[0].y : (Math.min(...ys) + Math.max(...ys)) / 2;
     const extent = Math.max(...xs.map((x) => Math.abs(x - cx)), ...ys.map((y) => Math.abs(y - cy)));
     const ratio = Math.min(0.9, Math.max(focus ? 0.1 : 0.22, extent * 2.6));
-    renderer.getCamera().animate({ x: cx, y: cy, ratio }, { duration: 900, easing: "quadraticInOut" });
-  }, [focus, highlight, related]);
+    renderer.getCamera().animate({ x: cx, y: cy, ratio }, { duration: reduceMotion ? 1 : 900, easing: "quadraticInOut" });
+  }, [focus, highlight, related, reduceMotion]);
 
   const zoom = (factor: number) => {
     const cam = sigma.current?.getCamera();
-    if (cam) cam.animate({ ratio: cam.getState().ratio * factor }, { duration: 250 });
+    if (cam) cam.animate({ ratio: cam.getState().ratio * factor }, { duration: reduceMotion ? 1 : 250 });
   };
 
   return (
@@ -234,7 +253,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
       </div>
       {marker && focus && (
         <div className="pointer-events-none absolute z-[1]" style={{ left: marker.x, top: marker.y }} aria-hidden>
-          <span className="absolute -left-5 -top-5 h-10 w-10 animate-ping rounded-full border-2 border-white/60" />
+          <span className="absolute -left-5 -top-5 h-10 w-10 motion-safe:animate-ping rounded-full border-2 border-white/60" />
           <span className="absolute -left-4 -top-4 h-8 w-8 rounded-full border border-white/40" />
         </div>
       )}

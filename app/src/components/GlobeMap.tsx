@@ -2,12 +2,16 @@
 // Canvas keeps the globe light enough for phones; the original flat map remains available.
 import { useEffect, useRef, useState } from "react";
 import type { MapProps, RouteStop } from "./StarMap";
+import { useReducedMotion } from "../lib/useReducedMotion";
 
 type V = { x: number; y: number; z: number };
 type Pin = RouteStop & { x: number; y: number };
 const clamp = (n: number, a: number, b: number) => Math.max(a, Math.min(b, n));
 
 export function GlobeMap(props: MapProps) {
+  const reduceMotion = useReducedMotion();
+  const motion = useRef(reduceMotion);
+  motion.current = reduceMotion;
   const canvas = useRef<HTMLCanvasElement>(null);
   const current = useRef(props);
   current.current = props;
@@ -32,7 +36,6 @@ export function GlobeMap(props: MapProps) {
     let target: typeof camera | null = null;
     let disposed = false;
     let hitNodes: { id: string; x: number; y: number; name: string }[] = [];
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const rotate = (v: V) => {
       const x = Math.cos(camera.yaw) * v.x - Math.sin(camera.yaw) * v.z;
       const z = Math.sin(camera.yaw) * v.x + Math.cos(camera.yaw) * v.z;
@@ -68,7 +71,7 @@ export function GlobeMap(props: MapProps) {
       frame = 0;
       if (target) {
         const diff = ((target.yaw - camera.yaw + Math.PI * 3) % (Math.PI*2)) - Math.PI;
-        const t = reduceMotion ? 1 : .13;
+        const t = motion.current ? 1 : .13;
         camera.yaw += diff*t; camera.pitch += (target.pitch-camera.pitch)*t; camera.zoom += (target.zoom-camera.zoom)*t;
         if (Math.abs(diff)+Math.abs(target.pitch-camera.pitch)+Math.abs(target.zoom-camera.zoom)<.004) target = null;
       }
@@ -169,6 +172,7 @@ export function GlobeMap(props: MapProps) {
   },[props.data]);
   useEffect(()=>{fly.current();},[props.focus,props.highlight]);
   useEffect(()=>{redraw.current();},[props.related,props.emphasized,props.route,props.activeStep]);
+  useEffect(()=>{redraw.current();},[reduceMotion]);
   return <div className="absolute inset-x-0 top-0 bottom-[58dvh] overflow-hidden bg-[#03070e] sm:bottom-0 sm:left-[432px]">
     <canvas ref={canvas} tabIndex={0} role="img" aria-label="Interactive globe of rare genetic conditions. Drag or use arrow keys to turn. Scroll or use plus and minus to zoom. Use search or Directions to choose a condition." className="absolute inset-0 h-full w-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-200" />
     {pins.map(p=><button key={p.step} onClick={()=>props.onStop(p.step)} aria-label={`Directions stop ${p.step+1}: ${p.label}`} style={{left:p.x,top:p.y}} className={`absolute z-10 grid h-7 w-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-xs font-bold shadow-lg ${p.step===props.activeStep?"border-white bg-amber-100 text-slate-900":"border-amber-200/70 bg-slate-900 text-amber-100"}`}>{p.step+1}</button>)}

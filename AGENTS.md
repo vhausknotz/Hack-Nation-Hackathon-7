@@ -77,6 +77,7 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 
 **Directions interaction check:** `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
 **Family brief check:** `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa` (desktop/phone, source fidelity, print/copy and closing).
+**Reduced-motion check:** `./.venv/Scripts/python tools/check_reduced_motion.py http://localhost:4173` (live preference changes, stable camera and visible selection at desktop/phone widths).
 Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (cloud/HTTP dependencies: `atlas_mcp/requirements-cloud.txt`; Azurite instructions in `atlas_mcp/CLOUD.md`). `agents/community_coverage/` stages offline research; its explicitly invoked `import_reviewed` command writes the ledger and calls Sol.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
 Bounded contribution/review/publication runner: [atlas_mcp/CYCLE.md](atlas_mcp/CYCLE.md). Paid reviews require the pinned local plan; never reset its persistent reservation state to get more attempts.

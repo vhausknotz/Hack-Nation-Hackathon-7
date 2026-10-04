@@ -62,6 +62,7 @@ cd app && npm install && npm run dev
 Tests: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (install `atlas_mcp/requirements-cloud.txt` for the cloud/HTTP tests; the cloud runbook explains optional Azurite integration).
 Interactive desktop/phone check: `./.venv/Scripts/python tools/check_directions.py http://localhost:4173 data/build/directions-qa`.
 Family brief, copy/print and source fidelity: `./.venv/Scripts/python tools/check_family_brief.py http://localhost:4173 data/build/family-brief-qa`.
+Reduced motion and live preference changes: `./.venv/Scripts/python tools/check_reduced_motion.py http://localhost:4173`.
 
 ## Data sources
 
