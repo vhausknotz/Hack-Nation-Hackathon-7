@@ -68,6 +68,19 @@ def check_text(text: str, c: dict) -> int:
         if a["type"] in ("trial", "therapy_program"):
             assert "not evidence that the treatment works" in text
     assert text.count("Listed, not recommended") >= len(orgs) + len(assets)
+    for route in c.get("shared_research", []):
+        partner = route["partner_asset"]
+        assert route["partner"]["name"] in text
+        assert partner["claim_id"] in text
+        assert f"as recorded on {partner['source_date']}" in text
+        if partner.get("restriction"):
+            assert f"Restriction, as recorded: {partner['restriction']}" in text
+        for quote in partner["quotes"]:
+            assert quote in text
+        assert "not an independently reviewed partnership proposal" in text
+        if org := route.get("partner_community"):
+            assert org["homepage"] in text and org["quote"] in text
+            assert org["page_date"] in text
     if not any(o["kind"] == "patient_organization" for o in orgs):
         assert "No patient group for this diagnosis has been found in the atlas yet" in text
     if not assets:
@@ -105,6 +118,11 @@ def main(base: str, output: str):
                         assert "Registry reports" in text or "Recruitment status not recorded" in text
                     if step == 4:
                         assert "Nothing here is a recommendation" in text and "Prepare one question for your care team" in text
+                        if c.get("shared_research"):
+                            assert "Research already connecting communities" in text
+                            assert c["shared_research"][0]["partner"]["name"] in text
+                            stop.locator("[data-research-bridge]").first.locator("summary").click()
+                            assert stop.locator("[data-research-bridge]").first.get_by_text("Evidence ID:", exact=False).count() == 2
                     stop.scroll_into_view_if_needed()
                     no_overflow(page, f"{name} stop {step + 1}")
                     page.screenshot(path=str(out / f"{name}-stop{step + 1}-{width}.png"))

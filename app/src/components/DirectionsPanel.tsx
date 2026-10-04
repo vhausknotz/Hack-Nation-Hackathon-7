@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useEvidence } from "./EvidenceDrawer";
 import { FamilyBrief } from "./FamilyBrief";
+import { SharedResearchPanel } from "./SharedResearch";
 import { ASSET_TYPE, gaps, groupStudies, isSolid, orgKindLabel, orgNotes, orgScope, questions, reviewLabel, statusLabel, studyFit, studyNotes, type Question } from "./familyJourney";
 import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
@@ -74,6 +75,7 @@ export function DirectionsPanel({ c, neighbors, step, onStep, emphasized, onEmph
           </>}
           {i === 3 && <Studies c={c} programs={programs} assets={assets} />}
           {i === 4 && <>
+            <SharedResearchPanel c={c} />
             <p className="mb-3">Nothing here is a recommendation. These questions help you check what the atlas found: whether a group or study includes your diagnosis, and whether it is open now.</p>
             {asks.slice(0, SHOWN_QUESTIONS).map((q, k) => <QuestionCard key={k} q={q} first={k === 0} />)}
             <button onClick={brief.open} className="mt-1 flex w-full items-center justify-between rounded-xl border border-machinery/30 px-4 py-2.5 text-left text-xs font-semibold text-machinery hover:bg-machinery-soft/40">

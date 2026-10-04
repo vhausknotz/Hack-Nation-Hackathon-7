@@ -85,6 +85,7 @@ export interface ConditionBundle {
   plain?: { summary: string; model: string; prompt: string } | null;
   communities?: Community[];
   assets?: ResearchAsset[];
+  shared_research?: SharedResearch[];
   id: string;
   name: string;
   also_known_as: string[];
@@ -130,6 +131,15 @@ export interface Community {
   claim_id: string;
   via?: string;
   review: ActionReview;
+}
+
+export interface SharedResearch {
+  asset_id: string;
+  partner: { id: string; name: string; gene: string };
+  partner_asset: ResearchAsset;
+  partner_community: Community | null;
+  basis: "same_reviewed_record";
+  is_computed_neighbor: boolean;
 }
 
 export interface ResearchAsset {

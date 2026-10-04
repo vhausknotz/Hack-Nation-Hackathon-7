@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { getMeta } from "../lib/data";
 import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
+import { collaborationQuestions } from "./SharedResearch";
 import type { ConditionBundle, Neighbor } from "../lib/types";
 import { ASSET_TYPE, gaps, groupStudies, orgKindLabel, orgNotes, orgScope, questions, researchQuestions, reviewLabel, statusLabel, studyFit, studyNotes } from "./familyJourney";
 
@@ -85,6 +86,31 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
         id: "studies", title: "Studies and research programs found",
         intro: studyBlocks[0].items ? "Status is as the registry reported it on the date shown. Recruiting does not mean you are eligible. Check the current record with the study team." : undefined,
         blocks: studyBlocks,
+      },
+      {
+        id: "collaboration", title: "Shared research: questions for patient-group organizers",
+        intro: "The same research record appears in two diagnoses' reviewed listings. This descriptive overlap is not an independently reviewed partnership proposal, evidence of matching biology, or permission to combine cohorts.",
+        blocks: collaborationQuestions(c).length ? collaborationQuestions(c).map(({ route, asset, question }) => ({
+          heading: `${asset.id}: ${asset.title}`,
+          items: [
+            { title: `A question for the study team`, url: asset.url, facts: [question], cautions: ["Check the current protocol, consent, scientific suitability and permission to reuse materials with the study team."] },
+            { title: `Also listed for ${route.partner.name}`, url: origin + routes.condition(route.partner.id),
+              facts: [
+                `${reviewLabel(route.partner_asset.review)}. Listed, not recommended.`,
+                `${statusLabel(route.partner_asset)} as recorded on ${route.partner_asset.source_date}.`,
+                `Why listed for this other diagnosis: ${route.partner_asset.review.reason}`,
+                `Restriction, as recorded: ${route.partner_asset.restriction || "No restriction was extracted; this does not mean eligibility is unrestricted."}`,
+                ...route.partner_asset.quotes.map(q => `Source quote: “${q}”`),
+                `Evidence for your diagnosis: ${asset.claim_id}`,
+                `Evidence for this other diagnosis: ${route.partner_asset.claim_id}`,
+              ], cautions: ["Both diagnoses' eligibility needs separate confirmation. Your diagnosis' restrictions are in the studies section above.", ...studyNotes(route.partner_asset)] },
+            ...(route.partner_community ? [{ title: `Community listed for ${route.partner.gene}: ${route.partner_community.name}`, url: route.partner_community.homepage,
+              facts: [`${reviewLabel(route.partner_community.review)}. Listed, not recommended.`,
+                `${route.partner_community.page_read === "archived_snapshot" ? "Archived source read" : "Source read"} ${route.partner_community.page_date}: ${route.partner_community.page || route.partner_community.homepage}`,
+                `Source quote: “${route.partner_community.quote}”`],
+              cautions: ["The organization's involvement in this study has not been established here."] }] : []),
+          ],
+        })) : [{ bullets: ["No shared research record has been found for this diagnosis in the reviewed atlas listings yet. A nearby condition on the map alone does not establish a shared research opportunity."] }],
       },
       {
         id: "questions", title: "Questions to take with you",
