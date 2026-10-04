@@ -30,7 +30,7 @@ Check the account usage tool at the start of substantial work and at milestones.
 
 ## Claude fallback
 
-Computer Use found a Cursor window titled `Claude Code - Hack-Nation Hackathon 7 - Cursor`. The accessibility tree exposed only its shell and both screenshot capture attempts timed out. **The chat input has not been observed; sending a handoff is not yet verified possible.** No message was sent. Do not guess coordinates or claim a successful transfer.
+Computer Use found a Cursor window titled `Claude Code - Hack-Nation Hackathon 7 - Cursor`. Screenshot capture timed out, but after the owner brought Cursor forward the accessibility tree exposed the actual Anthropic Claude Code message input. A targeted `sky.set_value` successfully placed `Codex handoff test — draft only, not sent.` there, and a fresh accessibility read verified it. **The test remains unsent.** The observed Send button still reported disabled, so submission and Claude's response remain untested. Earlier activation attempts failed; do not assume access is reliable. Reobserve the correct Anthropic input before replacing the test with a real authorized handoff; never reuse stale element indexes. No transfer has occurred.
 
 If access works later, first save the current checkpoint and ownership state, stop the continuation schedule, and send a concise natural-language prompt asking the existing Claude chat to read this file and HANDOFF.md and take over the agreed scope. Never paste secrets or automate terminal commands/security dialogs. Verify that the message was submitted and acknowledge whether Claude actually started. Once transferred, set the owner here to Claude and stop Codex implementation. If transfer fails, leave the repo and handoff recoverable and report the limitation.
 
