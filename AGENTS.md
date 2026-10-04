@@ -81,7 +81,9 @@ cd app && npm install && npm run build            # then deploy dist/ (docs/oper
 **Reduced-motion check:** `./.venv/Scripts/python tools/check_reduced_motion.py http://localhost:4173` (live preference changes, stable camera and visible selection at desktop/phone widths).
 Regression checks: `./.venv/Scripts/python -m pytest ledger/tests pipeline/tests agents/tests agents/community_coverage enrich/trials atlas_mcp/tests` (cloud/HTTP dependencies: `atlas_mcp/requirements-cloud.txt`; Azurite instructions in `atlas_mcp/CLOUD.md`). `agents/community_coverage/` stages offline research; its explicitly invoked `import_reviewed` command writes the ledger and calls Sol.
 Only one process may write ledger claims/reviews at a time. App export uses a read-only snapshot and can run alongside a campaign.
-Bounded contribution/review/publication runner: [atlas_mcp/CYCLE.md](atlas_mcp/CYCLE.md). Paid reviews require the pinned local plan; never reset its persistent reservation state to get more attempts.
+**Live engine (current operating mode):** `./.venv/Scripts/python tools/atlas_engine.py` runs continuously on the owner's PC: drains cloud MCP submissions into the local ledger, referees unreviewed findings with GPT-6 Sol after a 3-minute peer window (hard daily cap in `data/engine/config.json`, reservations in `data/engine/spend/`), rebuilds the graph, exports to `data/engine/export/`, uploads only shards that differ from the deployed `app/public/data` as a live overlay (`live/` in MCP storage, served by `/live/data`), posts feed events and refreshes the MCP snapshot. Stop it by creating `data/engine/stop`; log in `data/engine/engine.log`. Stop it before running `pipeline/build_graph.py` or a full export yourself. A full website deploy (export into `app/public/data`, `npm run build`, `tools/deploy_website.py`) resets the overlay base; keep the build under 250 MB (Static Web Apps free plan, checked by the deploy script).
+Hosted MCP extras: public `/live/feed` (activity + presence), GitHub OAuth sign-in (`atlas_mcp/oauth.py`; credentials only in `.env` and Function app settings via `tools/azure_mcp_operator.py set-github`), reviewer calibration, `fetch_page` for organization pages (`atlas_mcp/page_fetch.py`, public addresses only). Deploy MCP with `tools/azure_mcp_operator.py deploy`.
+Older bounded contribution/review/publication runner: [atlas_mcp/CYCLE.md](atlas_mcp/CYCLE.md). Paid reviews require the pinned local plan; never reset its persistent reservation state to get more attempts.
 New Ledger instances enforce an OS writer lease. The community scout is complete; check active jobs before starting any new writer. MCP intake itself never writes the evidence ledger or spends on models.
 
 ## Azure OpenAI (Foundry)
@@ -126,7 +128,8 @@ New Ledger instances enforce an OS writer lease. The community scout is complete
 
 ## Working preferences
 
-**Current coordination:** Codex implementation is stopped pending the owner's manual Claude Code handoff. Both external-agent packages (family UI 2b2f5b3 and community coverage f382cf4) are integrated and reviewed; their assignments are complete. No external agent owns active files. See HANDOFF.md and docs/vision_status.md for current work, budgets and ownership. Do not start a second ledger writer.
+**Current coordination (2026-10-04):** Claude Code is the lead (see HANDOFF.md). The owner points outside agents (e.g. their Codex) at the atlas through MCP; those are contributors, not code owners.
+Historical: Codex implementation was stopped pending the owner's manual Claude Code handoff. Both external-agent packages (family UI 2b2f5b3 and community coverage f382cf4) are integrated and reviewed; their assignments are complete. No external agent owns active files. See HANDOFF.md and docs/vision_status.md for current work, budgets and ownership. Do not start a second ledger writer.
 
 - Don't put time estimates on tasks or plans. Describe steps by what they produce.
 - Clarity beats feature count. Every screen should make sense at a glance; depth goes behind a click.
