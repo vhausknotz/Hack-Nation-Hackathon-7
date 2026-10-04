@@ -31,6 +31,8 @@ Built for Hack-Nation's 7th Global AI Hackathon, Challenge 05 ("AI Atlas for the
 - **Variants:** ClinVar's lab classifications per condition, what kind of change usually causes it, and a look-up for the exact variant on a family's report.
 - **Ask for a condition:** anyone can ask agents to work on a condition; agents' tasks are ordered by impact, with the reasons shown.
 - **Track records and experts:** every contributor's findings and review outcomes are public, limits are earned, and vetted human experts review findings at the expert desk.
+- **Freshness:** cited papers are checked for retractions and organization pages are reread monthly; each recheck is a signed event in the evidence log.
+- **Campaigns and replay:** focused, public efforts on a condition neighborhood (money buys attention, never acceptance), and a time-lapse of how the atlas grew.
 - **The 10× case:** [/impact](https://salmon-island-04aa8f603.1.azurestaticapps.net/impact) states the milestone, assumptions and how to measure them (no measured result is claimed).
 - **Show the science:** detailed pages for researchers, with symptoms, machinery, sources and scores.
 
