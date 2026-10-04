@@ -164,6 +164,7 @@ function Study({ asset: a }: { asset: ResearchAsset }) {
     {a.restriction && <p className="mt-2 whitespace-pre-wrap text-xs"><b className="font-semibold text-ink">Restriction:</b> {a.restriction}</p>}
     <p className="mt-2 text-xs">{a.review.reason}</p>
     {studyNotes(a).slice(0, -1).map((n, k) => <p key={k} className="mt-2 text-xs text-caution">{n}</p>)}
+    {a.team?.status_now && a.team.status_now !== a.status && <p className="mt-2 rounded-lg bg-caution-soft/60 p-2 text-xs text-caution"><b className="font-semibold">The registry now says: {a.team.status_now.replace(/_/g, " ").toLowerCase()}</b> (checked {a.team.retrieved.slice(0, 10)}). The listing above was reviewed when it said {a.status.replace(/_/g, " ").toLowerCase() || "something else"}.</p>}
     <DisputeNote dispute={a.dispute} quote={a.quotes[0]} review={a.review.reason} />
     {a.team && <StudyTeamCard team={a.team} />}
     <a className="mt-3 inline-block text-xs font-semibold text-machinery underline" href={a.url} target="_blank" rel="noreferrer">Check study and eligibility ↗</a>

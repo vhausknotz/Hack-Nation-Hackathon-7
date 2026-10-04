@@ -167,6 +167,7 @@ export interface StudyTeam {
   sites: number;
   countries: string[];
   updated: string | null;
+  status_now?: string | null;
   retrieved: string;
   url: string;
 }

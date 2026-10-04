@@ -17,7 +17,7 @@ import requests
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "data" / "build" / "study_contacts.json"
-REFRESH_DAYS = 14
+REFRESH_DAYS = 3  # recruitment status changes; the engine rechecks listed studies this often
 API = "https://clinicaltrials.gov/api/v2/studies/{}"
 
 
@@ -43,6 +43,7 @@ def team(study: dict) -> dict:
         "sites": len(locations),
         "countries": sorted({l["country"] for l in locations if l.get("country")})[:10],
         "updated": (status.get("lastUpdatePostDateStruct") or {}).get("date"),
+        "status_now": status.get("overallStatus"),  # freshness: compared with the status recorded in the reviewed claim
     }
 
 
@@ -57,7 +58,7 @@ def main() -> None:
     cache = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     now = datetime.now(timezone.utc)
     stale = lambda e: (now - datetime.fromisoformat(e["retrieved"])).days >= REFRESH_DAYS  # noqa: E731
-    todo = sorted(nct for nct in listed_studies() if nct not in cache or stale(cache[nct]))
+    todo = sorted(nct for nct in listed_studies() if nct not in cache or stale(cache[nct]) or "status_now" not in cache[nct])
     for nct in todo:
         try:
             r = requests.get(API.format(nct), timeout=30)

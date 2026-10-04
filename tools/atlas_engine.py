@@ -568,6 +568,18 @@ class Engine:
                 force = True  # republish everything newer than the freshly deployed release
         except Exception as error:
             log(f"base sync skipped: {type(error).__name__}: {error}")
+        if time.time() - self.state.get("freshness_at", 0) > 6 * 3600:  # recheck listed studies' registry status
+            self.state["freshness_at"] = time.time()
+            save_json(STATE / "state.json", self.state)
+            path = ROOT / "data/build/study_contacts.json"
+            before = path.read_bytes() if path.exists() else b""
+            try:
+                run([sys.executable, "pipeline/study_contacts.py"])
+                if path.exists() and path.read_bytes() != before:
+                    log("study registry records changed; republishing")
+                    force = True
+            except RuntimeError as error:
+                log(f"freshness check skipped: {error}")
         receipt = pull_and_drain(self.intake, ROOT / "data/contributions/cloud-bridge", LEDGER, limit=50)
         processed = receipt.get("processed", [])
         if processed:
