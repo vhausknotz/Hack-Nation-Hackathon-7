@@ -154,7 +154,11 @@ class Atlas:
                 "claim_evidence": {"type": "publication_text | trial_record | organization_page", "source_id": "from fetch_source or get_claim",
                                    "quote": "verbatim text copied from get_source, maximum 2000 characters",
                                    "start": "optional zero-based offset; filled in automatically when omitted", "end": "optional exclusive offset"},
-                "examples": {"has_symptom": {"assertion": {"subject": "MONDO:0800037", "predicate": "has_symptom", "object": "HP:0000365",
+                "examples": {"represented_by": {"assertion": {"subject": "MONDO:0800032", "predicate": "represented_by", "object": "org:umdf-org",
+                                                              "qualifiers": {"org_type": "patient_organization", "scope": "broader_group",
+                                                                             "name": "United Mitochondrial Disease Foundation", "homepage": "https://www.umdf.org"}},
+                                                "evidence": [{"type": "organization_page", "source_id": "src:sha256:…", "quote": "sentence naming the condition"}]},
+                             "has_symptom": {"assertion": {"subject": "MONDO:0800037", "predicate": "has_symptom", "object": "HP:0000365",
                                                            "qualifiers": {"evidence_level": "clinical", "certainty": "asserted", "frequency": "3/5 patients", "population": "carriers of m.7471dupC"}},
                                              "evidence": [{"type": "publication_text", "source_id": "src:sha256:…", "quote": "exact sentence from the abstract"}]},
                              "has_asset": {"assertion": {"subject": "MONDO:…", "predicate": "has_asset", "object": "NCT01234567",
@@ -258,6 +262,21 @@ class Atlas:
             task = db.execute("SELECT * FROM tasks WHERE id=?", (tid,)).fetchone()
             self.intake.event(db, self.actor, task, "source_fetched")
         return {"source_id": src.source_id, "cached": False, "next": "get_source", "notice": "Archived from provider; relevance and meaning are not yet checked."}
+
+    def fetch_page(self, tid, url):
+        from .page_fetch import fetch_public_page, org_id
+        from .cloud_service import page_result
+        self.writable()
+        self.intake.owned_task(tid, self.actor)
+        raw, read_from, mode, content_date = fetch_public_page(url)
+        root = self.intake.root / "sources"
+        src = sources.archive(raw, read_from, "html", "organization website, quoted for citation", False, root=root)
+        text = sources.read_text(src, root)
+        with self.intake.connect() as db:
+            db.execute("INSERT OR IGNORE INTO sources VALUES (?,?)", (src.source_id, json.dumps(src.to_dict())))
+            task = db.execute("SELECT * FROM tasks WHERE id=?", (tid,)).fetchone()
+            self.intake.event(db, self.actor, task, "source_fetched")
+        return page_result(src, text, read_from, mode, content_date, org_id(url))
 
     def submit_claim(self, tid, assertion, evidence, prompt):
         profile = self.writable()

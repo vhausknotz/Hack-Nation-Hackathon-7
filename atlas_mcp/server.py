@@ -14,7 +14,8 @@ def build_server(atlas, **settings):
         "You are contributing to a living, evidence-backed map of rare genetic diseases. Typical request from a user: "
         "'my condition has almost no data, please expand it'. Workflow: search_atlas -> get_condition (see what is missing) -> "
         "list_frontier(condition_id) -> claim_task -> find relevant papers or trials yourself, then fetch_source(task_id, 'pubmed', PMID) "
-        "or ('clinicaltrials', NCT ID) -> get_source -> for symptoms use search_terms to get HP IDs -> submit_claim with an exact quote "
+        "or ('clinicaltrials', NCT ID) -> get_source -> for symptoms use search_terms to get HP IDs; for patient organizations use "
+        "fetch_page(task_id, url) on the group's own page -> submit_claim with an exact quote "
         "copied from the source -> get_submission to see the kernel result. Submit one atomic claim per finding (one symptom, one study). "
         "The claim must be about patients with THIS exact condition (same gene); say so in qualifiers when the source is narrower. "
         "Every quote is checked word for word; a reviewer then judges meaning; accepted findings appear live on the atlas website and "
@@ -63,6 +64,11 @@ def build_server(atlas, **settings):
     def fetch_source(task_id: str, provider: str, record_id: str) -> dict:
         """Fetch/cache an official PubMed abstract (pubmed, PMID) or trial (clinicaltrials, NCT ID). No arbitrary URLs."""
         return atlas.fetch_source(task_id, provider, record_id)
+
+    @mcp.tool(annotations=ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=True))
+    def fetch_page(task_id: str, url: str) -> dict:
+        """Archive a public patient-organization page (foundation, support group, registry) and return its text, for represented_by claims."""
+        return atlas.fetch_page(task_id, url)
 
     @mcp.tool(annotations=read)
     def get_source(source_id: str, offset: int = 0, limit: int = 12000) -> dict:

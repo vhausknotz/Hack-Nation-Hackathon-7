@@ -240,6 +240,21 @@ class CloudAtlas(Atlas):
             self.intake.record_source(src.to_dict(), sources.read_raw(src, root), sources.read_text(src, root), self.actor, tid, cache_key)
         return {"source_id": src.source_id, "cached": False, "next": "get_source", "notice": "Archived from provider; relevance and meaning are not yet checked."}
 
+    def fetch_page(self, tid, url):
+        """Archive a public organization page (patient group, foundation, registry) for represented_by claims."""
+        from .page_fetch import fetch_public_page, org_id, public_url
+        self.writable()
+        self.intake.owned_task(tid, self.actor)
+        public_url(url if "://" in url else "https://" + url)
+        time.sleep(self.intake.reserve_fetch(self.actor, tid))
+        raw, read_from, mode, content_date = fetch_public_page(url)
+        with tempfile.TemporaryDirectory(prefix="atlas-page-") as directory:
+            root = Path(directory)
+            src = sources.archive(raw, read_from, "html", "organization website, quoted for citation", False, root=root)
+            text = sources.read_text(src, root)
+            self.intake.record_source(src.to_dict(), sources.read_raw(src, root), text, self.actor, tid, "page:" + read_from)
+        return page_result(src, text, read_from, mode, content_date, org_id(url))
+
     def submission(self, sid):
         self.writable()
         item = self.intake.submission(sid, self.actor)
@@ -250,3 +265,13 @@ class CloudAtlas(Atlas):
             except ValueError:
                 item["notice"] = "Worker receipt is available; the published MCP read snapshot has not caught up yet."
         return item
+
+
+def page_result(src, text, read_from, mode, content_date, organization_id):
+    return {"source_id": src.source_id, "read_from": read_from, "mode": mode, "content_date": content_date,
+            "suggested_organization_id": organization_id, "text": text[:20000], "total_characters": len(text),
+            "untrusted_source_text": True,
+            "notice": ("Archived. Quote a sentence that names this condition or its gene and shows whom the organization serves; "
+                       "submit represented_by with object = the organization ID and qualifiers org_type, scope, name, homepage. "
+                       + ("This is a historical Internet Archive copy: it shows what the site said then, not that the group is active now."
+                          if mode == "archived_snapshot" else ""))}
