@@ -114,8 +114,13 @@ class Scout:
                 self.budget.charge(usd=usd)
 
     def pick(self, worked):
+        # Prefer genes linked to a single condition: papers about the gene are then about this condition.
+        per_gene = {}
+        for c in self.conditions.values():
+            per_gene[c["gene"]["symbol"]] = per_gene.get(c["gene"]["symbol"], 0) + 1
         thin = [c for c in self.conditions.values() if len(c.get("phenotypes", [])) < 5 and c["id"] not in worked]
         random.shuffle(thin)
+        thin.sort(key=lambda c: per_gene[c["gene"]["symbol"]] > 1)
         for c in thin[:12]:
             gene = c["gene"]["symbol"]
             term = f'{gene}[tiab] AND (patient[tiab] OR patients[tiab] OR case[tiab] OR variant[tiab]) AND hasabstract'

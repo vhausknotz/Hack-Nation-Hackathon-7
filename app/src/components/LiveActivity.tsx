@@ -8,7 +8,7 @@ import type { AgentMarker, Pulse, Ripple } from "./StarMap";
 export function AgentAvatar({ color, role, size = 22, pulse = false }: { color: string; role: string; size?: number; pulse?: boolean }) {
   return (
     <span className="relative inline-grid place-items-center" style={{ width: size, height: size }}>
-      {pulse && <span className="absolute inset-0 animate-ping rounded-full opacity-40" style={{ background: color }} />}
+      {pulse && <span className="absolute inset-0 motion-safe:animate-ping rounded-full opacity-40" style={{ background: color }} />}
       <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden className="relative drop-shadow">
         <line x1="12" y1="2.5" x2="12" y2="5.5" stroke={color} strokeWidth="1.4" strokeLinecap="round" />
         <circle cx="12" cy="2.5" r="1.3" fill={color} />
@@ -150,7 +150,7 @@ export function LivePanel({ nameOf }: { nameOf: (id: string) => string | undefin
         className={`ml-auto flex items-center gap-2 rounded-full border bg-slate-950/85 px-3 py-1.5 text-[11px] text-white shadow-lg transition ${flash ? "border-emerald-300/80" : "border-white/15"}`}
       >
         <span className="relative flex h-2 w-2">
-          {working.length > 0 && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />}
+          {working.length > 0 && <span className="absolute inline-flex h-full w-full motion-safe:animate-ping rounded-full bg-emerald-400 opacity-60" />}
           <span className={`relative inline-flex h-2 w-2 rounded-full ${live.connected ? "bg-emerald-400" : "bg-slate-500"}`} />
         </span>
         <span className="font-semibold">Live</span>

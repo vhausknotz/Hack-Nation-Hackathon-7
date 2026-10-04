@@ -37,7 +37,7 @@ def main(base):
             page.wait_for_timeout(200)
             assert canvas.evaluate("el => el.toDataURL()") == first, "Reduced-motion globe keeps moving"
             page.get_by_role("button", name="Flat map", exact=True).click()
-            ring = page.locator("[class*='animate-ping']")
+            ring = page.locator("[data-focus-ring]")
             ring.wait_for(state="attached")
             assert ring.evaluate("el => getComputedStyle(el).animationName") == "none"
             rendered(page)
@@ -56,9 +56,9 @@ def main(base):
             page.get_by_role("button", name="Zoom out", exact=True).click()
             # Restore the preference without reloading; CSS and listener update.
             page.emulate_media(reduced_motion="no-preference")
-            page.wait_for_function("getComputedStyle(document.querySelector('[class*=\"animate-ping\"]')).animationName !== 'none'")
+            page.wait_for_function("getComputedStyle(document.querySelector('[data-focus-ring]')).animationName !== 'none'")
             page.emulate_media(reduced_motion="reduce")
-            page.wait_for_function("getComputedStyle(document.querySelector('[class*=\"animate-ping\"]')).animationName === 'none'")
+            page.wait_for_function("getComputedStyle(document.querySelector('[data-focus-ring]')).animationName === 'none'")
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
             assert not errors, errors
             print(f"PASS {width}px: live motion preference, globe settles, flat ring static, zoom usable", flush=True)

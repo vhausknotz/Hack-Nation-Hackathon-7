@@ -270,7 +270,7 @@ export function StarMap({ data, focus, related, highlight, emphasized, onSelect,
       </div>
       {marker && focus && (
         <div className="pointer-events-none absolute z-[1]" style={{ left: marker.x, top: marker.y }} aria-hidden>
-          <span className="absolute -left-5 -top-5 h-10 w-10 motion-safe:animate-ping rounded-full border-2 border-white/60" />
+          <span data-focus-ring className="absolute -left-5 -top-5 h-10 w-10 motion-safe:animate-ping rounded-full border-2 border-white/60" />
           <span className="absolute -left-4 -top-4 h-8 w-8 rounded-full border border-white/40" />
         </div>
       )}
