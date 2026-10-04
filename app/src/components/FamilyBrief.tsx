@@ -7,6 +7,8 @@ import { getMeta } from "../lib/data";
 import { external, routes } from "../lib/links";
 import { plainReason } from "../lib/plain";
 import { collaborationQuestions } from "./SharedResearch";
+import { checks } from "./Contrast";
+import { teamAddress } from "./StudyTeam";
 import { recordedReview } from "./EvidenceHistory";
 import { copyText } from "../lib/clipboard";
 import type { ConditionBundle, Neighbor } from "../lib/types";
@@ -92,29 +94,57 @@ export function buildBrief(c: ConditionBundle, neighbors: Neighbor[], built: str
         blocks: studyBlocks,
       },
       {
-        id: "collaboration", title: "Shared research: questions for patient-group organizers",
-        intro: "The same research record appears in two diagnoses' reviewed listings. This descriptive overlap is not an independently reviewed partnership proposal, evidence of matching biology, or permission to combine cohorts.",
-        blocks: collaborationQuestions(c).length ? collaborationQuestions(c).map(({ route, asset, question }) => ({
-          heading: `${asset.id}: ${asset.title}`,
-          items: [
-            { title: `A question for the study team`, url: asset.url, facts: [question], cautions: ["Check the current protocol, consent, scientific suitability and permission to reuse materials with the study team."] },
-            { title: `Also listed for ${route.partner.name}`, url: origin + routes.condition(route.partner.id),
-              facts: [
-                `${reviewLabel(route.partner_asset.review)}. Listed, not recommended.`,
-                `${statusLabel(route.partner_asset)} as recorded on ${route.partner_asset.source_date}.`,
-                `Why listed for this other diagnosis: ${route.partner_asset.review.reason}`,
-                `Restriction, as recorded: ${route.partner_asset.restriction || "No restriction was extracted; this does not mean eligibility is unrestricted."}`,
-                ...route.partner_asset.quotes.map(q => `Source quote: “${q}”`),
-                `Evidence for your diagnosis: ${asset.claim_id}`,
-                `Evidence for this other diagnosis: ${route.partner_asset.claim_id}`,
-              ], cautions: ["Both diagnoses' eligibility needs separate confirmation. Your diagnosis' restrictions are in the studies section above.", ...studyNotes(route.partner_asset)] },
-            ...(route.partner_community ? [{ title: `Community listed for ${route.partner.gene}: ${route.partner_community.name}`, url: route.partner_community.homepage,
-              facts: [`${reviewLabel(route.partner_community.review)}. Listed, not recommended.`,
-                `${route.partner_community.page_read === "archived_snapshot" ? "Archived source read" : "Source read"} ${route.partner_community.page_date}: ${route.partner_community.page || route.partner_community.homepage}`,
-                `Source quote: “${route.partner_community.quote}”`],
-              cautions: ["The organization's involvement in this study has not been established here."] }] : []),
-          ],
-        })) : [{ bullets: ["No shared research record has been found for this diagnosis in the reviewed atlas listings yet. A nearby condition on the map alone does not establish a shared research opportunity."] }],
+        id: "collaboration", title: "Partnership proposal draft: shared research",
+        intro: "A sourced starting point for contacting a study team that already includes another community. It rests on reviewed listings of the same research record for both diagnoses. This draft is not an independently reviewed partnership proposal, evidence of matching biology, or permission to combine cohorts.",
+        blocks: collaborationQuestions(c).length ? collaborationQuestions(c).map(({ route, asset, question }) => {
+          const team = asset.team;
+          const address = teamAddress(team);
+          const neighbor = neighbors.find((n) => n.id === route.partner.id) ?? c.neighbors.find((n) => n.id === route.partner.id);
+          const sym = (ids: string[]) => ids.map((h) => c.dict.symptoms[h]?.[1] || c.dict.symptoms[h]?.[0] || h).slice(0, 5).join(", ");
+          return {
+            heading: `${asset.id}: ${asset.title}`,
+            items: [
+              { title: "1. Who to approach", url: asset.url,
+                facts: team ? [
+                  ...(team.officials[0] ? [`${team.officials[0].name}${team.officials[0].affiliation ? `, ${team.officials[0].affiliation}` : ""} (${team.officials[0].role || "investigator"})`] : []),
+                  ...(team.sponsor ? [`Sponsor: ${team.sponsor}${team.collaborators.length ? `; collaborators: ${team.collaborators.join(", ")}` : ""}`] : []),
+                  ...team.contacts.filter((x) => x.email).slice(0, 2).map((x) => `Public study contact: ${x.name ? x.name + ", " : ""}${x.email}`),
+                  ...(team.sites ? [`${team.sites} site(s)${team.countries.length ? ` in ${team.countries.join(", ")}` : ""}`] : []),
+                  `From the official ClinicalTrials.gov record${team.updated ? `, updated ${team.updated}` : ""}.`,
+                ] : ["The registry record lists no named team; use the contact route on the study record."],
+                cautions: ["Use the study's public contact route. Do not share any person's medical details in a first message."] },
+              { title: "2. What we propose",
+                facts: [
+                  address ? `${address.greeting}, ${question}` : question,
+                  "Concretely: (a) confirm whether people with our diagnosis are, or could be, included under the current protocol; (b) share the questionnaires, outcome measures and data definitions used, so our community can align its registry; (c) tell us what an amendment, consent or data-sharing agreement would require; (d) suggest who else should be involved.",
+                ], cautions: [] },
+              { title: `3. Why our communities connect: ${route.partner.name}`, url: origin + routes.condition(route.partner.id),
+                facts: [
+                  `The same study record is a reviewed listing for both diagnoses (${asset.id}).`,
+                  ...(neighbor ? [
+                    `The two conditions are also computed neighbors on the map: ${plainReason(c, neighbor)}`,
+                    ...(neighbor.symptoms.length ? [`Shared recorded signs: ${sym(neighbor.symptoms)}.`] : []),
+                    ...(neighbor.contrast?.only_here.length ? [`Only recorded for ours: ${sym(neighbor.contrast.only_here)}.`] : []),
+                    ...(neighbor.contrast?.only_there.length ? [`Only recorded for ${route.partner.gene}: ${sym(neighbor.contrast.only_there)}.`] : []),
+                  ] : ["The shared study is the documented link; biological similarity has not been established here."]),
+                  ...(route.partner_community ? [`Community listed for ${route.partner.gene}: ${route.partner_community.name} (${route.partner_community.homepage}). Its involvement in this study has not been established.`,
+                    `${route.partner_community.page_read === "archived_snapshot" ? "Archived source read" : "Source read"} ${route.partner_community.page_date}: “${route.partner_community.quote}”`] : []),
+                ], cautions: [] },
+              { title: "4. What must be checked first",
+                facts: [
+                  ...(neighbor ? checks(c, neighbor) : ["Whether the two conditions share mechanism or presentation has not been assessed here; ask the study team."]),
+                  `Restriction for our diagnosis, as recorded: ${asset.restriction || "No restriction was extracted; this does not mean eligibility is unrestricted."}`,
+                  `For ${route.partner.name}: Restriction, as recorded: ${route.partner_asset.restriction || "No restriction was extracted; this does not mean eligibility is unrestricted."}`,
+                ], cautions: [...studyNotes(asset), ...studyNotes(route.partner_asset)] },
+              { title: "5. Evidence", url: asset.url,
+                facts: [
+                  `Our diagnosis: ${reviewLabel(asset.review)}. ${statusLabel(asset)} as recorded on ${asset.source_date}. Why listed: ${asset.review.reason} Evidence ID ${asset.claim_id}.`,
+                  `${route.partner.name}: ${reviewLabel(route.partner_asset.review)}. ${statusLabel(route.partner_asset)} as recorded on ${route.partner_asset.source_date}. Why listed: ${route.partner_asset.review.reason} Evidence ID ${route.partner_asset.claim_id}.`,
+                  ...route.partner_asset.quotes.map((q) => `Source quote: “${q}”`),
+                ], cautions: ["Recruitment and protocols change; the study team's current record is authoritative."] },
+            ],
+          };
+        }) : [{ bullets: ["No shared research record has been found for this diagnosis in the reviewed atlas listings yet. A nearby condition on the map alone does not establish a shared research opportunity."] }],
       },
       {
         id: "questions", title: "Questions to take with you",
