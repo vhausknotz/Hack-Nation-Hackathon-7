@@ -208,7 +208,7 @@ def main() -> None:
     # data_id identifies this exact export; the live overlay only applies on top of the same base.
     digest = hashlib.sha256()
     for path in sorted(p for p in OUT.rglob("*.json") if p.name != "meta.json"):
-        digest.update(path.relative_to(OUT).as_posix().encode() + b" " + hashlib.sha256(path.read_bytes()).digest())
+        digest.update(path.relative_to(OUT).as_posix().encode() + b"\0" + hashlib.sha256(path.read_bytes()).digest())
     meta = {
         "built": date.today().isoformat(), "data_id": digest.hexdigest()[:16], "shards": SHARDS, "counts": report,
         "sources": json.loads((ROOT / "data" / "sources_manifest.json").read_text()),
