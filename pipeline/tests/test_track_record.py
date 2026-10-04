@@ -13,7 +13,7 @@ def review(cid, who, verdict, seq, family="openai-gpt6"):
 
 def test_levels_and_earned_limits():
     assert level(3, 1) == "new" and level(5, 0) == "new"
-    assert level(9, 1) == "reliable" and level(4, 1) == "mixed" and level(2, 4) == "unreliable"
+    assert level(9, 1) == "reliable" and level(3, 2) == "mixed" and level(4, 1) == "new" and level(2, 4) == "unreliable"
     assert earned_quota(100, "reliable") == 200 and earned_quota(100, "unreliable") == 25 and earned_quota(10, "unreliable") == 5
 
 
