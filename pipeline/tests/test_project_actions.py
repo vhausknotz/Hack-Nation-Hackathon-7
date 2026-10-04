@@ -30,6 +30,9 @@ def test_new_qualified_trial_replaces_older_unrestricted_display(monkeypatch, tm
         def __init__(self, **_):
             pass
 
+        def all_challenges(self):
+            return []
+
         def claims_where(self, _):
             return [old, new, kept]
 
@@ -73,6 +76,7 @@ def test_newer_qualified_organization_quote_replaces_old_supported_quote(monkeyp
             "provenance": {"created": created}, "evidence": [{"quote": quote}]})}
     class FakeStore:
         def __init__(self, **_): pass
+        def all_challenges(self): return []
         def claims_where(self, _):
             return [row("old", "A different organization's description", "2026-10-01"),
                     row("new", "This program's condition page", "2026-10-04")]

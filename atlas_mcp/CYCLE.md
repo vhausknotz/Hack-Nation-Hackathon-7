@@ -63,6 +63,7 @@ ledger revision. Intake remains available.
   resumes there. Network side effects may be repeated if their successful reply
   was lost. Cloud snapshots use an atomic pointer and website deployment is
   replayable. A new signed ledger revision, tracked runtime/configuration change or changed generated graph input restarts publication checks. Operator documentation/checkpoint edits alone do not.
+- Family export stops on independently/human-reviewed counter-evidence affecting a visible study, patient-group listing or organization identity merge. The check runs before existing app bundles are replaced. Use MCP to inspect both sides; never reset the receipt or delete the objection to bypass it. A full family dispute view is still needed. An export stop does not retract old deployed content, so assess any affected live listing separately.
 
 No recurring operator service is installed by this command. The lead can invoke
 it from the already-authorized temporary continuation workflow. Stopping the

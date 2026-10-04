@@ -73,6 +73,12 @@ def load_actions(conditions: dict[str, dict]) -> dict[str, dict]:
     from ledger.store import Store
 
     store = Store(readonly=True)
+    from pipeline.family_disputes import check_family_disputes
+    try:
+        check_family_disputes(store)
+    except Exception:
+        store.close()
+        raise
     aliases = organization_aliases(store)
     rows = []
     asset_latest = {}
